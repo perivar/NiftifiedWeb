@@ -8,6 +8,7 @@ import { Home } from '../home/Index';
 import { Profile } from '../profile/Index';
 import { Admin } from '../admin/Index';
 import { Account } from '../account/Index';
+import { Frontpage } from '../frontpage/Index';
 
 function App() {
   const { pathname } = useLocation();
@@ -24,10 +25,11 @@ function App() {
       <Alert />
       <Switch>
         <Redirect from="/:url*(/+)" to={pathname ? pathname.slice(0, -1) : '/'} />
-        <PrivateRoute exact path="/" component={Home} />
+        <PrivateRoute exact path="/home" component={Home} />
         <PrivateRoute path="/profile" component={Profile} />
         <PrivateRoute path="/admin" roles={[Role.Admin]} component={Admin} />
         <Route path="/account" component={Account} />
+        <Route path="/" component={Frontpage} />
         <Redirect from="*" to="/" />
       </Switch>
     </div>
