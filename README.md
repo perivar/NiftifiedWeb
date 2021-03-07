@@ -1,1 +1,2 @@
-# NiftifiedWeb
+# Niftified
+Niftified Website

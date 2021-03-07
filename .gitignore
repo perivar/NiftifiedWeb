@@ -1,0 +1,5 @@
+/obj
+/bin
+/Client/node_modules
+/Client/*.eslintcache
+/Client/src/debug.log
