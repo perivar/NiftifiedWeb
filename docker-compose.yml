@@ -1,7 +1,7 @@
 version: "3.7"
 
 services:
-  camapi:
+  niftyapi:
     container_name: niftified.api
     build:
       context: ./
@@ -15,7 +15,7 @@ services:
     ports:
       - "5050:5050"
 
-  camclient:
+  niftyclient:
     container_name: niftified.client
     build:
       context: ./Client

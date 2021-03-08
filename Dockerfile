@@ -1,4 +1,4 @@
-# docker build -t cam .
+# docker build -t niftified.api .
 # OR use docker-compose
 
 # Set runtime image
@@ -19,8 +19,8 @@ RUN apt-get update -yq \
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 
 WORKDIR /src
-COPY Niftified.csproj Niftified/
-RUN dotnet restore Niftified/Niftified.csproj
+COPY Niftified.csproj NiftifiedWeb/
+RUN dotnet restore NiftifiedWeb/Niftified.csproj
 
 COPY  . .
 
