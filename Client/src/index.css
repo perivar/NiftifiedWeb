@@ -47,6 +47,18 @@ a {
   font-weight: 600;
 }
 
+.item-like i {
+  outline: none;
+}
+
+.item-like:hover i {
+  color: darkgray;
+}
+
+.item-like-selected {
+  color: rgb(0, 102, 255);
+}
+
 body {
   background: #ffffff;
   min-height: 900px;

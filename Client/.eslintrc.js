@@ -68,7 +68,16 @@ module.exports = {
         extensions: ['.jsx', '.tsx']
       }
     ],
-    'react/jsx-no-bind': 'warn',
+    'react/jsx-no-bind': [
+      'warn',
+      {
+        ignoreDOMComponents: false,
+        ignoreRefs: false,
+        allowArrowFunctions: true,
+        allowFunctions: true,
+        allowBind: false
+      }
+    ],
     'react/jsx-no-duplicate-props': 'warn',
     // 'react/jsx-one-expression-per-line': 'warn',
     'react/jsx-pascal-case': 'warn',
@@ -180,7 +189,7 @@ module.exports = {
         depth: 3
       }
     ],
-    'jsx-a11y/click-events-have-key-events': 'warn'
+    'jsx-a11y/click-events-have-key-events': 'off' // turn this on to warn again to be sure you support accessability
   },
   settings: {
     react: {

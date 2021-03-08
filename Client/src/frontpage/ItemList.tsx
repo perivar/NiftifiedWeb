@@ -97,7 +97,7 @@ function ItemList({ match }: { match: any }) {
   return (
     <>
       <div className="container px-0 py-4">
-        <div className="pp-category-filter">
+        {/* <div className="pp-category-filter">
           <div className="row">
             <div className="col-sm-12">
               <a className="btn btn-primary pp-filter-button" href="#" data-filter="all">
@@ -117,7 +117,7 @@ function ItemList({ match }: { match: any }) {
               </a>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
       <div className="container px-0">
         <div className="pp-gallery">

@@ -9,11 +9,11 @@ services:
     restart: always
     environment:
       ASPNETCORE_ENVIRONMENT: "Production"
-      ASPNETCORE_URLS: http://+:7070
+      ASPNETCORE_URLS: http://+:5050
     expose:
-      - "7070"
+      - "5050"
     ports:
-      - "7070:7070"
+      - "5050:5050"
 
   camclient:
     container_name: niftified.client
@@ -22,9 +22,9 @@ services:
       dockerfile: Dockerfile
     restart: always
     expose:
-      - "4040"
+      - "5151"
     ports:
-      - "4040:4040"
+      - "5151:5151"
 
 # Remember to start the network before running this file:
 # $ docker network create mydockernet
