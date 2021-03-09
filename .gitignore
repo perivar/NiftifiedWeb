@@ -3,3 +3,4 @@
 /Client/node_modules
 /Client/*.eslintcache
 /Client/src/debug.log
+NiftifiedDatabase.db
