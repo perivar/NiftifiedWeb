@@ -31,6 +31,22 @@ namespace Niftified.Controllers
 			return Ok(editions);
 		}
 
+		[Authorize]
+		[HttpGet]
+		public ActionResult<IEnumerable<EditionResponse>> GetAllCollections()
+		{
+			var collections = _niftyService.GetAllCollections();
+			return Ok(collections);
+		}
+
+		[Authorize]
+		[HttpGet("{accountId:int}")]
+		public ActionResult<IEnumerable<EditionResponse>> GetAllCollectionsByAccountId(int accountId)
+		{
+			var collections = _niftyService.GetAllCollectionsByAccountId(accountId);
+			return Ok(collections);
+		}
+
 		[HttpGet("{id:int}")]
 		public ActionResult<EditionResponse> GetEditionById(int id)
 		{

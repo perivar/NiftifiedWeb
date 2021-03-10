@@ -9,7 +9,7 @@ import { accountService } from './_services';
 import { App } from './app/Index';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './index.css';
+import './index.scss';
 
 // setup fake backend
 // import { configureFakeBackend } from './_helpers';

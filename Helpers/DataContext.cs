@@ -10,6 +10,7 @@ namespace Niftified.Helpers
 		public DbSet<Account> Accounts { get; set; }
 		public DbSet<Edition> Editions { get; set; }
 		public DbSet<Volume> Volumes { get; set; }
+		public DbSet<Collection> Collections { get; set; }
 		public DbSet<Offer> Offers { get; set; }
 		public DbSet<Person> Persons { get; set; }
 		public DbSet<Tx> Txs { get; set; }

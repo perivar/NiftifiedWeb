@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import ImgPrev from './ImgPrev';
-import { NewEdition } from './NewEdition';
+import { NewEditionForm } from './NewEdition';
 
 function Creator({ match }: { match: any }) {
   const { path } = match;
@@ -9,7 +9,7 @@ function Creator({ match }: { match: any }) {
   return (
     <>
       {/* <ImgPrev></ImgPrev> */}
-      <NewEdition />
+      <NewEditionForm />
     </>
   );
 }

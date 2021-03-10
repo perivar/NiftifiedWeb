@@ -51,6 +51,10 @@ namespace Niftified.Helpers
 						return true;
 					}
 				));
+
+			CreateMap<Collection, CollectionResponse>();
+
+			CreateMap<CreateCollectionRequest, Collection>();
 		}
 	}
 }

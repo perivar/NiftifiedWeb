@@ -12,6 +12,7 @@ namespace Niftified.Entities
 
 		public string Alias { get; set; } // might not want to use name, only hash
 
+		public int AccountId { get; set; }
 		public Account Account { get; set; } // reference to account
 
 		public Status Status { get; set; }

@@ -17,6 +17,10 @@ namespace Niftified.Services
 		EditionResponse CreateEdition(CreateEditionRequest model);
 		EditionResponse UpdateEdition(int id, UpdateEditionRequest model);
 		void DeleteEdition(int id);
+
+		CollectionResponse CreateCollecton(CreateCollectionRequest model);
+		IEnumerable<CollectionResponse> GetAllCollections();
+		IEnumerable<CollectionResponse> GetAllCollectionsByAccountId(int id);
 	}
 
 	public class NiftyService : INiftyService
@@ -123,6 +127,34 @@ namespace Niftified.Services
 			if (edition == null) throw new KeyNotFoundException("Edition not found");
 			_context.Editions.Remove(edition);
 			_context.SaveChanges();
+		}
+
+		public CollectionResponse CreateCollecton(CreateCollectionRequest model)
+		{
+			// validate
+			if (_context.Collections.Any(x => x.Name == model.Name))
+				throw new AppException($"Name '{model.Name}' is already registered");
+
+			// map model to new object
+			var collection = _mapper.Map<Collection>(model);
+
+			// save 
+			_context.Collections.Add(collection);
+			_context.SaveChanges();
+
+			return _mapper.Map<CollectionResponse>(collection);
+		}
+
+		public IEnumerable<CollectionResponse> GetAllCollections()
+		{
+			var collections = _context.Collections;
+			return _mapper.Map<IList<CollectionResponse>>(collections);
+		}
+
+		public IEnumerable<CollectionResponse> GetAllCollectionsByAccountId(int accountId)
+		{
+			var collections = _context.Collections.Select(a => a.AccountId == accountId);
+			return _mapper.Map<IList<CollectionResponse>>(collections);
 		}
 	}
 }

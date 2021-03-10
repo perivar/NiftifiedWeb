@@ -9,7 +9,7 @@ using Niftified.Helpers;
 namespace Niftified.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20210310074723_InitialCreate")]
+    [Migration("20210310195013_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -123,6 +123,9 @@ namespace Niftified.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("AccountId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
@@ -137,7 +140,9 @@ namespace Niftified.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Collection");
+                    b.HasIndex("AccountId");
+
+                    b.ToTable("Collections");
                 });
 
             modelBuilder.Entity("Niftified.Entities.Edition", b =>
@@ -271,7 +276,7 @@ namespace Niftified.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("AccountId")
+                    b.Property<int>("AccountId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Alias")
@@ -483,6 +488,15 @@ namespace Niftified.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Niftified.Entities.Collection", b =>
+                {
+                    b.HasOne("Niftified.Entities.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Niftified.Entities.Edition", b =>
                 {
                     b.HasOne("Niftified.Entities.Collection", "Collection")
@@ -503,7 +517,9 @@ namespace Niftified.Migrations
                 {
                     b.HasOne("Niftified.Entities.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountId");
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Niftified.Entities.Edition", null)
                         .WithMany("Creators")
