@@ -9,6 +9,8 @@ import { Profile } from '../profile/Index';
 import { Admin } from '../admin/Index';
 import { Account } from '../account/Index';
 import { Frontpage } from '../frontpage/Index';
+import { Creator } from '../creator/Index';
+import { Layout } from './Layout';
 
 function App() {
   const { pathname } = useLocation();
@@ -20,19 +22,22 @@ function App() {
   }, []);
 
   return (
-    <div className={`app-container${user ? ' bg-light' : ''}`}>
-      <Nav />
-      <Alert />
-      <Switch>
-        <Redirect from="/:url*(/+)" to={pathname ? pathname.slice(0, -1) : '/'} />
-        <PrivateRoute exact path="/home" component={Home} />
-        <PrivateRoute path="/profile" component={Profile} />
-        <PrivateRoute path="/admin" roles={[Role.Admin]} component={Admin} />
-        <Route path="/account" component={Account} />
-        <Route path="/" component={Frontpage} />
-        <Redirect from="*" to="/" />
-      </Switch>
-    </div>
+    <>
+      <Layout>
+        {/* <Nav /> */}
+        <Alert />
+        <Switch>
+          <Redirect from="/:url*(/+)" to={pathname ? pathname.slice(0, -1) : '/'} />
+          <PrivateRoute exact path="/home" component={Home} />
+          <PrivateRoute path="/profile" component={Profile} />
+          <PrivateRoute path="/admin" roles={[Role.Admin]} component={Admin} />
+          <PrivateRoute path="/creator" component={Creator} />
+          <Route path="/account" component={Account} />
+          <Route path="/frontpage" component={Frontpage} />
+          <Redirect from="*" to="/frontpage" />
+        </Switch>
+      </Layout>
+    </>
   );
 }
 

@@ -6,11 +6,13 @@ namespace Niftified.Entities
 	public class Volume
 	{
 		public int Id { get; set; }
+		public DateTime Created { get; set; }
+		public DateTime? Updated { get; set; }
+
 
 		public string HashId { get; set; } // connection to nifty chain
 		public string ExternalHashId { get; set; } // id on external block chain?
 
-		public int OwnerId { get; set; }
 		public Person Owner { get; set; }
 
 		public VolumeStatus Status { get; set; } // for sale, not for sale
@@ -18,13 +20,10 @@ namespace Niftified.Entities
 
 		// An 'edition' of a print is a limited set of identical prints made from the same plate. 
 		// Editioned prints must be identical. 
-		public int EditionId { get; set; } // reference that connects several items into one bacth
 		public Edition Edition { get; set; } // reference that connects several items into one bacth
 
 		// volume of the edition in the print number (e.g. "15/30" for the 15th print in an edition of 30). 
 		public int EditionNumber { get; set; } // e.g. number 15 of 30
-
-		public byte[] TransactionRawData { get; set; } // raw transaction data
 
 		// Bids
 		// Last Bid

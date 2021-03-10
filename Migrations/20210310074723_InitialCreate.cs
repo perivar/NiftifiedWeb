@@ -127,31 +127,6 @@ namespace Niftified.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Persons",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Created = table.Column<DateTime>(nullable: false),
-                    UniqueId = table.Column<string>(nullable: true),
-                    Alias = table.Column<string>(nullable: true),
-                    AccountId = table.Column<int>(nullable: true),
-                    Status = table.Column<int>(nullable: false),
-                    SalesCommision = table.Column<double>(nullable: false),
-                    EditionId = table.Column<int>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Persons", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Persons_Accounts_AccountId",
-                        column: x => x.AccountId,
-                        principalTable: "Accounts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Editions",
                 columns: table => new
                 {
@@ -160,12 +135,11 @@ namespace Niftified.Migrations
                     LanguageCode = table.Column<string>(nullable: true),
                     HashId = table.Column<string>(nullable: true),
                     ExternalHashId = table.Column<string>(nullable: true),
-                    CreatorId = table.Column<int>(nullable: false),
+                    SalesCommisionToCreators = table.Column<double>(nullable: false),
+                    SalesCommisionToBlockchain = table.Column<double>(nullable: false),
                     Created = table.Column<DateTime>(nullable: false),
                     ExternalCreated = table.Column<DateTime>(nullable: true),
-                    SalesCommisionToCreator = table.Column<double>(nullable: false),
-                    SalesCommisionToBlockchain = table.Column<double>(nullable: false),
-                    EditionTotal = table.Column<int>(nullable: false),
+                    Updated = table.Column<DateTime>(nullable: true),
                     Name = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
                     Version = table.Column<string>(nullable: true),
@@ -173,8 +147,9 @@ namespace Niftified.Migrations
                     Series = table.Column<string>(nullable: true),
                     BoxName = table.Column<string>(nullable: true),
                     Theme = table.Column<string>(nullable: true),
-                    CollectionId = table.Column<int>(nullable: false),
+                    CollectionId = table.Column<int>(nullable: true),
                     DataSource = table.Column<string>(nullable: true),
+                    DataSourceRawData = table.Column<byte[]>(nullable: true),
                     ExternalDataSource = table.Column<string>(nullable: true),
                     ExternalDataSourceFileType = table.Column<string>(nullable: true)
                 },
@@ -186,13 +161,63 @@ namespace Niftified.Migrations
                         column: x => x.CollectionId,
                         principalTable: "Collection",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Persons",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Created = table.Column<DateTime>(nullable: false),
+                    Updated = table.Column<DateTime>(nullable: true),
+                    UniqueId = table.Column<string>(nullable: true),
+                    Alias = table.Column<string>(nullable: true),
+                    AccountId = table.Column<int>(nullable: true),
+                    Status = table.Column<int>(nullable: false),
+                    Type = table.Column<int>(nullable: false),
+                    SalesCommisionShare = table.Column<double>(nullable: false),
+                    EditionId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Persons", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Editions_Persons_CreatorId",
-                        column: x => x.CreatorId,
-                        principalTable: "Persons",
+                        name: "FK_Persons_Accounts_AccountId",
+                        column: x => x.AccountId,
+                        principalTable: "Accounts",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Persons_Editions_EditionId",
+                        column: x => x.EditionId,
+                        principalTable: "Editions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Tag",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Code = table.Column<string>(nullable: true),
+                    LanguageCode = table.Column<string>(nullable: true),
+                    Name = table.Column<string>(nullable: true),
+                    Description = table.Column<string>(nullable: true),
+                    EditionId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tag", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Tag_Editions_EditionId",
+                        column: x => x.EditionId,
+                        principalTable: "Editions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -227,42 +252,20 @@ namespace Niftified.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Tag",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Code = table.Column<string>(nullable: true),
-                    LanguageCode = table.Column<string>(nullable: true),
-                    Name = table.Column<string>(nullable: true),
-                    Description = table.Column<string>(nullable: true),
-                    EditionId = table.Column<int>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Tag", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Tag_Editions_EditionId",
-                        column: x => x.EditionId,
-                        principalTable: "Editions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Volumes",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    Created = table.Column<DateTime>(nullable: false),
+                    Updated = table.Column<DateTime>(nullable: true),
                     HashId = table.Column<string>(nullable: true),
                     ExternalHashId = table.Column<string>(nullable: true),
-                    OwnerId = table.Column<int>(nullable: false),
+                    OwnerId = table.Column<int>(nullable: true),
                     Status = table.Column<int>(nullable: false),
                     Type = table.Column<int>(nullable: false),
-                    EditionId = table.Column<int>(nullable: false),
-                    EditionNumber = table.Column<int>(nullable: false),
-                    TransactionRawData = table.Column<byte[]>(nullable: true)
+                    EditionId = table.Column<int>(nullable: true),
+                    EditionNumber = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -272,24 +275,43 @@ namespace Niftified.Migrations
                         column: x => x.EditionId,
                         principalTable: "Editions",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Volumes_Persons_OwnerId",
                         column: x => x.OwnerId,
                         principalTable: "Persons",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Wallet",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Created = table.Column<DateTime>(nullable: false),
+                    Updated = table.Column<DateTime>(nullable: true),
+                    PublicKey = table.Column<string>(nullable: true),
+                    PrivateKeyEncrypted = table.Column<string>(nullable: true),
+                    ReceivingAddress = table.Column<string>(nullable: true),
+                    PersonId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Wallet", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Wallet_Persons_PersonId",
+                        column: x => x.PersonId,
+                        principalTable: "Persons",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Editions_CollectionId",
                 table: "Editions",
                 column: "CollectionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Editions_CreatorId",
-                table: "Editions",
-                column: "CreatorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Offers_PersonId",
@@ -326,25 +348,14 @@ namespace Niftified.Migrations
                 table: "Volumes",
                 column: "OwnerId");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_Persons_Editions_EditionId",
-                table: "Persons",
-                column: "EditionId",
-                principalTable: "Editions",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+            migrationBuilder.CreateIndex(
+                name: "IX_Wallet_PersonId",
+                table: "Wallet",
+                column: "PersonId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Editions_Collection_CollectionId",
-                table: "Editions");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Editions_Persons_CreatorId",
-                table: "Editions");
-
             migrationBuilder.DropTable(
                 name: "Addresses");
 
@@ -367,7 +378,7 @@ namespace Niftified.Migrations
                 name: "Volumes");
 
             migrationBuilder.DropTable(
-                name: "Collection");
+                name: "Wallet");
 
             migrationBuilder.DropTable(
                 name: "Persons");
@@ -377,6 +388,9 @@ namespace Niftified.Migrations
 
             migrationBuilder.DropTable(
                 name: "Editions");
+
+            migrationBuilder.DropTable(
+                name: "Collection");
         }
     }
 }

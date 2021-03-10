@@ -2,8 +2,11 @@ import React from 'react';
 import { Item, ItemProps } from './Item';
 
 function ItemList({ match }: { match: any }) {
+  const { path } = match;
+
   const items: ItemProps[] = [];
   items.push({
+    path,
     id: '1',
     creator: 'Anette Moi',
     title: 'Bryne',
@@ -14,6 +17,7 @@ function ItemList({ match }: { match: any }) {
     image: '/nifty-images/nfy-1.png'
   });
   items.push({
+    path,
     id: '2',
     creator: 'Anette Moi',
     title: 'Dogs',
@@ -24,6 +28,7 @@ function ItemList({ match }: { match: any }) {
     image: '/nifty-images/nfy-2.png'
   });
   items.push({
+    path,
     id: '3',
     creator: 'Anette Moi',
     title: 'Inkassovarsel',
@@ -34,6 +39,7 @@ function ItemList({ match }: { match: any }) {
     image: '/nifty-images/nfy-3.png'
   });
   items.push({
+    path,
     id: '4',
     creator: 'Anette Moi',
     title: 'Kikutstua',
@@ -44,6 +50,7 @@ function ItemList({ match }: { match: any }) {
     image: '/nifty-images/nfy-4.png'
   });
   items.push({
+    path,
     id: '5',
     creator: 'Anette Moi',
     title: 'Fuck It',
@@ -54,6 +61,7 @@ function ItemList({ match }: { match: any }) {
     image: '/nifty-images/nfy-5.png'
   });
   items.push({
+    path,
     id: '6',
     creator: 'CryptoPunks',
     title: 'Eric 5',
@@ -64,6 +72,7 @@ function ItemList({ match }: { match: any }) {
     image: '/nifty-images/nfy-6.png'
   });
   items.push({
+    path,
     id: '7',
     creator: 'CryptoPunks',
     title: 'Tom 4',
@@ -74,6 +83,7 @@ function ItemList({ match }: { match: any }) {
     image: '/nifty-images/nfy-7.png'
   });
   items.push({
+    path,
     id: '8',
     creator: 'Julian',
     title: 'Invaders',
@@ -84,6 +94,7 @@ function ItemList({ match }: { match: any }) {
     image: '/nifty-images/nfy-8.png'
   });
   items.push({
+    path,
     id: '9',
     creator: 'Julian',
     title: 'Invaders are here',
@@ -126,6 +137,7 @@ function ItemList({ match }: { match: any }) {
               items.map((item: ItemProps, index: number) => (
                 <Item
                   key={index}
+                  path={path}
                   id={item.id}
                   creator={item.creator}
                   title={item.title}

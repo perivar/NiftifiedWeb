@@ -7,12 +7,13 @@ namespace Niftified.Entities
 	{
 		public int Id { get; set; }
 		public DateTime Created { get; set; }
-		public int Type { get; set; }
-
-		public int ApprovedOfferId { get; set; }
-		public Offer ApprovedOffer { get; set; }
+		public DateTime? Updated { get; set; }
 
 		public string Description { get; set; }
+
+		public TransactionType Type { get; set; }
+
+		public Offer ApprovedOffer { get; set; }
 
 		public Edition Edition { get; set; }
 		public Volume Volume { get; set; }

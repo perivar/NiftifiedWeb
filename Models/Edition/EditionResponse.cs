@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using Niftified.Entities;
 
-namespace Niftified.Entities
+namespace Niftified.Models.Accounts
 {
-	public class Edition
+	public class EditionResponse
 	{
 		public int Id { get; set; }
 		public string LanguageCode { get; set; }
@@ -11,14 +12,15 @@ namespace Niftified.Entities
 		public string ExternalHashId { get; set; } // id on external block chain?
 
 		public List<Person> Creators { get; set; } // note the sales commision will have to add up to 100%
-		public double SalesCommisionToCreators { get; set; }
-		public double SalesCommisionToBlockchain { get; set; }
 
 		public DateTime Created { get; set; } // minted when?
 		public DateTime? ExternalCreated { get; set; } // minted in external block chain?
 		public DateTime? Updated { get; set; }
 
-		public List<Volume> Volumes { get; set; } // all volumes of this one edition, could be only one
+		public double SalesCommisionToCreators { get; set; }
+		public double SalesCommisionToBlockchain { get; set; }
+
+		public List<Volume> Volumes { get; set; } // at least one needs to exist
 
 		public string Name { get; set; }
 		public string Description { get; set; }
@@ -39,30 +41,5 @@ namespace Niftified.Entities
 		public string ExternalDataSource { get; set; } // source if the data is external to the blockchain (not stored in the blockchain)
 		public string ExternalDataSourceFileType { get; set; }
 
-		// Other owners
-		// 4 editions on sale for 0.4 ETH by razzilcrypto
-		// 3 editions in wallet. Not for sale by Janus-Faced
-		// => find out through same edition id
-
-		// History
-		// Bought 3 editions for 0.15 ETH 2 minutes ago by Janus-Faced
-		// Offer cancelled 1 days ago by 0x54ec6aa23...0be4
-		// Offered 1 WETH for 1 edition 1 days ago by 0x2ace7105b...345c
-		// Offered 0.3 WETH for 1 edition 1 days ago by 0x54ec6aa23...0be4
-		// Offered 1.01 WETH for 1 edition 1 days ago by 0x9fd2f92b9...3600
-		// Put on Sale for 0.15 NFY 19 minutes ago by lakshepassion
-		// Minted 2 hours ago by Silvia Puff cuties (a whole batch)
-		// => find out through same edition id (note edition needs minted date)
-
-		// Bids
-		// Last Bid
-		// 3 editions in wallet, not for sale by storm
-		// 0.16 WETH by The Collector
-		// 1.5 WETH expired by 0xb52e2dbf7...ae06
-		// 1.25 WETH by C.Camaro
-		// 1.01 WETH expired by 0x9fd2f92b9...3600
-
-		// Service fee 2.5%. 0.246 ETH $430.37
 	}
-
 }

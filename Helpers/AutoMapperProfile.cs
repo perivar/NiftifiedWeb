@@ -31,6 +31,26 @@ namespace Niftified.Helpers
 						return true;
 					}
 				));
+
+
+			CreateMap<Edition, EditionResponse>();
+
+			CreateMap<CreateEditionRequest, Edition>();
+
+			CreateMap<UpdateEditionRequest, Edition>()
+				.ForAllMembers(x => x.Condition(
+					(src, dest, prop) =>
+					{
+						// ignore null & empty string properties
+						if (prop == null) return false;
+						if (prop.GetType() == typeof(string) && string.IsNullOrEmpty((string)prop)) return false;
+
+						// ignore null field
+						// if (x.DestinationMember.Name == "XYZ" && src.XYZRoleRoleRoleRoleRole == null) return false;
+
+						return true;
+					}
+				));
 		}
 	}
 }

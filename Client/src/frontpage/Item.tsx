@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 // import { accountService } from '../_services';
 
 export interface ItemProps {
+  path: string;
   id: string;
   creator: string;
   title: string;
@@ -16,6 +18,7 @@ export interface ItemProps {
 export const Item = (props: ItemProps) => {
   // const user = accountService.userValue;
 
+  const { path } = props;
   const { id } = props;
   const { title } = props;
   const { creator } = props;
@@ -60,7 +63,7 @@ export const Item = (props: ItemProps) => {
       </div>
       <div className="row">
         <div className="col">
-          <a href={`/detail/${id}`}>
+          <Link to={`${path}/detail/${id}`}>
             <figure className="pp-effect">
               <img className="img-fluid" src={image} alt="{title}" />
               <figcaption>
@@ -68,7 +71,7 @@ export const Item = (props: ItemProps) => {
                 <p>{creator}</p>
               </figcaption>
             </figure>
-          </a>
+          </Link>
         </div>
       </div>
     </div>
