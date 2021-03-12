@@ -8,6 +8,7 @@ using System;
 using Niftified.Helpers;
 using Niftified.Middleware;
 using Niftified.Services;
+using Microsoft.OpenApi.Models;
 
 namespace WebApi
 {
@@ -27,7 +28,37 @@ namespace WebApi
 			services.AddCors();
 			services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.IgnoreNullValues = true);
 			services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-			services.AddSwaggerGen();
+
+			services.AddSwaggerGen(c =>
+				{
+					c.SwaggerDoc("v1", new OpenApiInfo { Title = "Niftified-Service", Version = "v1" });
+
+					c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+					{
+						Name = "Authorization",
+						Type = SecuritySchemeType.ApiKey,
+						Scheme = "Bearer",
+						BearerFormat = "JWT",
+						In = ParameterLocation.Header,
+						Description = "JWT Authorization header using the Bearer scheme."
+					});
+
+					c.AddSecurityRequirement(new OpenApiSecurityRequirement
+					{
+			 {
+				   new OpenApiSecurityScheme
+					 {
+						 Reference = new OpenApiReference
+						 {
+							 Type = ReferenceType.SecurityScheme,
+							 Id = "Bearer"
+						 }
+					 },
+					 new string[] {}
+
+			 }
+					});
+				});
 
 			// configure strongly typed settings object
 			services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));

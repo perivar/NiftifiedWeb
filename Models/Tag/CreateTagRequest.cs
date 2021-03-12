@@ -1,13 +1,16 @@
-using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using Niftified.Entities;
 
-namespace Niftified.Entities
+namespace Niftified.Models.Accounts
 {
-	public class Tag
+	public class CreateTagRequest
 	{
-		public int Id { get; set; }
+		[Required]
 		public string LanguageCode { get; set; } // what language
+		[Required]
 		public string Name { get; set; }
+
 		public string Description { get; set; }
 	}
 }

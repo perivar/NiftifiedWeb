@@ -34,6 +34,9 @@ namespace Niftified.Migrations
                     b.Property<string>("FirstName")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("LanguageCode")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("LastName")
                         .HasColumnType("TEXT");
 
@@ -316,9 +319,6 @@ namespace Niftified.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Code")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
@@ -335,7 +335,7 @@ namespace Niftified.Migrations
 
                     b.HasIndex("EditionId");
 
-                    b.ToTable("Tag");
+                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("Niftified.Entities.Tx", b =>

@@ -80,7 +80,7 @@ const Content = ({ tab }: { tab: string | null }) => {
 
 function ItemDetail({ match }: { match: any }) {
   const { params } = match;
-  const { id } = params;
+  // const { id } = params;
 
   const creator = 'Anette Moi';
   const title = 'Bryne';
@@ -110,7 +110,7 @@ function ItemDetail({ match }: { match: any }) {
           <div className="col card">
             <div className="text-right item-like mt-2">
               <i
-                className={`far fa-heart fa-2x ${isLiking ? 'item-like-selected' : ''}`}
+                className={`item-link fa-2x ${isLiking ? 'fas fa-heart item-like-selected' : 'far fa-heart'}`}
                 onClick={handleLikeClick}
                 role="button"
                 tabIndex={0}

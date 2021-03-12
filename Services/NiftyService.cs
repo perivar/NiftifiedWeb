@@ -12,15 +12,22 @@ namespace Niftified.Services
 {
 	public interface INiftyService
 	{
+		// edition
 		IEnumerable<EditionResponse> GetAllEditions();
 		EditionResponse GetEditionById(int id);
 		EditionResponse CreateEdition(CreateEditionRequest model);
 		EditionResponse UpdateEdition(int id, UpdateEditionRequest model);
 		void DeleteEdition(int id);
 
+		// collection
 		CollectionResponse CreateCollecton(CreateCollectionRequest model);
 		IEnumerable<CollectionResponse> GetAllCollections();
-		IEnumerable<CollectionResponse> GetAllCollectionsByAccountId(int id);
+		IEnumerable<CollectionResponse> GetAllCollectionsByAccountId(int accountId);
+		IEnumerable<CollectionResponse> GetCollectionsByAccountId(int accountId, string query);
+
+		// tag
+		TagResponse CreateTag(CreateTagRequest model);
+		IEnumerable<TagResponse> GetAllTags();
 	}
 
 	public class NiftyService : INiftyService
@@ -129,6 +136,7 @@ namespace Niftified.Services
 			_context.SaveChanges();
 		}
 
+		// collection
 		public CollectionResponse CreateCollecton(CreateCollectionRequest model)
 		{
 			// validate
@@ -153,8 +161,39 @@ namespace Niftified.Services
 
 		public IEnumerable<CollectionResponse> GetAllCollectionsByAccountId(int accountId)
 		{
-			var collections = _context.Collections.Select(a => a.AccountId == accountId);
+			var collections = _context.Collections.Where(entity => entity.AccountId == accountId);
 			return _mapper.Map<IList<CollectionResponse>>(collections);
 		}
+
+		public IEnumerable<CollectionResponse> GetCollectionsByAccountId(int accountId, string query)
+		{
+			var collections = _context.Collections
+			.Where(entity => entity.AccountId == accountId && entity.Name.ToLower().Contains(query.ToLower()));
+			return _mapper.Map<IList<CollectionResponse>>(collections);
+		}
+
+		// tag
+		public TagResponse CreateTag(CreateTagRequest model)
+		{
+			// validate
+			if (_context.Tags.Any(x => x.Name == model.Name))
+				throw new AppException($"Name '{model.Name}' is already registered");
+
+			// map model to new object
+			var tag = _mapper.Map<Tag>(model);
+
+			// save 
+			_context.Tags.Add(tag);
+			_context.SaveChanges();
+
+			return _mapper.Map<TagResponse>(tag);
+		}
+
+		public IEnumerable<TagResponse> GetAllTags()
+		{
+			var tags = _context.Tags;
+			return _mapper.Map<IList<TagResponse>>(tags);
+		}
+
 	}
 }

@@ -50,7 +50,7 @@ export const Item = (props: ItemProps) => {
         <div className="col text-right">
           <div className="item-like">
             <i
-              className={`far fa-heart ${isLiking ? 'item-like-selected' : ''}`}
+              className={`item-link ${isLiking ? 'fas fa-heart item-like-selected' : 'far fa-heart'}`}
               onClick={handleLikeClick}
               role="button"
               tabIndex={0}

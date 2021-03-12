@@ -47,12 +47,12 @@ a {
     font-weight: 600;
 }
 
-.item-like i {
-    outline: none;
+.item-link:hover {
+    color: darkgray;
 }
 
-.item-like:hover i {
-    color: darkgray;
+.item-like i {
+    outline: none;
 }
 
 .item-like-selected {
@@ -60,11 +60,7 @@ a {
 }
 
 .show-block {
-    display: inline-block;
-}
-
-.input-tags:focus {
-    outline: 0;
+    display: block;
 }
 
 body {

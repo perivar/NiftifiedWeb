@@ -6,6 +6,9 @@ namespace Niftified.Models.Accounts
 	public class CreateRequest
 	{
 		[Required]
+		public string LanguageCode { get; set; }
+
+		[Required]
 		public string FirstName { get; set; }
 
 		[Required]

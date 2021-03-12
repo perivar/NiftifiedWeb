@@ -2,11 +2,14 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Formik, Field, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
+import CustomSelect from '../_common/select/CustomSelect';
+import { languageOptions } from '../_common/languageOptions';
 
 import { accountService, alertService } from '../_services';
 
 function Register({ history }: { history: any }) {
   const initialValues = {
+    languageCode: '',
     firstName: '',
     lastName: '',
     email: '',
@@ -16,6 +19,7 @@ function Register({ history }: { history: any }) {
   };
 
   const validationSchema = Yup.object().shape({
+    languageCode: Yup.string().required('Language is required'),
     firstName: Yup.string().required('First Name is required'),
     lastName: Yup.string().required('Last Name is required'),
     email: Yup.string().email('Email is invalid').required('Email is required'),
@@ -50,9 +54,25 @@ function Register({ history }: { history: any }) {
           <div className="card-body">
             <div className="form-row">
               <div className="form-group col">
-                <label htmlFor="firstNameField">First Name</label>
+                <label htmlFor="languageCode">Language</label>
                 <Field
-                  id="firstNameField"
+                  id="languageCode"
+                  name="languageCode"
+                  type="text"
+                  options={languageOptions}
+                  component={CustomSelect}
+                  placeholder="Select language..."
+                  isMulti={false}
+                />
+                <ErrorMessage name="languageCode" component="div" className="invalid-feedback show-block" />
+                <small>This is the preferred language you want to use.</small>
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group col">
+                <label htmlFor="firstName">First Name</label>
+                <Field
+                  id="firstName"
                   name="firstName"
                   type="text"
                   className={`form-control${errors.firstName && touched.firstName ? ' is-invalid' : ''}`}
@@ -60,9 +80,9 @@ function Register({ history }: { history: any }) {
                 <ErrorMessage name="firstName" component="div" className="invalid-feedback" />
               </div>
               <div className="form-group col">
-                <label htmlFor="lastNameField">Last Name</label>
+                <label htmlFor="lastName">Last Name</label>
                 <Field
-                  id="lastNameField"
+                  id="lastName"
                   name="lastName"
                   type="text"
                   className={`form-control${errors.lastName && touched.lastName ? ' is-invalid' : ''}`}
@@ -71,9 +91,9 @@ function Register({ history }: { history: any }) {
               </div>
             </div>
             <div className="form-group">
-              <label htmlFor="emailField">Email</label>
+              <label htmlFor="email">Email</label>
               <Field
-                id="emailField"
+                id="email"
                 name="email"
                 type="text"
                 className={`form-control${errors.email && touched.email ? ' is-invalid' : ''}`}
@@ -82,9 +102,9 @@ function Register({ history }: { history: any }) {
             </div>
             <div className="form-row">
               <div className="form-group col">
-                <label htmlFor="passwordField">Password</label>
+                <label htmlFor="password">Password</label>
                 <Field
-                  id="passwordField"
+                  id="password"
                   name="password"
                   type="password"
                   className={`form-control${errors.password && touched.password ? ' is-invalid' : ''}`}
@@ -92,9 +112,9 @@ function Register({ history }: { history: any }) {
                 <ErrorMessage name="password" component="div" className="invalid-feedback" />
               </div>
               <div className="form-group col">
-                <label htmlFor="confirmPasswordField">Confirm Password</label>
+                <label htmlFor="confirmPassword">Confirm Password</label>
                 <Field
-                  id="confirmPasswordField"
+                  id="confirmPassword"
                   name="confirmPassword"
                   type="password"
                   className={`form-control${errors.confirmPassword && touched.confirmPassword ? ' is-invalid' : ''}`}

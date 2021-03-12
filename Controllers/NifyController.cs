@@ -24,30 +24,62 @@ namespace Niftified.Controllers
 			_mapper = mapper;
 		}
 
-		[HttpGet]
-		public ActionResult<IEnumerable<EditionResponse>> GetAllEditions()
-		{
-			var editions = _niftyService.GetAllEditions();
-			return Ok(editions);
-		}
-
 		[Authorize]
-		[HttpGet]
-		public ActionResult<IEnumerable<EditionResponse>> GetAllCollections()
+		[HttpGet("/api/collection/")]
+		public ActionResult<IEnumerable<CollectionResponse>> GetAllCollections()
 		{
 			var collections = _niftyService.GetAllCollections();
 			return Ok(collections);
 		}
 
 		[Authorize]
-		[HttpGet("{accountId:int}")]
-		public ActionResult<IEnumerable<EditionResponse>> GetAllCollectionsByAccountId(int accountId)
+		[HttpGet("/api/collection/{accountId:int}")]
+		public ActionResult<IEnumerable<CollectionResponse>> GetAllCollectionsByAccountId(int accountId)
 		{
 			var collections = _niftyService.GetAllCollectionsByAccountId(accountId);
 			return Ok(collections);
 		}
 
-		[HttpGet("{id:int}")]
+		[Authorize]
+		[HttpGet("/api/collection/{accountId:int}/{query}")]
+		public ActionResult<IEnumerable<CollectionResponse>> GetCollectionsByAccountId(int accountId, string query)
+		{
+			var collections = _niftyService.GetCollectionsByAccountId(accountId, query);
+			return Ok(collections);
+		}
+
+		[Authorize]
+		[HttpPost("/api/collection/")]
+		public ActionResult<CollectionResponse> CreateCollection(CreateCollectionRequest model)
+		{
+			var collection = _niftyService.CreateCollecton(model);
+			return Ok(collection);
+		}
+
+		[Authorize]
+		[HttpGet("/api/tag/")]
+		public ActionResult<IEnumerable<TagResponse>> GetAllTags()
+		{
+			var tags = _niftyService.GetAllTags();
+			return Ok(tags);
+		}
+
+		[Authorize]
+		[HttpPost("/api/tag/")]
+		public ActionResult<TagResponse> CreateTag(CreateTagRequest model)
+		{
+			var tag = _niftyService.CreateTag(model);
+			return Ok(tag);
+		}
+
+		[HttpGet("/api/edition/")]
+		public ActionResult<IEnumerable<EditionResponse>> GetAllEditions()
+		{
+			var editions = _niftyService.GetAllEditions();
+			return Ok(editions);
+		}
+
+		[HttpGet("/api/edition/{id:int}")]
 		public ActionResult<EditionResponse> GetEditionById(int id)
 		{
 			var edition = _niftyService.GetEditionById(id);
@@ -55,7 +87,7 @@ namespace Niftified.Controllers
 		}
 
 		[Authorize]
-		[HttpPost]
+		[HttpPost("/api/edition/")]
 		public ActionResult<EditionResponse> CreateEdition(CreateEditionRequest model)
 		{
 			var edition = _niftyService.CreateEdition(model);
@@ -63,7 +95,7 @@ namespace Niftified.Controllers
 		}
 
 		[Authorize]
-		[HttpPut("{id:int}")]
+		[HttpPut("/api/edition/{id:int}")]
 		public ActionResult<EditionResponse> UpdateEdition(int id, UpdateEditionRequest model)
 		{
 			// TODO: only owners can update their own?

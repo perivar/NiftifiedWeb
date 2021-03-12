@@ -32,7 +32,7 @@ namespace Niftified.Helpers
 					}
 				));
 
-
+			// edition
 			CreateMap<Edition, EditionResponse>();
 
 			CreateMap<CreateEditionRequest, Edition>();
@@ -45,16 +45,20 @@ namespace Niftified.Helpers
 						if (prop == null) return false;
 						if (prop.GetType() == typeof(string) && string.IsNullOrEmpty((string)prop)) return false;
 
-						// ignore null field
-						// if (x.DestinationMember.Name == "XYZ" && src.XYZRoleRoleRoleRoleRole == null) return false;
-
 						return true;
 					}
 				));
 
+			// collection
 			CreateMap<Collection, CollectionResponse>();
 
 			CreateMap<CreateCollectionRequest, Collection>();
+
+			// tag
+			CreateMap<Tag, TagResponse>();
+
+			CreateMap<CreateTagRequest, Tag>();
+
 		}
 	}
 }

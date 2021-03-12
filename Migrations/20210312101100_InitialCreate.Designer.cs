@@ -9,7 +9,7 @@ using Niftified.Helpers;
 namespace Niftified.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20210310195013_InitialCreate")]
+    [Migration("20210312101100_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -34,6 +34,9 @@ namespace Niftified.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("FirstName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LanguageCode")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LastName")
@@ -318,9 +321,6 @@ namespace Niftified.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Code")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
@@ -337,7 +337,7 @@ namespace Niftified.Migrations
 
                     b.HasIndex("EditionId");
 
-                    b.ToTable("Tag");
+                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("Niftified.Entities.Tx", b =>

@@ -2,6 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Formik, Field, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
+import CustomSelect from '../../_common/select/CustomSelect';
+import { languageOptions } from '../../_common/languageOptions';
 
 import { accountService, alertService } from '../../_services';
 
@@ -10,6 +12,7 @@ function AddEdit({ history, match }: { history: any; match: any }) {
   const isAddMode = !id;
 
   const initialValues = {
+    languageCode: '',
     firstName: '',
     lastName: '',
     email: '',
@@ -19,6 +22,7 @@ function AddEdit({ history, match }: { history: any; match: any }) {
   };
 
   const validationSchema = Yup.object().shape({
+    languageCode: Yup.string().required('Language is required'),
     firstName: Yup.string().required('First Name is required'),
     lastName: Yup.string().required('Last Name is required'),
     email: Yup.string().email('Email is invalid').required('Email is required'),
@@ -78,7 +82,7 @@ function AddEdit({ history, match }: { history: any; match: any }) {
         if (!isAddMode) {
           // get user and set form fields
           accountService.getById(id).then((user) => {
-            const fields = ['firstName', 'lastName', 'email', 'role'];
+            const fields = ['languageCode', 'firstName', 'lastName', 'email', 'role'];
             fields.forEach((field) => setFieldValue(field, user[field], false));
           });
         }
@@ -87,6 +91,22 @@ function AddEdit({ history, match }: { history: any; match: any }) {
         return (
           <Form>
             <h1>{isAddMode ? 'Add User' : 'Edit User'}</h1>
+            <div className="form-row">
+              <div className="form-group col">
+                <label htmlFor="languageCode">Language</label>
+                <Field
+                  id="languageCode"
+                  name="languageCode"
+                  type="text"
+                  options={languageOptions}
+                  component={CustomSelect}
+                  placeholder="Select language..."
+                  isMulti={false}
+                />
+                <ErrorMessage name="languageCode" component="div" className="invalid-feedback show-block" />
+                <small>This is the preferred language you want to use.</small>
+              </div>
+            </div>
             <div className="form-row">
               <div className="form-group col">
                 <label htmlFor="firstNameField">First Name</label>

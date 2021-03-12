@@ -13,6 +13,7 @@ namespace Niftified.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    LanguageCode = table.Column<string>(nullable: true),
                     FirstName = table.Column<string>(nullable: true),
                     LastName = table.Column<string>(nullable: true),
                     Email = table.Column<string>(nullable: true),
@@ -205,12 +206,11 @@ namespace Niftified.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Tag",
+                name: "Tags",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Code = table.Column<string>(nullable: true),
                     LanguageCode = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
@@ -218,9 +218,9 @@ namespace Niftified.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Tag", x => x.Id);
+                    table.PrimaryKey("PK_Tags", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Tag_Editions_EditionId",
+                        name: "FK_Tags_Editions_EditionId",
                         column: x => x.EditionId,
                         principalTable: "Editions",
                         principalColumn: "Id",
@@ -346,8 +346,8 @@ namespace Niftified.Migrations
                 column: "AccountId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tag_EditionId",
-                table: "Tag",
+                name: "IX_Tags_EditionId",
+                table: "Tags",
                 column: "EditionId");
 
             migrationBuilder.CreateIndex(
@@ -381,7 +381,7 @@ namespace Niftified.Migrations
                 name: "RefreshToken");
 
             migrationBuilder.DropTable(
-                name: "Tag");
+                name: "Tags");
 
             migrationBuilder.DropTable(
                 name: "Txs");

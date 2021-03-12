@@ -2,7 +2,9 @@ import React, { useState, useEffect, useMemo, CSSProperties } from 'react';
 import { Formik, FormikHelpers, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { useDropzone } from 'react-dropzone';
-import { InputTags } from '../_common/tagsinput/InputTags';
+// import AsyncCreatableSelect from 'react-select/async-creatable';
+import { niftyService, alertService } from '../_services';
+import CustomCreatableSelect from '../_common/select/CustomCreatableSelect';
 
 const baseStyle: CSSProperties = {
   flex: 1,
@@ -172,28 +174,78 @@ export const NewEditionForm = () => {
   const validationSchema = Yup.object().shape({
     file: Yup.mixed().required('File is required'),
     name: Yup.string().required('Name is required'),
-    volumeTotal: Yup.number().required('Total number of volumes are required')
+    volumeTotal: Yup.number().integer().min(1).max(1000).required('Total number of volumes are required')
   });
 
   const onSubmit = (values: FormValues, formikHelpers: FormikHelpers<FormValues>) => {
-    formikHelpers.setSubmitting(false);
+    // alert(JSON.stringify(values, null, 2));
+    niftyService
+      .createEdition(values)
+      .then(() => {
+        formikHelpers.setSubmitting(true);
+        alertService.success('Successfully created a new edition!', {
+          keepAfterRouteChange: true
+        });
+      })
+      .catch((error) => {
+        formikHelpers.setSubmitting(false);
+        alertService.error(error, { autoClose: false });
+      });
+  };
 
-    if (values.file) {
-      alert(
-        JSON.stringify(
-          {
-            fileName: values.file.name,
-            type: values.file.type,
-            size: `${values.file.size} bytes`
-          },
-          null,
-          2
-        )
-      );
+  const onCollectionChange = (newValue: any, actionMeta: any, setFieldValue: Function) => {
+    console.group('Value Changed');
+    console.log(newValue);
+    console.log(`action: ${actionMeta.action}`);
+    console.groupEnd();
+
+    if (actionMeta.action === 'create-option') {
+      onCollectionCreate(newValue, setFieldValue);
+    } else {
+      setFieldValue('collection', newValue);
     }
   };
 
-  const [tagState, setTagState] = useState<string[]>([]);
+  const onCollectionCreate = (newValue: any, setFieldValue: any): any => {
+    const { value } = newValue.find((obj: any) => obj.__isNew__ === true);
+
+    niftyService
+      .createCollection(value)
+      .then((res) => {
+        const { id } = res;
+        const { name } = res;
+        const option = { label: name, value: id };
+        // and concatinate the old list with the new
+        const remaining = newValue.filter((obj: any) => obj.label !== value);
+        const newCollection = { ...remaining, option };
+        setFieldValue('collection', newCollection);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const loadCollectionOptions = (value: string, callback: Function) => {
+    niftyService
+      .getCollections()
+      .then((res) => {
+        const options = res.map((obj: any) => {
+          const value = obj.id;
+          const label = obj.name;
+          return { label, value };
+        });
+        callback(options);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  // mapper function
+  const optionsMapper = (obj: any): any => ({
+    label: obj.name,
+    value: obj.id
+  });
 
   return (
     <div className="container">
@@ -204,77 +256,106 @@ export const NewEditionForm = () => {
         render={({ setFieldValue, errors, touched, isSubmitting }) => {
           return (
             <Form>
-              <div className="form-row">
-                <div className="form-group col-4">
+              <div className="row">
+                <div className="col-4">
                   <UploadImageComponent setFieldValue={setFieldValue} />
                   <ErrorMessage name="file" component="div" className="invalid-feedback show-block" />
                 </div>
-                <div className="form-group col">
-                  <div className="row">
-                    <label htmlFor="name">Name</label>
-                    <Field
-                      id="name"
-                      name="name"
-                      type="text"
-                      className={`form-control${errors.name && touched.name ? ' is-invalid' : ''}`}
-                    />
-                    <small id="nameHelpBlock" className="form-text text-muted">
-                      Please describe your edition with a hopefully unique name
-                    </small>
-                    <ErrorMessage name="name" component="div" className="invalid-feedback" />
-                  </div>
+                <div className="col-8">
+                  <div className="form-row">
+                    <div className="form-group col-8">
+                      <label htmlFor="name">Name</label>
+                      <Field
+                        id="name"
+                        name="name"
+                        type="text"
+                        className={`form-control${errors.name && touched.name ? ' is-invalid' : ''}`}
+                      />
+                      <small id="nameHelpBlock" className="form-text text-muted">
+                        Please describe your edition with a somewhat unique name
+                      </small>
+                      <ErrorMessage name="name" component="div" className="invalid-feedback" />
+                    </div>
 
-                  <div className="row mt-2">
-                    <label htmlFor="tags">Tags</label>
-                    <div className="input-group">
-                      <InputTags id="tags" values={tagState} onTags={(value) => setTagState(value.values)} />
+                    <div className="form-group col-4">
+                      <label htmlFor="theme">Number of volumes (versions)</label>
+                      <Field
+                        id="volumeTotal"
+                        name="volumeTotal"
+                        type="number"
+                        className={`form-control${errors.volumeTotal && touched.volumeTotal ? ' is-invalid' : ''}`}
+                      />
+                      <small id="volumeTotalHelpBlock" className="form-text text-muted">
+                        This is the total number of volumes to be produced for this edition
+                      </small>
+                      <ErrorMessage name="volumeTotal" component="div" className="invalid-feedback" />
                     </div>
                   </div>
 
-                  <div className="row mt-2">
-                    <label htmlFor="theme">Number of volumes (versions)</label>
-                    <Field
-                      id="volumeTotal"
-                      name="volumeTotal"
-                      type="number"
-                      className={`form-control${errors.volumeTotal && touched.volumeTotal ? ' is-invalid' : ''}`}
-                    />
-                    <small id="volumeTotalHelpBlock" className="form-text text-muted">
-                      This is the total number of volumes to be produced for this edition
-                    </small>
-                    <ErrorMessage name="volumeTotal" component="div" className="invalid-feedback" />
+                  <div className="form-row">
+                    <div className="form-group col-12">
+                      <label htmlFor="tags">Tags</label>
+                      <Field
+                        name="tags"
+                        component={CustomCreatableSelect}
+                        placeholder="Select Tag..."
+                        isMulti={true}
+                        optionsMapper={optionsMapper}
+                        createOption={niftyService.createTag}
+                        readOptions={niftyService.getTags}
+                      />
+                    </div>
                   </div>
 
-                  <div className="row mt-2">
-                    <label htmlFor="description">Description</label>
-                    <Field
-                      id="description"
-                      name="description"
-                      type="textarea"
-                      as="textarea"
-                      rows={5}
-                      className={`form-control${errors.description && touched.description ? ' is-invalid' : ''}`}
-                    />
-                    <small id="nameHelpBlock" className="form-text text-muted">
-                      This is your longer detailed description.
-                    </small>
-                    <ErrorMessage name="description" component="div" className="invalid-feedback" />
+                  <div className="form-row">
+                    <div className="form-group col-12">
+                      <label htmlFor="description">Description</label>
+                      <Field
+                        id="description"
+                        name="description"
+                        type="textarea"
+                        as="textarea"
+                        rows={5}
+                        className={`form-control${errors.description && touched.description ? ' is-invalid' : ''}`}
+                      />
+                      <small id="nameHelpBlock" className="form-text text-muted">
+                        This is your longer detailed description.
+                      </small>
+                      <ErrorMessage name="description" component="div" className="invalid-feedback" />
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="form-row">
-                <div className="form-group col"></div>
-              </div>
+              {/* <div className="row mt-2">
+                    <label htmlFor="tags">Tags</label>
+                    <div style={{ width: '100%' }}>
+                      <AsyncCreatableSelect
+                        isMulti
+                        cacheOptions
+                        defaultOptions
+                        loadOptions={loadTagOptions}
+                        // onCreateOption={onTagCreateOption}
+                        // onChange={onTagChange}
+                        onChange={(newValue: any, actionMeta: any) => {
+                          onTagChange(newValue, actionMeta, setFieldValue);
+                        }}
+                        onBlur={() => setFieldTouched('tags', true)}
+                      />
+                    </div>
+                  </div> */}
 
               <div className="form-row">
                 <div className="form-group col">
                   <label htmlFor="theme">Collection</label>
                   <Field
-                    id="collection"
                     name="collection"
-                    type="text"
-                    className={`form-control${errors.collection && touched.collection ? ' is-invalid' : ''}`}
+                    component={CustomCreatableSelect}
+                    placeholder="Select Collection ..."
+                    isMulti={false}
+                    optionsMapper={optionsMapper}
+                    createOption={niftyService.createCollection}
+                    readOptions={niftyService.getCollections}
                   />
                   <ErrorMessage name="collection" component="div" className="invalid-feedback" />
                 </div>

@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using Niftified.Entities;
 
-namespace Niftified.Entities
+namespace Niftified.Models.Accounts
 {
-	public class Tag
+	public class TagResponse
 	{
 		public int Id { get; set; }
 		public string LanguageCode { get; set; } // what language
