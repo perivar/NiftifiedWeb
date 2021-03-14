@@ -1,16 +1,18 @@
 import React from 'react';
-// import { Route, Switch } from 'react-router-dom';
-// import ImgPrev from './ImgPrev';
+import { Route, Switch } from 'react-router-dom';
 import { NewEditionForm } from './NewEdition';
+import { EditEditionForm } from './EditEdition';
+import { ListEditions } from './ListEditions';
 
-function Creator({ match }: { match: any }) {
-  // const { path } = match;
+function Creator({ history, match }: { history: any; match: any }) {
+  const { path } = match;
 
   return (
-    <>
-      {/* <ImgPrev></ImgPrev> */}
-      <NewEditionForm />
-    </>
+    <Switch>
+      <Route exact path={`${path}`} component={ListEditions} />
+      <Route path={`${path}/new`} component={NewEditionForm} />
+      <Route path={`${path}/edit/:id`} component={EditEditionForm} />
+    </Switch>
   );
 }
 

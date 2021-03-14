@@ -78,7 +78,7 @@ export const CustomCreatableSelect = ({
           setOptions(newOptions);
 
           // and update value list
-          const newValues = [...value, newOption];
+          const newValues = isMulti ? [...value, newOption] : newOption;
           setValue(newValues);
 
           // and set formik field

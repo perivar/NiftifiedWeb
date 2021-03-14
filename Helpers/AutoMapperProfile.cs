@@ -1,3 +1,4 @@
+using System.Linq;
 using AutoMapper;
 using Niftified.Entities;
 using Niftified.Models.Accounts;
@@ -58,6 +59,30 @@ namespace Niftified.Helpers
 			CreateMap<Tag, TagResponse>();
 
 			CreateMap<CreateTagRequest, Tag>();
+
+			// person
+			CreateMap<Person, PersonResponse>();
+
+			CreateMap<CreatePersonRequest, Person>();
+
+			CreateMap<UpdatePersonRequest, Person>()
+				.ForAllMembers(x => x.Condition(
+					(src, dest, prop) =>
+					{
+						// ignore null & empty string properties
+						if (prop == null) return false;
+						if (prop.GetType() == typeof(string) && string.IsNullOrEmpty((string)prop)) return false;
+
+						return true;
+					}
+				));
+
+			// likes
+			CreateMap<Likes, LikesResponse>();
+
+			CreateMap<CreateLikesRequest, Likes>();
+
+			CreateMap<UpdateLikesRequest, Likes>();
 
 		}
 	}

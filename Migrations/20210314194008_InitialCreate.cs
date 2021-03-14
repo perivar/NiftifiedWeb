@@ -41,9 +41,9 @@ namespace Niftified.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     AddressId = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
-                    Received = table.Column<double>(nullable: false),
-                    Sent = table.Column<double>(nullable: false),
-                    Balance = table.Column<double>(nullable: false)
+                    Received = table.Column<decimal>(nullable: false),
+                    Sent = table.Column<decimal>(nullable: false),
+                    Balance = table.Column<decimal>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -59,30 +59,11 @@ namespace Niftified.Migrations
                     AddressId = table.Column<string>(nullable: true),
                     BlockIndex = table.Column<int>(nullable: false),
                     TxId = table.Column<string>(nullable: true),
-                    Amount = table.Column<double>(nullable: false)
+                    Amount = table.Column<decimal>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AddressTxs", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Txs",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    TxId = table.Column<string>(nullable: true),
-                    Vin = table.Column<string>(nullable: true),
-                    Vout = table.Column<string>(nullable: true),
-                    Total = table.Column<double>(nullable: false),
-                    Timestamp = table.Column<DateTime>(nullable: false),
-                    BlockHash = table.Column<string>(nullable: true),
-                    BlockIndex = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Txs", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -100,12 +81,40 @@ namespace Niftified.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Collections", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Collections_Accounts_AccountId",
-                        column: x => x.AccountId,
-                        principalTable: "Accounts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Likes",
+                columns: table => new
+                {
+                    AccountId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    LikedEditionIds = table.Column<string>(nullable: true),
+                    LikedVolumeIds = table.Column<string>(nullable: true),
+                    LikedPersonIds = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Likes", x => x.AccountId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Txs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    TxId = table.Column<string>(nullable: true),
+                    Vin = table.Column<string>(nullable: true),
+                    Vout = table.Column<string>(nullable: true),
+                    Total = table.Column<decimal>(nullable: false),
+                    Timestamp = table.Column<DateTime>(nullable: false),
+                    BlockHash = table.Column<string>(nullable: true),
+                    BlockIndex = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Txs", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -140,6 +149,7 @@ namespace Niftified.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    AccountId = table.Column<int>(nullable: false),
                     LanguageCode = table.Column<string>(nullable: true),
                     HashId = table.Column<string>(nullable: true),
                     ExternalHashId = table.Column<string>(nullable: true),
@@ -156,10 +166,15 @@ namespace Niftified.Migrations
                     BoxName = table.Column<string>(nullable: true),
                     Theme = table.Column<string>(nullable: true),
                     CollectionId = table.Column<int>(nullable: true),
-                    DataSource = table.Column<string>(nullable: true),
+                    DataSourcePath = table.Column<string>(nullable: true),
+                    DataSourceFileType = table.Column<string>(nullable: true),
+                    DataSourceFileName = table.Column<string>(nullable: true),
+                    DataSourceFileSize = table.Column<long>(nullable: false),
                     DataSourceRawData = table.Column<byte[]>(nullable: true),
-                    ExternalDataSource = table.Column<string>(nullable: true),
-                    ExternalDataSourceFileType = table.Column<string>(nullable: true)
+                    ExternalDataSourcePath = table.Column<string>(nullable: true),
+                    ExternalDataSourceFileType = table.Column<string>(nullable: true),
+                    ExternalDataSourceFileName = table.Column<string>(nullable: true),
+                    ExternalDataSourceFileSize = table.Column<long>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -191,12 +206,6 @@ namespace Niftified.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Persons", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Persons_Accounts_AccountId",
-                        column: x => x.AccountId,
-                        principalTable: "Accounts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Persons_Editions_EditionId",
                         column: x => x.EditionId,
@@ -241,11 +250,11 @@ namespace Niftified.Migrations
                     PersonHashId = table.Column<string>(nullable: true),
                     Created = table.Column<DateTime>(nullable: false),
                     Description = table.Column<string>(nullable: true),
-                    Amount = table.Column<double>(nullable: false),
+                    Amount = table.Column<decimal>(nullable: false),
                     CurrencyUniqueId = table.Column<string>(nullable: true),
                     From = table.Column<DateTime>(nullable: false),
                     To = table.Column<DateTime>(nullable: false),
-                    ServiceFeeAmount = table.Column<double>(nullable: false)
+                    ServiceFeeAmount = table.Column<decimal>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -271,7 +280,9 @@ namespace Niftified.Migrations
                     OwnerId = table.Column<int>(nullable: true),
                     Status = table.Column<int>(nullable: false),
                     Type = table.Column<int>(nullable: false),
-                    EditionId = table.Column<int>(nullable: true),
+                    Amount = table.Column<decimal>(nullable: false),
+                    CurrencyUniqueId = table.Column<string>(nullable: true),
+                    EditionId = table.Column<int>(nullable: false),
                     EditionNumber = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
@@ -282,7 +293,7 @@ namespace Niftified.Migrations
                         column: x => x.EditionId,
                         principalTable: "Editions",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Volumes_Persons_OwnerId",
                         column: x => x.OwnerId,
@@ -316,11 +327,6 @@ namespace Niftified.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Collections_AccountId",
-                table: "Collections",
-                column: "AccountId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Editions_CollectionId",
                 table: "Editions",
                 column: "CollectionId");
@@ -329,11 +335,6 @@ namespace Niftified.Migrations
                 name: "IX_Offers_PersonId",
                 table: "Offers",
                 column: "PersonId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Persons_AccountId",
-                table: "Persons",
-                column: "AccountId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Persons_EditionId",
@@ -375,6 +376,9 @@ namespace Niftified.Migrations
                 name: "AddressTxs");
 
             migrationBuilder.DropTable(
+                name: "Likes");
+
+            migrationBuilder.DropTable(
                 name: "Offers");
 
             migrationBuilder.DropTable(
@@ -393,6 +397,9 @@ namespace Niftified.Migrations
                 name: "Wallet");
 
             migrationBuilder.DropTable(
+                name: "Accounts");
+
+            migrationBuilder.DropTable(
                 name: "Persons");
 
             migrationBuilder.DropTable(
@@ -400,9 +407,6 @@ namespace Niftified.Migrations
 
             migrationBuilder.DropTable(
                 name: "Collections");
-
-            migrationBuilder.DropTable(
-                name: "Accounts");
         }
     }
 }

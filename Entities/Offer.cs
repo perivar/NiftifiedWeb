@@ -17,12 +17,12 @@ namespace Niftified.Entities
 		public DateTime Created { get; set; }
 		public string Description { get; set; }
 
-		public double Amount { get; set; }
+		public decimal Amount { get; set; }
 		public string CurrencyUniqueId { get; set; }
 		public DateTime From { get; set; } // from when is the bid valid
 		public DateTime To { get; set; } // expiration
 
-		public double ServiceFeeAmount { get; set; }
+		public decimal ServiceFeeAmount { get; set; }
 
 		// Bids
 		// Last Bid

@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using Niftified.Entities;
 
-namespace Niftified.Entities
+namespace Niftified.Models.Accounts
 {
-	public class Person
+	public class PersonResponse
 	{
 		public int Id { get; set; }
 		public DateTime Created { get; set; }
@@ -12,7 +13,7 @@ namespace Niftified.Entities
 
 		public string Alias { get; set; } // might not want to use name, only hash
 
-		public int AccountId { get; set; } // reference to account
+		public Account Account { get; set; } // reference to account
 
 		public Status Status { get; set; }
 

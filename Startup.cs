@@ -26,7 +26,15 @@ namespace WebApi
 		{
 			services.AddDbContext<DataContext>();
 			services.AddCors();
-			services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.IgnoreNullValues = true);
+
+			// services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.IgnoreNullValues = true);
+			services.AddControllers().AddNewtonsoftJson(options =>
+			{
+				options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+				options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+			}
+			);
+
 			services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 			services.AddSwaggerGen(c =>

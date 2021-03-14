@@ -28,7 +28,7 @@ function handleResponse(response: any) {
 
       // extract error message and convert to string
       const error =
-        (data && data.errors && Object.values(data.errors).map((a: any) => a)) || // typical 400 errors
+        (data && data.errors && Object.values(data.errors).join(' ')) || // typical 400 errors
         (data && data.title) ||
         (data && data.message) ||
         response.statusText;

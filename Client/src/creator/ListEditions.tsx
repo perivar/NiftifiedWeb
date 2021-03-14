@@ -1,0 +1,74 @@
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { niftyService, alertService } from '../_services';
+
+export const ListEditions = ({ match }: { match: any }) => {
+  const { path } = match;
+
+  const [isLoading, setLoading] = useState<boolean>(false);
+  const [editions, setEditions] = useState<any>([]);
+
+  // load tag options async
+  React.useEffect(() => {
+    setLoading(true);
+
+    niftyService
+      .getEditionsByAccountId()
+      .then((res) => {
+        setEditions(res);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setLoading(false);
+      });
+  }, []);
+
+  return (
+    <>
+      <Link className="btn btn-primary" to={`${path}/new`}>
+        Create New Edition
+      </Link>
+      <div className="container mt-4">
+        <div className="row">
+          <div className="col">
+            <h4>Your editions</h4>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th scope="col"></th>
+                  <th scope="col">#</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Description</th>
+                  <th scope="col">Version</th>
+                  <th scope="col"># of Volumes</th>
+                  <th scope="col">Edit</th>
+                </tr>
+              </thead>
+              <tbody>
+                {editions &&
+                  editions.map((edition: any) => (
+                    <tr key={edition.id}>
+                      <td>
+                        <img alt={edition.name} height="80" src={`/stored-images/${edition.dataSourceFileName}`}></img>
+                      </td>
+                      <td>{edition.id}</td>
+                      <td>{edition.name}</td>
+                      <td>{edition.description}</td>
+                      <td>{edition.version}</td>
+                      <td>{edition.volumes.length}</td>
+                      <td>
+                        <Link to={`${path}/edit/${edition.id}`} className="btn btn-sm btn-primary mr-1">
+                          Edit
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};

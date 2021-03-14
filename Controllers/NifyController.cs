@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Niftified.Entities;
 using Niftified.Models.Accounts;
 using Niftified.Services;
+using System.Linq;
 
 namespace Niftified.Controllers
 {
@@ -25,23 +26,23 @@ namespace Niftified.Controllers
 		}
 
 		[Authorize]
-		[HttpGet("/api/collection/")]
-		public ActionResult<IEnumerable<CollectionResponse>> GetAllCollections()
+		[HttpGet("/api/collections/")]
+		public ActionResult<IEnumerable<CollectionResponse>> GetCollections()
 		{
-			var collections = _niftyService.GetAllCollections();
+			var collections = _niftyService.GetCollections();
 			return Ok(collections);
 		}
 
 		[Authorize]
-		[HttpGet("/api/collection/{accountId:int}")]
-		public ActionResult<IEnumerable<CollectionResponse>> GetAllCollectionsByAccountId(int accountId)
+		[HttpGet("/api/collections/{accountId:int}")]
+		public ActionResult<IEnumerable<CollectionResponse>> GetCollectionsByAccountId(int accountId)
 		{
-			var collections = _niftyService.GetAllCollectionsByAccountId(accountId);
+			var collections = _niftyService.GetCollectionsByAccountId(accountId);
 			return Ok(collections);
 		}
 
 		[Authorize]
-		[HttpGet("/api/collection/{accountId:int}/{query}")]
+		[HttpGet("/api/collections/{accountId:int}/{query}")]
 		public ActionResult<IEnumerable<CollectionResponse>> GetCollectionsByAccountId(int accountId, string query)
 		{
 			var collections = _niftyService.GetCollectionsByAccountId(accountId, query);
@@ -57,10 +58,10 @@ namespace Niftified.Controllers
 		}
 
 		[Authorize]
-		[HttpGet("/api/tag/")]
-		public ActionResult<IEnumerable<TagResponse>> GetAllTags()
+		[HttpGet("/api/tags/")]
+		public ActionResult<IEnumerable<TagResponse>> GetTags()
 		{
-			var tags = _niftyService.GetAllTags();
+			var tags = _niftyService.GetTags();
 			return Ok(tags);
 		}
 
@@ -72,12 +73,20 @@ namespace Niftified.Controllers
 			return Ok(tag);
 		}
 
-		[HttpGet("/api/edition/")]
-		public ActionResult<IEnumerable<EditionResponse>> GetAllEditions()
+		[HttpGet("/api/editions/")]
+		public ActionResult<IEnumerable<EditionResponse>> GetEditions()
 		{
-			var editions = _niftyService.GetAllEditions();
+			var editions = _niftyService.GetEditions();
 			return Ok(editions);
 		}
+
+		[HttpGet("/api/editions/{accountId:int}")]
+		public ActionResult<IEnumerable<EditionResponse>> GetEditionsByAccountId(int accountId)
+		{
+			var editions = _niftyService.GetEditions();
+			return Ok(editions);
+		}
+
 
 		[HttpGet("/api/edition/{id:int}")]
 		public ActionResult<EditionResponse> GetEditionById(int id)
@@ -88,8 +97,17 @@ namespace Niftified.Controllers
 
 		[Authorize]
 		[HttpPost("/api/edition/")]
-		public ActionResult<EditionResponse> CreateEdition(CreateEditionRequest model)
+		public ActionResult<EditionResponse> CreateEdition([FromForm] CreateEditionRequest model)
 		{
+			// check raw parameters
+			// var form = Request.Form;
+
+			// Check if the request contains multipart/form-data.
+			if (model.File == null)
+			{
+				return new UnsupportedMediaTypeResult();
+			}
+
 			var edition = _niftyService.CreateEdition(model);
 			return Ok(edition);
 		}
@@ -102,6 +120,79 @@ namespace Niftified.Controllers
 
 			var edition = _niftyService.UpdateEdition(id, model);
 			return Ok(edition);
+		}
+
+		[Authorize(Role.Admin)]
+		[HttpGet("/api/persons/")]
+		public ActionResult<IEnumerable<PersonResponse>> GetPersons()
+		{
+			var persons = _niftyService.GetPersons();
+			return Ok(persons);
+		}
+
+		[Authorize]
+		[HttpGet("/api/person/{id:int}")]
+		public ActionResult<PersonResponse> GetPersonById(int id)
+		{
+			var person = _niftyService.GetPersonById(id);
+			return Ok(person);
+		}
+
+		[Authorize]
+		[HttpGet("/api/persons/{accountId:int}")]
+		public ActionResult<IEnumerable<PersonResponse>> GetPersonsByAccountId(int accountId)
+		{
+			var persons = _niftyService.GetPersonsByAccountId(accountId);
+			return Ok(persons);
+		}
+
+		[Authorize]
+		[HttpPost("/api/person/")]
+		public ActionResult<PersonResponse> CreatePerson(CreatePersonRequest model)
+		{
+			var person = _niftyService.CreatePerson(model);
+			return Ok(person);
+		}
+
+		[Authorize]
+		[HttpPut("/api/person/{id:int}")]
+		public ActionResult<PersonResponse> UpdatePerson(int id, UpdatePersonRequest model)
+		{
+			// TODO: only owners can update their own?
+
+			var person = _niftyService.UpdatePerson(id, model);
+			return Ok(person);
+		}
+
+		[Authorize]
+		[HttpGet("/api/likes/{accountId:int}")]
+		public ActionResult<LikesResponse> GetLikesByAccountId(int accountId)
+		{
+			var likes = _niftyService.GetLikesByAccountId(accountId);
+			return Ok(likes);
+		}
+
+		[Authorize]
+		[HttpPost("/api/likes/")]
+		public ActionResult<LikesResponse> CreateLikes(CreateLikesRequest model)
+		{
+			try
+			{
+				var likes = _niftyService.CreateLikes(model);
+				return Ok(likes);
+			}
+			catch (System.Exception)
+			{
+				// likes already exist - so update
+				var updateRequest = new UpdateLikesRequest();
+				updateRequest.AccountId = model.AccountId;
+				updateRequest.LikedEditionIds = model.LikedEditionIds;
+				updateRequest.LikedPersonIds = model.LikedPersonIds;
+				updateRequest.LikedVolumeIds = model.LikedVolumeIds;
+
+				var likes = _niftyService.UpdateLikes(updateRequest.AccountId, updateRequest);
+				return Ok(likes);
+			}
 		}
 
 	}

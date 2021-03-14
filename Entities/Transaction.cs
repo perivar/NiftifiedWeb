@@ -15,11 +15,11 @@ namespace Niftified.Entities
 
 		public Offer ApprovedOffer { get; set; }
 
-		public Edition Edition { get; set; }
-		public Volume Volume { get; set; }
+		public int EditionId { get; set; }
+		public int VolumeId { get; set; }
 
-		public double Amount { get; set; }
-		public string CurrencyUniqueId { get; set; }
+		public decimal Amount { get; set; }
+		public string CurrencyUniqueId { get; set; } // NOK, USD, NFY
 
 		// History
 		// Bought 3 editions for 0.15 ETH 2 minutes ago by Janus-Faced

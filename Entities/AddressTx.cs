@@ -9,7 +9,7 @@ namespace Niftified.Entities
 		public string AddressId { get; set; } // { type: String, index: true},
 		public int BlockIndex { get; set; } // {type: Number, default: 0, index: true},
 		public string TxId { get; set; } // { type: String, lowercase: true, index: true},
-		public double Amount { get; set; } // { type: Number, default: 0, index: true}
+		public decimal Amount { get; set; } // { type: Number, default: 0, index: true}
 	}
 }
 

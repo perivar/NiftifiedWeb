@@ -13,5 +13,11 @@ namespace Niftified.Helpers
 		public int SmtpPort { get; set; }
 		public string SmtpUser { get; set; }
 		public string SmtpPass { get; set; }
+
+		// edition parameters
+		public string StoredFilesPath { get; set; }
+		public double DefaultSalesCommissionToCreators { get; set; }
+		public double DefaultSalesCommissionToBlockchain { get; set; }
+
 	}
 }

@@ -5,7 +5,8 @@ namespace Niftified.Entities
 {
 	public enum VolumeStatus
 	{
-		ForSale, 
+		Pending,
+		ForSale,
 		NotForSale
 	}
 }

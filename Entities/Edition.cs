@@ -6,6 +6,8 @@ namespace Niftified.Entities
 	public class Edition
 	{
 		public int Id { get; set; }
+		public int AccountId { get; set; } // account
+
 		public string LanguageCode { get; set; }
 		public string HashId { get; set; } // connection to nifty chain
 		public string ExternalHashId { get; set; } // id on external block chain?
@@ -33,11 +35,16 @@ namespace Niftified.Entities
 
 		public List<Tag> Tags { get; set; } // relevant tags for grouping
 
-		public string DataSource { get; set; } // copy of the source when the data is stored in the blockchain
+		public string DataSourcePath { get; set; } // copy of the source when the data is stored in the blockchain
+		public string DataSourceFileType { get; set; }
+		public string DataSourceFileName { get; set; }
+		public long DataSourceFileSize { get; set; }
 		public byte[] DataSourceRawData { get; set; } // raw source data (i.e. an image or the protocol that references externally)
 
-		public string ExternalDataSource { get; set; } // source if the data is external to the blockchain (not stored in the blockchain)
+		public string ExternalDataSourcePath { get; set; } // source if the data is external to the blockchain (not stored in the blockchain)
 		public string ExternalDataSourceFileType { get; set; }
+		public string ExternalDataSourceFileName { get; set; }
+		public long ExternalDataSourceFileSize { get; set; }
 
 		// Other owners
 		// 4 editions on sale for 0.4 ETH by razzilcrypto
