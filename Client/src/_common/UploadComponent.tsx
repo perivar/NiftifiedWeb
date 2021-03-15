@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, CSSProperties } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { FieldProps } from 'formik';
 
 const baseStyle: CSSProperties = {
   flex: 1,
@@ -60,9 +61,13 @@ const imgStyle: CSSProperties = {
   height: '100%'
 };
 
-function UploadImageComponent(props: any) {
-  const { setFieldValue } = props; // access formiks values
+function UploadImageComponent({ field, form }: FieldProps) {
+  const { setFieldValue } = form; // access formiks values
+
+  // set initial value using formiks values for form.values and field.name
+  // const [files, setFiles] = useState<any>(form.values[field.name]);
   const [files, setFiles] = useState<any>([]);
+
   const { getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject } = useDropzone({
     accept: 'image/*',
     multiple: false,

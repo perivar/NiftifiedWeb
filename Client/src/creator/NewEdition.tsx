@@ -79,7 +79,7 @@ export const NewEditionForm = ({ history }: { history: any }) => {
           <Form noValidate>
             <div className="row">
               <div className="col-4">
-                <UploadImageComponent id="file" name="file" setFieldValue={setFieldValue} />
+                <Field id="file" name="file" component={UploadImageComponent} />
                 <ErrorMessage name="file" component="div" className="invalid-feedback show-block" />
               </div>
               <div className="col-8">

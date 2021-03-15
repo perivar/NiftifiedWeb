@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { niftyService, alertService } from '../_services';
+import ConfirmModal from '../_common/ConfirmModal';
 
 export const ListEditions = ({ match }: { match: any }) => {
   const { path } = match;
 
   const [isLoading, setLoading] = useState<boolean>(false);
   const [editions, setEditions] = useState<any>([]);
+
+  const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number>(0);
 
   // load tag options async
   React.useEffect(() => {
@@ -23,6 +27,27 @@ export const ListEditions = ({ match }: { match: any }) => {
         setLoading(false);
       });
   }, []);
+
+  const onCancelDeleteEdition = () => {
+    // make sure to set confirm delete id to zero
+    setConfirmDeleteId(0);
+  };
+
+  const confirmDelete = (id: number) => {
+    setConfirmDeleteId(id);
+    setShowConfirmDelete(true);
+  };
+
+  const onConfirmedDeleteEdition = () => {
+    if (confirmDeleteId !== 0) {
+      // we have a confirmed id
+      // alert(confirmDeleteId);
+
+      niftyService.deleteEdition(confirmDeleteId).then(() => {
+        alert(`deleted edition:${confirmDeleteId}`);
+      });
+    }
+  };
 
   return (
     <>
@@ -42,7 +67,7 @@ export const ListEditions = ({ match }: { match: any }) => {
                   <th scope="col">Description</th>
                   <th scope="col">Version</th>
                   <th scope="col"># of Volumes</th>
-                  <th scope="col">Edit</th>
+                  <th scope="col">Edit / Delete</th>
                 </tr>
               </thead>
               <tbody>
@@ -61,6 +86,15 @@ export const ListEditions = ({ match }: { match: any }) => {
                         <Link to={`${path}/edit/${edition.id}`} className="btn btn-sm btn-primary mr-1">
                           Edit
                         </Link>
+                        {edition && edition.volumes && edition.volumes.every((v: any) => v.status === 0) ? (
+                          <button onClick={() => confirmDelete(edition.id)} className="btn btn-sm btn-danger">
+                            Delete
+                          </button>
+                        ) : (
+                          <button type="button" className="btn btn-secondary btn-sm" disabled>
+                            Locked
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -69,6 +103,12 @@ export const ListEditions = ({ match }: { match: any }) => {
           </div>
         </div>
       </div>
+      <ConfirmModal
+        show={showConfirmDelete}
+        setShow={setShowConfirmDelete}
+        onConfirm={onConfirmedDeleteEdition}
+        onCancel={onCancelDeleteEdition}
+      />
     </>
   );
 };

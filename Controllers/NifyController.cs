@@ -80,6 +80,14 @@ namespace Niftified.Controllers
 			return Ok(editions);
 		}
 
+		[HttpGet("/api/editions/{query}")]
+		public ActionResult<IEnumerable<EditionResponse>> GetEditionsByQuery(string query)
+		{
+			var editions = _niftyService.GetEditionsByQuery(query);
+			return Ok(editions);
+		}
+
+		[Authorize]
 		[HttpGet("/api/editions/{accountId:int}")]
 		public ActionResult<IEnumerable<EditionResponse>> GetEditionsByAccountId(int accountId)
 		{
@@ -87,12 +95,19 @@ namespace Niftified.Controllers
 			return Ok(editions);
 		}
 
-
 		[HttpGet("/api/edition/{id:int}")]
 		public ActionResult<EditionResponse> GetEditionById(int id)
 		{
 			var edition = _niftyService.GetEditionById(id);
 			return Ok(edition);
+		}
+
+		[Authorize]
+		[HttpGet("/api/edition/{id:int}/iseditable")]
+		public ActionResult<bool> GetEditionIsEditable(int id)
+		{
+			var isEditable = _niftyService.GetEditionIsEditable(id);
+			return Ok(isEditable);
 		}
 
 		[Authorize]

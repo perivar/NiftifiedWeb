@@ -16,10 +16,12 @@ namespace Niftified.Services
 	{
 		// edition
 		EditionResponse GetEditionById(int id);
+		bool GetEditionIsEditable(int id);
 		EditionResponse CreateEdition(CreateEditionRequest model);
 		EditionResponse UpdateEdition(int id, UpdateEditionRequest model);
 		IEnumerable<EditionResponse> GetEditions();
 		IEnumerable<EditionResponse> GetEditionsByAccountId(int accountId);
+		IEnumerable<EditionResponse> GetEditionsByQuery(string query);
 		void DeleteEdition(int id);
 
 		// collection
@@ -78,6 +80,35 @@ namespace Niftified.Services
 			var editions = _context.Editions.Where(entity => entity.AccountId == accountId)
 			.Include(a => a.Volumes);
 			return _mapper.Map<IList<EditionResponse>>(editions);
+		}
+
+		public IEnumerable<EditionResponse> GetEditionsByQuery(string query)
+		{
+			// TODO suppor tags?
+
+			var editions = _context.Editions
+			.Where(
+				e => EF.Functions.Like(e.Name, query)
+				|| EF.Functions.Like(e.Description, query)
+				|| EF.Functions.Like(e.Series, query)
+				|| EF.Functions.Like(e.Collection.Name, query)
+			)
+			.Include(a => a.Volumes);
+			return _mapper.Map<IList<EditionResponse>>(editions);
+		}
+
+		public bool GetEditionIsEditable(int id)
+		{
+			var edition = _context.Editions.Find(id);
+			if (edition == null) throw new KeyNotFoundException("Edition not found");
+
+			// Load the volumes related to a given edition 
+			_context.Entry(edition).Collection(p => p.Volumes).Load();
+
+			// check if any of the volumes are in "non pending", i.e. minted already
+			var isEditable = edition.Volumes.Any(v => v.Status != VolumeStatus.Pending);
+
+			return isEditable;
 		}
 
 		public EditionResponse GetEditionById(int id)

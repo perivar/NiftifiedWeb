@@ -28,8 +28,8 @@ export const CustomCreatableSelect = ({
   createOption: extCreateOption,
   readOptions: extReadOptions
 }: CustomCreatableSelectProps) => {
-  // state
-  const [value, setValue] = useState<any>([]);
+  // set initial value using formiks values for form.values and field.name
+  const [value, setValue] = useState<any>(form.values[field.name]);
   const [options, setOptions] = useState<any>([]);
   const [isLoading, setLoading] = useState<boolean>(false);
 

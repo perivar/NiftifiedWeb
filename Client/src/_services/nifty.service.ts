@@ -13,8 +13,11 @@ export const niftyService = {
   getCollections,
   createCollection,
   getEditions,
+  getEditionsByQuery,
   getEditionsByAccountId,
   getEditionById,
+  getEditionIsEditable,
+  deleteEdition,
   createEdition,
   getPersons,
   createPerson
@@ -69,8 +72,16 @@ function getEditionsByAccountId() {
   return Promise.reject('not logged in');
 }
 
+function getEditionsByQuery(query: string) {
+  return fetchWrapper.get(`${baseUrl}/editions/${query}`);
+}
+
 function getEditionById(id: number) {
   return fetchWrapper.get(`${baseUrl}/edition/${id}`);
+}
+
+function getEditionIsEditable(id: number) {
+  return fetchWrapper.get(`${baseUrl}/edition/${id}/iseditable`);
 }
 
 function createEdition(params: any) {
@@ -92,6 +103,14 @@ function createEdition(params: any) {
   // merge params
   const allParams = { ...params, ...body };
   return axiosWrapper.postMultipartFormData(`${baseUrl}/edition`, allParams);
+}
+
+function deleteEdition(id: number) {
+  const user = accountService.userValue;
+  if (user && user.id) {
+    return fetchWrapper.get(`${baseUrl}/edition/delete/${id}`);
+  }
+  return Promise.reject('not logged in');
 }
 
 function getPersons() {
