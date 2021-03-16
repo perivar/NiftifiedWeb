@@ -8,11 +8,12 @@ export const ListEditions = ({ match }: { match: any }) => {
 
   const [isLoading, setLoading] = useState<boolean>(false);
   const [editions, setEditions] = useState<any>([]);
+  // const [editionsEditable, setEditionsEditable] = useState<any>([]);
 
-  const [showConfirmDelete, setShowConfirmDelete] = useState<boolean>(false);
+  const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<number>(0);
 
-  // load tag options async
+  // load editions async
   React.useEffect(() => {
     setLoading(true);
 
@@ -28,6 +29,23 @@ export const ListEditions = ({ match }: { match: any }) => {
       });
   }, []);
 
+  // check if any of them are non editable (i.e. some volumes are non-pending)
+  // React.useEffect(() => {
+  //   if (editions && editions.length > 0) {
+  //     editions.forEach((e: any) => {
+  //       niftyService
+  //         .getEditionIsEditable(e.id)
+  //         .then((res: any) => {
+  //           console.log(res);
+  //           setEditionsEditable((editionsEditable: any) => [...editionsEditable, res]);
+  //         })
+  //         .catch((error) => {
+  //           console.log(error);
+  //         });
+  //     });
+  //   }
+  // }, [editions]);
+
   const onCancelDeleteEdition = () => {
     // make sure to set confirm delete id to zero
     setConfirmDeleteId(0);
@@ -35,7 +53,7 @@ export const ListEditions = ({ match }: { match: any }) => {
 
   const confirmDelete = (id: number) => {
     setConfirmDeleteId(id);
-    setShowConfirmDelete(true);
+    setShowConfirmModal(true);
   };
 
   const onConfirmedDeleteEdition = () => {
@@ -44,7 +62,8 @@ export const ListEditions = ({ match }: { match: any }) => {
       // alert(confirmDeleteId);
 
       niftyService.deleteEdition(confirmDeleteId).then(() => {
-        alert(`deleted edition:${confirmDeleteId}`);
+        // remove from list and re-render
+        setEditions(editions.filter((edition: any) => edition.id !== confirmDeleteId));
       });
     }
   };
@@ -66,12 +85,17 @@ export const ListEditions = ({ match }: { match: any }) => {
                   <th scope="col">Name</th>
                   <th scope="col">Description</th>
                   <th scope="col">Version</th>
-                  <th scope="col"># of Volumes</th>
-                  <th scope="col">Edit / Delete</th>
+                  <th scope="col" className="text-center">
+                    Show / Mint Volumes
+                  </th>
+                  <th scope="col" className="text-center">
+                    Edit / Delete
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {editions &&
+                {!isLoading &&
+                  editions &&
                   editions.map((edition: any) => (
                     <tr key={edition.id}>
                       <td>
@@ -81,18 +105,25 @@ export const ListEditions = ({ match }: { match: any }) => {
                       <td>{edition.name}</td>
                       <td>{edition.description}</td>
                       <td>{edition.version}</td>
-                      <td>{edition.volumes.length}</td>
+                      {/* <td>{edition.volumes.length}</td> */}
                       <td>
+                        <Link to={`${path}/volumes/${edition.id}`} className="btn btn-sm btn-light btn-block">
+                          {edition.volumesCount}
+                        </Link>
+                      </td>
+                      <td className="text-center">
                         <Link to={`${path}/edit/${edition.id}`} className="btn btn-sm btn-primary mr-1">
                           Edit
                         </Link>
-                        {edition && edition.volumes && edition.volumes.every((v: any) => v.status === 0) ? (
+                        {!isLoading ? (
+                          // editionsEditable && editionsEditable[edition.id] ? (
+                          // edition && edition.volumes && edition.volumes.every((v: any) => v.status === 0) ? (
                           <button onClick={() => confirmDelete(edition.id)} className="btn btn-sm btn-danger">
                             Delete
                           </button>
                         ) : (
                           <button type="button" className="btn btn-secondary btn-sm" disabled>
-                            Locked
+                            Delete
                           </button>
                         )}
                       </td>
@@ -104,8 +135,8 @@ export const ListEditions = ({ match }: { match: any }) => {
         </div>
       </div>
       <ConfirmModal
-        show={showConfirmDelete}
-        setShow={setShowConfirmDelete}
+        show={showConfirmModal}
+        setShow={setShowConfirmModal}
         onConfirm={onConfirmedDeleteEdition}
         onCancel={onCancelDeleteEdition}
       />

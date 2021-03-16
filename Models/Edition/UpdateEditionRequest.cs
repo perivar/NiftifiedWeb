@@ -17,6 +17,7 @@ namespace Niftified.Models.Accounts
 
 		// TODO: how can we update the volumes after they are created?
 		// public List<Volume> Volumes { get; set; } // at least one needs to exist
+		public int VolumesCount { get; set; }  // number of volumes, should be the same as Volumes.Count		
 
 		public string Name { get; set; }
 		public string Description { get; set; }

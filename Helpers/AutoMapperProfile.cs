@@ -10,6 +10,7 @@ namespace Niftified.Helpers
 		// mappings between model and entity objects
 		public AutoMapperProfile()
 		{
+			// account and authentication
 			CreateMap<Account, AccountResponse>();
 
 			CreateMap<Account, AuthenticateResponse>();
@@ -84,6 +85,22 @@ namespace Niftified.Helpers
 
 			CreateMap<UpdateLikesRequest, Likes>();
 
+			// volume
+			CreateMap<Volume, VolumeResponse>();
+
+			CreateMap<CreateVolumeRequest, Volume>();
+
+			CreateMap<UpdateVolumeRequest, Volume>()
+				.ForAllMembers(x => x.Condition(
+					(src, dest, prop) =>
+					{
+						// ignore null & empty string properties
+						if (prop == null) return false;
+						if (prop.GetType() == typeof(string) && string.IsNullOrEmpty((string)prop)) return false;
+
+						return true;
+					}
+				));
 		}
 	}
 }

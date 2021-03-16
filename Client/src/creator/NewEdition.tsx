@@ -20,7 +20,7 @@ interface FormValues {
   boxName: string;
   theme: string;
   collection: string;
-  volumeTotal: number;
+  volumesCount: number;
   tags: string[];
 }
 
@@ -36,15 +36,19 @@ export const NewEditionForm = ({ history }: { history: any }) => {
     boxName: '',
     theme: '',
     collection: '',
-    volumeTotal: 1,
-    tags: ['']
+    volumesCount: 1,
+    tags: []
   };
 
   const validationSchema = Yup.object().shape({
     file: Yup.mixed().required('File is required'),
+    tags: Yup.array().min(1, 'At least one tag is required'),
     name: Yup.string().required('Name is required'),
     description: Yup.string().required('Description is required'),
-    volumeTotal: Yup.number().integer().min(1).max(1000).required('Total number of volumes are required')
+    volumesCount: Yup.number()
+      .integer()
+      .min(1, 'At least one volume is required')
+      .max(1000, 'Cannot exceed 1000 volumes')
   });
 
   const onSubmit = (values: FormValues, formikHelpers: FormikHelpers<FormValues>) => {
@@ -101,15 +105,15 @@ export const NewEditionForm = ({ history }: { history: any }) => {
                   <div className="form-group col-4">
                     <label htmlFor="theme">Number of volumes (versions)</label>
                     <Field
-                      id="volumeTotal"
-                      name="volumeTotal"
+                      id="volumesCount"
+                      name="volumesCount"
                       type="number"
-                      className={`form-control${errors.volumeTotal && touched.volumeTotal ? ' is-invalid' : ''}`}
+                      className={`form-control${errors.volumesCount && touched.volumesCount ? ' is-invalid' : ''}`}
                     />
-                    <small id="volumeTotalHelpBlock" className="form-text text-muted">
+                    <small id="volumesCountHelpBlock" className="form-text text-muted">
                       This is the total number of volumes to be produced for this edition
                     </small>
-                    <ErrorMessage name="volumeTotal" component="div" className="invalid-feedback" />
+                    <ErrorMessage name="volumesCount" component="div" className="invalid-feedback" />
                   </div>
                 </div>
 
@@ -153,6 +157,7 @@ export const NewEditionForm = ({ history }: { history: any }) => {
                       createOption={niftyService.createTag}
                       readOptions={niftyService.getTags}
                     />
+                    <ErrorMessage name="tags" component="div" className="invalid-feedback  show-block" />
                   </div>
                 </div>
 

@@ -23,8 +23,7 @@ namespace Niftified.Models.Accounts
 		public double SalesCommisionToCreators { get; set; }
 
 		[Required]
-		public int VolumeTotal { get; set; } // how many volumes to create, could be only one
-
+		public int VolumesCount { get; set; }  // how many volumes to create, could be only one
 
 		[Required]
 		public string Name { get; set; }

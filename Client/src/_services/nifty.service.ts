@@ -17,8 +17,11 @@ export const niftyService = {
   getEditionsByAccountId,
   getEditionById,
   getEditionIsEditable,
-  deleteEdition,
   createEdition,
+  updateEdition,
+  deleteEdition,
+  getVolumeById,
+  getVolumesByEditionId,
   getPersons,
   createPerson
 };
@@ -81,7 +84,7 @@ function getEditionById(id: number) {
 }
 
 function getEditionIsEditable(id: number) {
-  return fetchWrapper.get(`${baseUrl}/edition/${id}/iseditable`);
+  return fetchWrapper.get(`${baseUrl}/edition/iseditable/${id}`);
 }
 
 function createEdition(params: any) {
@@ -105,12 +108,44 @@ function createEdition(params: any) {
   return axiosWrapper.postMultipartFormData(`${baseUrl}/edition`, allParams);
 }
 
+function updateEdition(id: string, params: any) {
+  const user = accountService.userValue;
+  const accountId = user && user.id ? user.id : 1;
+
+  const body = {
+    accountId,
+    languageCode: user && user.languageCode ? user.languageCode : 'no-NO',
+    currencyUniqueId: params.currencyUniqueId ? params.currencyUniqueId : 'NFY',
+    tagIds: params.tags.map((a: any) => a.value),
+    collectionId: params.collection ? params.collection.value : ''
+  };
+
+  // delete params that should not be included in the post
+  delete params['tags'];
+  delete params['collection'];
+
+  // merge params
+  const allParams = { ...params, ...body };
+
+  return fetchWrapper.put(`${baseUrl}/edition/${id}`, allParams).then((edition) => {
+    return edition;
+  });
+}
+
 function deleteEdition(id: number) {
   const user = accountService.userValue;
   if (user && user.id) {
-    return fetchWrapper.get(`${baseUrl}/edition/delete/${id}`);
+    return fetchWrapper.delete(`${baseUrl}/edition/delete/${id}`);
   }
   return Promise.reject('not logged in');
+}
+
+function getVolumesByEditionId(editionId: number) {
+  return fetchWrapper.get(`${baseUrl}/volumes/${editionId}`);
+}
+
+function getVolumeById(id: number) {
+  return fetchWrapper.get(`${baseUrl}/volume/${id}`);
 }
 
 function getPersons() {

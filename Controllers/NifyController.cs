@@ -7,6 +7,7 @@ using Niftified.Entities;
 using Niftified.Models.Accounts;
 using Niftified.Services;
 using System.Linq;
+using System.Security.Claims;
 
 namespace Niftified.Controllers
 {
@@ -14,13 +15,16 @@ namespace Niftified.Controllers
 	[Route("[controller]")]
 	public class NiftyController : BaseController
 	{
+		private readonly IAccountService _accountService;
 		private readonly INiftyService _niftyService;
 		private readonly IMapper _mapper;
 
 		public NiftyController(
+  			IAccountService accountService,
 			INiftyService niftyService,
 			IMapper mapper)
 		{
+			_accountService = accountService;
 			_niftyService = niftyService;
 			_mapper = mapper;
 		}
@@ -91,7 +95,7 @@ namespace Niftified.Controllers
 		[HttpGet("/api/editions/{accountId:int}")]
 		public ActionResult<IEnumerable<EditionResponse>> GetEditionsByAccountId(int accountId)
 		{
-			var editions = _niftyService.GetEditions();
+			var editions = _niftyService.GetEditionsByAccountId(accountId);
 			return Ok(editions);
 		}
 
@@ -103,11 +107,11 @@ namespace Niftified.Controllers
 		}
 
 		[Authorize]
-		[HttpGet("/api/edition/{id:int}/iseditable")]
+		[HttpGet("/api/edition/iseditable/{id:int}")]
 		public ActionResult<bool> GetEditionIsEditable(int id)
 		{
 			var isEditable = _niftyService.GetEditionIsEditable(id);
-			return Ok(isEditable);
+			return Ok(new { id, isEditable });
 		}
 
 		[Authorize]
@@ -135,6 +139,40 @@ namespace Niftified.Controllers
 
 			var edition = _niftyService.UpdateEdition(id, model);
 			return Ok(edition);
+		}
+
+		[Authorize]
+		[HttpDelete("/api/edition/delete/{id:int}")]
+		public ActionResult<EditionResponse> DeleteEdition(int id)
+		{
+			// get the current logged in user 
+			// and verify that the edition is owner by this user
+			var accountId = Account.Id;
+			var edition = _niftyService.GetEditionById(id);
+			if (edition.AccountId != accountId)
+			{
+				throw new KeyNotFoundException("Cannot delete an edition you don't own!");
+			}
+			else
+			{
+				_niftyService.DeleteEdition(id);
+			}
+
+			return Ok(true);
+		}
+
+		[HttpGet("/api/volumes/{editionId:int}")]
+		public ActionResult<IEnumerable<VolumeResponse>> GetVolumesByEditionId(int editionId)
+		{
+			var volumes = _niftyService.GetVolumesByEditionId(editionId);
+			return Ok(volumes);
+		}
+
+		[HttpGet("/api/volume/{id:int}")]
+		public ActionResult<VolumeResponse> GetVolumeById(int id)
+		{
+			var volumes = _niftyService.GetVolumeById(id);
+			return Ok(volumes);
 		}
 
 		[Authorize(Role.Admin)]

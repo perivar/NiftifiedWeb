@@ -22,6 +22,7 @@ namespace Niftified.Models.Accounts
 		public double SalesCommisionToCreators { get; set; }
 		public double SalesCommisionToBlockchain { get; set; }
 
+		public int VolumesCount { get; set; }  // number of volumes, should be the same as Volumes.Count		
 		public List<Volume> Volumes { get; set; } // at least one needs to exist
 
 		public string Name { get; set; }

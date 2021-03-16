@@ -9,6 +9,7 @@ using Niftified.Helpers;
 using Niftified.Middleware;
 using Niftified.Services;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace WebApi
 {
@@ -27,13 +28,15 @@ namespace WebApi
 			services.AddDbContext<DataContext>();
 			services.AddCors();
 
-			// services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.IgnoreNullValues = true);
 			services.AddControllers().AddNewtonsoftJson(options =>
 			{
 				options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 				options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
 			}
 			);
+
+			// in order to access the User when using a custom data model for users
+			services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 			services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 

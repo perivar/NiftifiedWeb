@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { niftyService, alertService } from '../_services';
 import CustomCreatableSelect from '../_common/select/CustomCreatableSelect';
 import FocusError from '../_common/FocusError';
-import UploadImageComponent from '../_common/UploadComponent';
+// import UploadImageComponent from '../_common/UploadComponent';
 import * as Scroll from 'react-scroll';
 
 const scroll = Scroll.animateScroll;
@@ -22,7 +22,7 @@ export interface EditFormValues {
   boxName: string;
   theme: string;
   collection: string;
-  volumeTotal: number;
+  volumesCount: number;
   tags: string[];
 }
 
@@ -34,13 +34,32 @@ export const EditEditionForm = ({ history, match }: { history: any; match: any }
   const [edition, setEdition] = useState<any>([]);
 
   const validationSchema = Yup.object().shape({
+    tags: Yup.array().min(1, 'At least one tag is required'),
     name: Yup.string().required('Name is required'),
     description: Yup.string().required('Description is required'),
-    volumeTotal: Yup.number().integer().min(1).max(1000).required('Total number of volumes are required')
+    volumesCount: Yup.number()
+      .integer()
+      .min(1, 'At least one volume is required')
+      .max(1000, 'Cannot exceed 1000 volumes')
   });
 
   const onSubmit = (values: EditFormValues, formikHelpers: FormikHelpers<EditFormValues>) => {
-    alert(JSON.stringify(values, null, 2));
+    // alert(JSON.stringify(values, null, 2));
+    formikHelpers.setSubmitting(true);
+    niftyService
+      .updateEdition(id, values)
+      .then(() => {
+        formikHelpers.setSubmitting(false);
+        alertService.success('Successfully updated the edition!', {
+          keepAfterRouteChange: true
+        });
+        history.push('/creator');
+      })
+      .catch((error) => {
+        formikHelpers.setSubmitting(false);
+        alertService.error(error, { autoClose: false });
+        scroll.scrollToTop();
+      });
   };
 
   // load edtion by id async
@@ -62,7 +81,7 @@ export const EditEditionForm = ({ history, match }: { history: any; match: any }
           boxName: res.boxName,
           theme: res.theme,
           collection: optionsMapper(res.collection),
-          volumeTotal: res.volumes.length,
+          volumesCount: res.volumes.length,
           tags: res.tags.map((obj: any) => {
             const newOption = optionsMapper(obj);
             return newOption;
@@ -89,15 +108,19 @@ export const EditEditionForm = ({ history, match }: { history: any; match: any }
     boxName: edition.boxName,
     theme: edition.theme,
     collection: edition.collection,
-    volumeTotal: edition.volumeTotal,
+    volumesCount: edition.volumesCount,
     tags: edition.tags
   };
 
   // mapper function
-  const optionsMapper = (obj: any): any => ({
-    label: obj.name,
-    value: obj.id
-  });
+  const optionsMapper = (obj: any): any => {
+    if (obj) {
+      return {
+        label: obj.name,
+        value: obj.id
+      };
+    }
+  };
 
   return (
     <>
@@ -132,15 +155,15 @@ export const EditEditionForm = ({ history, match }: { history: any; match: any }
                       <div className="form-group col-4">
                         <label htmlFor="theme">Number of volumes (versions)</label>
                         <Field
-                          id="volumeTotal"
-                          name="volumeTotal"
+                          id="volumesCount"
+                          name="volumesCount"
                           type="number"
-                          className={`form-control${errors.volumeTotal && touched.volumeTotal ? ' is-invalid' : ''}`}
+                          className={`form-control${errors.volumesCount && touched.volumesCount ? ' is-invalid' : ''}`}
                         />
-                        <small id="volumeTotalHelpBlock" className="form-text text-muted">
+                        <small id="volumesCountHelpBlock" className="form-text text-muted">
                           This is the total number of volumes to be produced for this edition
                         </small>
-                        <ErrorMessage name="volumeTotal" component="div" className="invalid-feedback" />
+                        <ErrorMessage name="volumesCount" component="div" className="invalid-feedback" />
                       </div>
                     </div>
 

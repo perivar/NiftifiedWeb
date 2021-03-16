@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Niftified.Helpers;
 
 namespace Niftified.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20210316173800_AddedIsConfirmedPerson")]
+    partial class AddedIsConfirmedPerson
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -227,9 +229,6 @@ namespace Niftified.Migrations
 
                     b.Property<string>("Version")
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("VolumesCount")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 

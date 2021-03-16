@@ -24,6 +24,14 @@ namespace Niftified.Services
 		IEnumerable<EditionResponse> GetEditionsByQuery(string query);
 		void DeleteEdition(int id);
 
+		// volume
+		VolumeResponse GetVolumeById(int id);
+		VolumeResponse CreateVolume(CreateVolumeRequest model);
+		VolumeResponse UpdateVolume(int id, UpdateVolumeRequest model);
+		IEnumerable<VolumeResponse> GetVolumes();
+		IEnumerable<VolumeResponse> GetVolumesByEditionId(int editionId);
+		void DeleteVolume(int id);
+
 		// collection
 		CollectionResponse CreateCollecton(CreateCollectionRequest model);
 		IEnumerable<CollectionResponse> GetCollections();
@@ -71,20 +79,22 @@ namespace Niftified.Services
 		public IEnumerable<EditionResponse> GetEditions()
 		{
 			var editions = _context.Editions
-			.Include(a => a.Volumes);
+			// .Include(a => a.Volumes)
+			;
 			return _mapper.Map<IList<EditionResponse>>(editions);
 		}
 
 		public IEnumerable<EditionResponse> GetEditionsByAccountId(int accountId)
 		{
 			var editions = _context.Editions.Where(entity => entity.AccountId == accountId)
-			.Include(a => a.Volumes);
+			// .Include(a => a.Volumes)
+			;
 			return _mapper.Map<IList<EditionResponse>>(editions);
 		}
 
 		public IEnumerable<EditionResponse> GetEditionsByQuery(string query)
 		{
-			// TODO suppor tags?
+			// TODO support querying tags?
 
 			var editions = _context.Editions
 			.Where(
@@ -93,7 +103,8 @@ namespace Niftified.Services
 				|| EF.Functions.Like(e.Series, query)
 				|| EF.Functions.Like(e.Collection.Name, query)
 			)
-			.Include(a => a.Volumes);
+			// .Include(a => a.Volumes)
+			;
 			return _mapper.Map<IList<EditionResponse>>(editions);
 		}
 
@@ -106,8 +117,7 @@ namespace Niftified.Services
 			_context.Entry(edition).Collection(p => p.Volumes).Load();
 
 			// check if any of the volumes are in "non pending", i.e. minted already
-			var isEditable = edition.Volumes.Any(v => v.Status != VolumeStatus.Pending);
-
+			var isEditable = !edition.Volumes.Any(v => v.Status != VolumeStatus.Pending);
 			return isEditable;
 		}
 
@@ -117,7 +127,7 @@ namespace Niftified.Services
 			if (edition == null) throw new KeyNotFoundException("Edition not found");
 
 			// Load the volumes related to a given edition 
-			_context.Entry(edition).Collection(p => p.Volumes).Load();
+			// _context.Entry(edition).Collection(p => p.Volumes).Load();
 
 			// Load the * related to a given edition 
 			_context.Entry(edition).Collection(p => p.Tags).Load();
@@ -200,7 +210,7 @@ namespace Niftified.Services
 
 			// add one volume up to VolumeTotal
 			var volumes = new List<Volume>();
-			for (int i = 0; i < model.VolumeTotal; i++)
+			for (int i = 0; i < model.VolumesCount; i++)
 			{
 				var volume = new Volume();
 				volume.Created = DateTime.UtcNow;
@@ -241,10 +251,6 @@ namespace Niftified.Services
 			var edition = _context.Editions.Find(id);
 			if (edition == null) throw new KeyNotFoundException("Edition not found");
 
-			// validate
-			if (_context.Editions.Any(x => x.Name == model.Name))
-				throw new AppException($"Name '{model.Name}' is already registered");
-
 			// copy model to edition and save
 			_mapper.Map(model, edition);
 			edition.Updated = DateTime.UtcNow;
@@ -256,11 +262,26 @@ namespace Niftified.Services
 
 		public void DeleteEdition(int id)
 		{
-			// TODO - this should also delete all volumes			
-			var edition = _context.Editions.Find(id);
-			if (edition == null) throw new KeyNotFoundException("Edition not found");
-			_context.Editions.Remove(edition);
-			_context.SaveChanges();
+			// cannot delete if any of the volumes are already published/ minted
+			if (GetEditionIsEditable(id))
+			{
+				var edition = _context.Editions.Find(id);
+				if (edition == null) throw new KeyNotFoundException("Edition not found");
+
+				// Load the volumes related to a given edition 
+				_context.Entry(edition).Collection(p => p.Volumes).Load();
+
+				// and delete
+				edition.Volumes.Clear();
+				// _context.SaveChanges();
+
+				_context.Editions.Remove(edition);
+				_context.SaveChanges();
+			}
+			else
+			{
+				throw new KeyNotFoundException("Cannot delete edition if volumes are in a non-pending state");
+			}
 		}
 
 		// collection
@@ -459,6 +480,69 @@ namespace Niftified.Services
 			var likes = _context.Likes.Find(id);
 			if (likes == null) throw new KeyNotFoundException("Likes not found");
 			_context.Likes.Remove(likes);
+			_context.SaveChanges();
+		}
+
+		// volume
+		public VolumeResponse GetVolumeById(int id)
+		{
+			var volume = _context.Volumes.Find(id);
+			if (volume == null) throw new KeyNotFoundException("Volume not found");
+			return _mapper.Map<VolumeResponse>(volume);
+		}
+
+		public VolumeResponse CreateVolume(CreateVolumeRequest model)
+		{
+			// validate
+			if (_context.Volumes.Any(x => x.EditionId == model.EditionId && x.EditionNumber == model.EditionNumber))
+				throw new AppException($"Volume '{model.EditionId}:{model.EditionNumber}' is already registered");
+
+			// map model to new object
+			var volume = _mapper.Map<Volume>(model);
+			volume.Created = DateTime.UtcNow;
+
+			// save 
+			_context.Volumes.Add(volume);
+			_context.SaveChanges();
+
+			return _mapper.Map<VolumeResponse>(volume);
+		}
+
+		public VolumeResponse UpdateVolume(int id, UpdateVolumeRequest model)
+		{
+			var volume = _context.Volumes.Find(id);
+			if (volume == null) throw new KeyNotFoundException("Volume not found");
+
+			// validate
+			if (_context.Volumes.Any(x => x.EditionId == model.EditionId && x.EditionNumber == model.EditionNumber))
+				throw new AppException($"Volume '{model.EditionId}:{model.EditionNumber}' is already registered");
+
+			// copy model to edition and save
+			_mapper.Map(model, volume);
+			volume.Updated = DateTime.UtcNow;
+			_context.Volumes.Update(volume);
+			_context.SaveChanges();
+
+			return _mapper.Map<VolumeResponse>(volume);
+		}
+
+		public IEnumerable<VolumeResponse> GetVolumes()
+		{
+			var volumes = _context.Volumes;
+			return _mapper.Map<IList<VolumeResponse>>(volumes);
+		}
+
+		public IEnumerable<VolumeResponse> GetVolumesByEditionId(int editionId)
+		{
+			var volumes = _context.Volumes.Where(entity => entity.EditionId == editionId);
+			return _mapper.Map<IList<VolumeResponse>>(volumes);
+		}
+
+		public void DeleteVolume(int id)
+		{
+			var volume = _context.Volumes.Find(id);
+			if (volume == null) throw new KeyNotFoundException("Volume not found");
+			_context.Volumes.Remove(volume);
 			_context.SaveChanges();
 		}
 	}

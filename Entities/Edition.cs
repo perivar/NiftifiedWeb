@@ -20,6 +20,7 @@ namespace Niftified.Entities
 		public DateTime? ExternalCreated { get; set; } // minted in external block chain?
 		public DateTime? Updated { get; set; }
 
+		public int VolumesCount { get; set; } // should be the same as Volumes.Count
 		public List<Volume> Volumes { get; set; } // all volumes of this one edition, could be only one
 
 		public string Name { get; set; }
