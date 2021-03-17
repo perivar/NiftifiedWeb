@@ -11,16 +11,7 @@ export const Layout: React.FunctionComponent<Props> = (props: Props) => {
     <>
       <Header />
       <div className="page-content">
-        <div className="container">
-          <div className="container pp-section">
-            <div className="row">
-              <div className="col-md-9 col-sm-12 px-0">
-                <h1 className="h4">Collect and create Nifties - crypto protected digital art / music / sound</h1>
-              </div>
-            </div>
-          </div>
-          {props.children}
-        </div>
+        <div className="container mt-3">{props.children}</div>
       </div>
       <Footer />
     </>

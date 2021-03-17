@@ -147,6 +147,11 @@ namespace Niftified.Services
 			var edition = _mapper.Map<Edition>(model);
 			edition.Created = DateTime.UtcNow;
 
+			if (model.AccountId == 0)
+			{
+				throw new AppException($"AccountId '{model.AccountId}' cannot be zero");
+			}
+
 			// store file
 			if (model.File.Length > 0)
 			{
@@ -188,17 +193,30 @@ namespace Niftified.Services
 			var creators = new List<Person>();
 			if (model.AccountIsCreator)
 			{
-				// create a person that is both the Sole Creator and original Owner of all volumes
-				var account = _context.Accounts.Find(model.AccountId);
-				if (account == null) throw new KeyNotFoundException("Account not found");
+				// check if the person object isn't already created
+				var person = _context.Persons.Where(p => p.AccountId == model.AccountId).FirstOrDefault();
+				if (person != null)
+				{
+					// reuse existing
+					owner = person;
+				}
+				else
+				{
+					// create
+					var account = _context.Accounts.Find(model.AccountId);
+					if (account == null) throw new KeyNotFoundException("Account not found");
 
-				owner.Alias = string.Format("{0} {1}", account.FirstName, account.LastName);
-				owner.Status = Status.Active;
-				owner.Type = PersonType.Owner;
-				owner.AccountId = account.Id;
-				owner.SalesCommisionShare = 100;
-				// owners wallet
-				// var wallet = new Wallet();
+					owner.Alias = string.Format("{0} {1}", account.FirstName, account.LastName);
+					owner.UniqueId = "HASH_NOT_YET_GENERATED";
+					owner.Status = Status.Active;
+					owner.Type = PersonType.Owner;
+					owner.AccountId = account.Id;
+					owner.SalesCommisionShare = 100;
+
+					// create a person that is both the Sole Creator and original Owner of all volumes
+					// owners wallet
+					// var wallet = new Wallet();
+				}
 
 				// creators
 				creators.Add(owner);
@@ -528,13 +546,14 @@ namespace Niftified.Services
 
 		public IEnumerable<VolumeResponse> GetVolumes()
 		{
-			var volumes = _context.Volumes;
+			var volumes = _context.Volumes.Include(v => v.Owner);
 			return _mapper.Map<IList<VolumeResponse>>(volumes);
 		}
 
 		public IEnumerable<VolumeResponse> GetVolumesByEditionId(int editionId)
 		{
-			var volumes = _context.Volumes.Where(entity => entity.EditionId == editionId);
+			var volumes = _context.Volumes.Where(entity => entity.EditionId == editionId)
+			.Include(v => v.Owner);
 			return _mapper.Map<IList<VolumeResponse>>(volumes);
 		}
 

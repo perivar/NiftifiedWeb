@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Niftified.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class InitialDatabase : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -158,6 +158,7 @@ namespace Niftified.Migrations
                     Created = table.Column<DateTime>(nullable: false),
                     ExternalCreated = table.Column<DateTime>(nullable: true),
                     Updated = table.Column<DateTime>(nullable: true),
+                    VolumesCount = table.Column<int>(nullable: false),
                     Name = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
                     Version = table.Column<string>(nullable: true),
@@ -196,10 +197,14 @@ namespace Niftified.Migrations
                     Created = table.Column<DateTime>(nullable: false),
                     Updated = table.Column<DateTime>(nullable: true),
                     UniqueId = table.Column<string>(nullable: true),
+                    PublicKey = table.Column<string>(nullable: true),
+                    PrivateKeyEncrypted = table.Column<string>(nullable: true),
+                    BlockchainAddress = table.Column<string>(nullable: true),
                     Alias = table.Column<string>(nullable: true),
                     AccountId = table.Column<int>(nullable: false),
                     Status = table.Column<int>(nullable: false),
                     Type = table.Column<int>(nullable: false),
+                    IsConfirmed = table.Column<bool>(nullable: false),
                     SalesCommisionShare = table.Column<double>(nullable: false),
                     EditionId = table.Column<int>(nullable: true)
                 },

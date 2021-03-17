@@ -6,6 +6,7 @@ import CustomCreatableSelect from '../_common/select/CustomCreatableSelect';
 import FocusError from '../_common/FocusError';
 import UploadImageComponent from '../_common/UploadComponent';
 import * as Scroll from 'react-scroll';
+import { Link } from 'react-router-dom';
 
 const scroll = Scroll.animateScroll;
 
@@ -22,6 +23,8 @@ interface FormValues {
   collection: string;
   volumesCount: number;
   tags: string[];
+  amount: number; // Initial amount for auctions or the selling price for fixed price sales
+  currencyUniqueId: string;
 }
 
 export const NewEditionForm = ({ history }: { history: any }) => {
@@ -37,7 +40,9 @@ export const NewEditionForm = ({ history }: { history: any }) => {
     theme: '',
     collection: '',
     volumesCount: 1,
-    tags: []
+    tags: [],
+    amount: 1,
+    currencyUniqueId: 'NFY'
   };
 
   const validationSchema = Yup.object().shape({
@@ -77,106 +82,104 @@ export const NewEditionForm = ({ history }: { history: any }) => {
   });
 
   return (
-    <div className="container">
+    <div className="container-fluid">
+      <h4>You are now just one step away from creating your own crypto art...</h4>
       <Formik initialValues={initialValues} onSubmit={onSubmit} validationSchema={validationSchema}>
         {({ setFieldValue, values, errors, touched, isSubmitting }) => (
           <Form noValidate>
-            <div className="row">
+            <div className="form-row">
               <div className="col-4">
-                <Field id="file" name="file" component={UploadImageComponent} />
-                <ErrorMessage name="file" component="div" className="invalid-feedback show-block" />
+                <div className="form-group">
+                  <Field id="file" name="file" component={UploadImageComponent} />
+                  <div className="ml-3">
+                    <ErrorMessage name="file" component="div" className="invalid-feedback show-block" />
+                  </div>
+                </div>
               </div>
-              <div className="col-8">
-                <div className="form-row">
-                  <div className="form-group col-8">
-                    <label htmlFor="name">Name</label>
-                    <Field
-                      id="name"
-                      name="name"
-                      type="text"
-                      className={`form-control${errors.name && touched.name ? ' is-invalid' : ''}`}
-                    />
-                    <small id="nameHelpBlock" className="form-text text-muted">
-                      Please describe your edition with a somewhat unique name
-                    </small>
-                    <ErrorMessage name="name" component="div" className="invalid-feedback" />
-                  </div>
-
-                  <div className="form-group col-4">
-                    <label htmlFor="theme">Number of volumes (versions)</label>
-                    <Field
-                      id="volumesCount"
-                      name="volumesCount"
-                      type="number"
-                      className={`form-control${errors.volumesCount && touched.volumesCount ? ' is-invalid' : ''}`}
-                    />
-                    <small id="volumesCountHelpBlock" className="form-text text-muted">
-                      This is the total number of volumes to be produced for this edition
-                    </small>
-                    <ErrorMessage name="volumesCount" component="div" className="invalid-feedback" />
-                  </div>
+              <div className="col">
+                <div className="form-group">
+                  <label htmlFor="name">Name</label>
+                  <Field
+                    id="name"
+                    name="name"
+                    type="text"
+                    className={`form-control${errors.name && touched.name ? ' is-invalid' : ''}`}
+                  />
+                  <small id="nameHelpBlock" className="form-text text-muted">
+                    Please describe your edition with a somewhat unique name so that potential buyers can find YOUR
+                    creation easiliy.
+                  </small>
+                  <ErrorMessage name="name" component="div" className="invalid-feedback" />
                 </div>
 
-                <div className="form-row">
-                  <div className="form-group col-12">
-                    <Field
-                      type="checkbox"
-                      name="accountIsCreator"
-                      id="accountIsCreator"
-                      className={`form-check-input ${
-                        errors.accountIsCreator && touched.accountIsCreator ? ' is-invalid' : ''
-                      }`}
-                      onChange={() => setFieldValue('accountIsCreator', !values.accountIsCreator)}
-                    />
-                    <label htmlFor="accountIsCreator" className="form-check-label">
-                      Account holder is Sole Creator
-                    </label>
-                    <ErrorMessage name="accountIsCreator" component="div" className="invalid-feedback" />
-                    {values.accountIsCreator ? (
-                      <small id="accountIsCreatorHelpBlock" className="form-text text-muted">
-                        If this is checked, the account holder (logged in user) is also the Sole Creator and receives
-                        the full sales commision whenever sold
-                      </small>
-                    ) : (
-                      <p className="invalid-feedback show-block">
-                        Currently only Account holder as Sole Creator is Supported
-                      </p>
-                    )}
-                  </div>
+                <div className="form-group">
+                  <label htmlFor="theme">Number of volumes (versions)</label>
+                  <Field
+                    id="volumesCount"
+                    name="volumesCount"
+                    type="number"
+                    className={`form-control${errors.volumesCount && touched.volumesCount ? ' is-invalid' : ''}`}
+                  />
+                  <small id="volumesCountHelpBlock" className="form-text text-muted">
+                    This is the total number of volumes to be produced for this edition
+                  </small>
+                  <ErrorMessage name="volumesCount" component="div" className="invalid-feedback" />
                 </div>
 
-                <div className="form-row">
-                  <div className="form-group col-12">
-                    <label htmlFor="tags">Tags</label>
-                    <Field
-                      name="tags"
-                      component={CustomCreatableSelect}
-                      placeholder="Select Tag..."
-                      isMulti={true}
-                      optionsMapper={optionsMapper}
-                      createOption={niftyService.createTag}
-                      readOptions={niftyService.getTags}
-                    />
-                    <ErrorMessage name="tags" component="div" className="invalid-feedback  show-block" />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group col-12">
-                    <label htmlFor="description">Description</label>
-                    <Field
-                      id="description"
-                      name="description"
-                      type="textarea"
-                      as="textarea"
-                      rows={5}
-                      className={`form-control${errors.description && touched.description ? ' is-invalid' : ''}`}
-                    />
-                    <small id="nameHelpBlock" className="form-text text-muted">
-                      This is your longer detailed description.
+                <div className="form-group">
+                  <Field
+                    type="checkbox"
+                    name="accountIsCreator"
+                    id="accountIsCreator"
+                    className={`form-check-input ${
+                      errors.accountIsCreator && touched.accountIsCreator ? ' is-invalid' : ''
+                    }`}
+                    onChange={() => setFieldValue('accountIsCreator', !values.accountIsCreator)}
+                  />
+                  <label htmlFor="accountIsCreator" className="form-check-label">
+                    Account holder is Sole Creator
+                  </label>
+                  <ErrorMessage name="accountIsCreator" component="div" className="invalid-feedback" />
+                  {values.accountIsCreator ? (
+                    <small id="accountIsCreatorHelpBlock" className="form-text text-muted">
+                      If this is checked, the account holder (logged in user) is also the Sole Creator and receives the
+                      full sales commision whenever sold
                     </small>
-                    <ErrorMessage name="description" component="div" className="invalid-feedback" />
-                  </div>
+                  ) : (
+                    <p className="invalid-feedback show-block">
+                      Currently only Account holder as Sole Creator is Supported
+                    </p>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="tags">Tags</label>
+                  <Field
+                    name="tags"
+                    component={CustomCreatableSelect}
+                    placeholder="Select Tag..."
+                    isMulti={true}
+                    optionsMapper={optionsMapper}
+                    createOption={niftyService.createTag}
+                    readOptions={niftyService.getTags}
+                  />
+                  <ErrorMessage name="tags" component="div" className="invalid-feedback  show-block" />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="description">Description</label>
+                  <Field
+                    id="description"
+                    name="description"
+                    type="textarea"
+                    as="textarea"
+                    rows={5}
+                    className={`form-control${errors.description && touched.description ? ' is-invalid' : ''}`}
+                  />
+                  <small id="nameHelpBlock" className="form-text text-muted">
+                    This is your longer detailed description.
+                  </small>
+                  <ErrorMessage name="description" component="div" className="invalid-feedback" />
                 </div>
               </div>
             </div>

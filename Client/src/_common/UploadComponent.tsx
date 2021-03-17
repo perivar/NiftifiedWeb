@@ -8,9 +8,9 @@ const baseStyle: CSSProperties = {
   flexDirection: 'column',
   alignItems: 'center',
   padding: '10px',
-  borderWidth: 2,
-  borderRadius: 2,
-  borderColor: '#eeeeee',
+  borderWidth: 1,
+  borderRadius: 4,
+  borderColor: '#cccccc',
   borderStyle: 'dashed',
   backgroundColor: '#fafafa',
   color: '#bdbdbd',
@@ -28,37 +28,6 @@ const acceptStyle: CSSProperties = {
 
 const rejectStyle: CSSProperties = {
   borderColor: '#ff1744'
-};
-
-const thumbsContainerStyle: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'row',
-  flexWrap: 'wrap',
-  marginTop: 16
-};
-
-const thumbStyle: CSSProperties = {
-  display: 'inline-flex',
-  borderRadius: 2,
-  border: '1px solid #eaeaea',
-  marginBottom: 8,
-  marginRight: 8,
-  width: 200,
-  height: 200,
-  padding: 4,
-  boxSizing: 'border-box'
-};
-
-const thumbInnerStyle: CSSProperties = {
-  display: 'flex',
-  minWidth: 0,
-  overflow: 'hidden'
-};
-
-const imgStyle: CSSProperties = {
-  display: 'block',
-  width: 'auto',
-  height: '100%'
 };
 
 function UploadImageComponent({ field, form }: FieldProps) {
@@ -95,9 +64,9 @@ function UploadImageComponent({ field, form }: FieldProps) {
   );
 
   const thumbs = files.map((file: any) => (
-    <div style={thumbStyle} key={file.name}>
-      <div style={thumbInnerStyle}>
-        <img src={file.preview} style={imgStyle} alt={file.name} />
+    <div key={file.name}>
+      <div>
+        <img className="img-thumbnail" src={file.preview} alt={file.name} />
       </div>
     </div>
   ));
@@ -111,23 +80,22 @@ function UploadImageComponent({ field, form }: FieldProps) {
   );
 
   return (
-    <section className="container">
+    <section className="container-fluid">
       <div {...getRootProps({ style })}>
         <input {...getInputProps()} />
         {isDragActive ? (
-          <p>Drop the file here ...</p>
+          <div className="font-weight-light text-center">Drop the file here ...</div>
         ) : (
           <>
-            <div>Drag 'n' drop a file here,</div>
-            <div>or click to select file</div>
+            <div className="font-weight-light text-center">Drag 'n' drop file here, or click to select</div>
           </>
         )}
-        <i className="far fa-image fa-4x" aria-hidden="true"></i>
+        <i className="far fa-image fa-3x" aria-hidden="true"></i>
       </div>
-      <aside style={thumbsContainerStyle}>{thumbs}</aside>
+      <aside className="mt-2">{thumbs}</aside>
       {files && files[0] && (
         <small>
-          <ul className="list-unstyled">
+          <ul className="list-unstyled mt-2">
             <li>{`Filename: ${files[0].name}`}</li>
             <li>{`Type: ${files[0].type}`}</li>
             <li>{`Size: ${files[0].size} bytes`}</li>

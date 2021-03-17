@@ -322,6 +322,9 @@ namespace Niftified.Migrations
                     b.Property<string>("Alias")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("BlockchainAddress")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
@@ -330,6 +333,12 @@ namespace Niftified.Migrations
 
                     b.Property<bool>("IsConfirmed")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("PrivateKeyEncrypted")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PublicKey")
+                        .HasColumnType("TEXT");
 
                     b.Property<double>("SalesCommisionShare")
                         .HasColumnType("REAL");

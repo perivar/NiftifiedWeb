@@ -9,8 +9,8 @@ using Niftified.Helpers;
 namespace Niftified.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20210316204013_AddedVolumesCount")]
-    partial class AddedVolumesCount
+    [Migration("20210317174414_InitialDatabase")]
+    partial class InitialDatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -324,6 +324,9 @@ namespace Niftified.Migrations
                     b.Property<string>("Alias")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("BlockchainAddress")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
@@ -332,6 +335,12 @@ namespace Niftified.Migrations
 
                     b.Property<bool>("IsConfirmed")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("PrivateKeyEncrypted")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PublicKey")
+                        .HasColumnType("TEXT");
 
                     b.Property<double>("SalesCommisionShare")
                         .HasColumnType("REAL");

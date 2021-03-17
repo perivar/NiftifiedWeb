@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { niftyService, alertService } from '../_services';
+import { niftyService } from '../_services';
 import ConfirmModal from '../_common/ConfirmModal';
 
 export const ListEditions = ({ match }: { match: any }) => {
@@ -89,7 +89,7 @@ export const ListEditions = ({ match }: { match: any }) => {
                     Show / Mint Volumes
                   </th>
                   <th scope="col" className="text-center">
-                    Edit / Delete
+                    Publish / Edit / Delete
                   </th>
                 </tr>
               </thead>
@@ -112,7 +112,10 @@ export const ListEditions = ({ match }: { match: any }) => {
                         </Link>
                       </td>
                       <td className="text-center">
-                        <Link to={`${path}/edit/${edition.id}`} className="btn btn-sm btn-primary mr-1">
+                        <Link to={`${path}/publish/${edition.id}`} className="btn btn-sm btn-primary mr-1">
+                          Publish
+                        </Link>
+                        <Link to={`${path}/edit/${edition.id}`} className="btn btn-sm btn-secondary mr-1">
                           Edit
                         </Link>
                         {!isLoading ? (

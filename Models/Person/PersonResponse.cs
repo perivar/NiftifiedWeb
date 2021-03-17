@@ -9,7 +9,12 @@ namespace Niftified.Models.Accounts
 		public int Id { get; set; }
 		public DateTime Created { get; set; }
 		public DateTime? Updated { get; set; }
+
+		// section for information used for the blockchain 
 		public string UniqueId { get; set; } // hash
+		public string PublicKey { get; set; }
+		public string PrivateKeyEncrypted { get; set; }
+		public string BlockchainAddress { get; set; } // where to send commision payments to?
 
 		public string Alias { get; set; } // might not want to use name, only hash
 

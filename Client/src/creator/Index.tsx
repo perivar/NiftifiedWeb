@@ -4,6 +4,7 @@ import { NewEditionForm } from './NewEdition';
 import { EditEditionForm } from './EditEdition';
 import { ListEditions } from './ListEditions';
 import { ListVolumes } from './ListVolumes';
+import { PublishEdition } from './PublishEdition';
 
 function Creator({ history, match }: { history: any; match: any }) {
   const { path } = match;
@@ -14,6 +15,7 @@ function Creator({ history, match }: { history: any; match: any }) {
       <Route path={`${path}/new`} component={NewEditionForm} />
       <Route path={`${path}/edit/:id`} component={EditEditionForm} />
       <Route path={`${path}/volumes/:id`} component={ListVolumes} />
+      <Route path={`${path}/publish/:id`} component={PublishEdition} />
     </Switch>
   );
 }

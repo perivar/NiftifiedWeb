@@ -107,6 +107,14 @@ function ItemList({ match }: { match: any }) {
 
   return (
     <>
+      <div className="container pp-section">
+        <div className="row">
+          <div className="col-md-9 col-sm-12 px-0">
+            <h1 className="h4">Collect and create Nifties - crypto protected digital art / music / sound</h1>
+          </div>
+        </div>
+      </div>
+
       <div className="container px-0 py-4">
         {/* <div className="pp-category-filter">
           <div className="row">

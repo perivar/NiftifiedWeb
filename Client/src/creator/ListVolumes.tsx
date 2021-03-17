@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { niftyService, alertService } from '../_services';
+import { niftyService } from '../_services';
+
+export enum VolumeType {
+  Auction,
+  FixedPrice
+}
+
+export enum VolumeStatus {
+  Pending, // not yet minted
+  ForSale, // ready to be sold
+  NotForSale // not set to be sold
+}
 
 export const ListVolumes = ({ match }: { match: any }) => {
   const { path } = match;
@@ -23,11 +34,11 @@ export const ListVolumes = ({ match }: { match: any }) => {
         console.log(error);
         setLoading(false);
       });
-  }, []);
+  }, [id]);
 
   return (
     <>
-      <Link className="btn btn-primary" to={`${path}/new`}>
+      <Link className="btn btn-primary" to={`/creator/publish/${id}`}>
         Publish / Mint
       </Link>
       <div className="container mt-4">
@@ -42,6 +53,7 @@ export const ListVolumes = ({ match }: { match: any }) => {
                   <th scope="col">Amount</th>
                   <th scope="col">Currency</th>
                   <th scope="col">Type</th>
+                  <th scope="col">Current Owner</th>
                 </tr>
               </thead>
               <tbody>
@@ -50,10 +62,11 @@ export const ListVolumes = ({ match }: { match: any }) => {
                   volumes.map((volume: any) => (
                     <tr key={volume.id}>
                       <td>{volume.editionNumber}</td>
-                      <td>{volume.status}</td>
+                      <td>{VolumeStatus[volume.status]}</td>
                       <td>{volume.amount}</td>
                       <td>{volume.currencyUniqueId}</td>
-                      <td>{volume.type}</td>
+                      <td>{VolumeType[volume.type]}</td>
+                      <td>{volume.owner.alias ? volume.owner.alias : volume.owner.uniqueId}</td>
                     </tr>
                   ))}
               </tbody>
