@@ -14,8 +14,11 @@ namespace Niftified.Models.Accounts
 		[Required]
 		public int OwnerId { get; set; }
 
-		public VolumeStatus Status { get; set; } // for sale, not for sale
-		public VolumeType Type { get; set; } // auction, fixed price
+		[EnumDataType(typeof(VolumeStatus))]
+		public string Status { get; set; } // for sale, not for sale
+
+		[EnumDataType(typeof(VolumeType))]
+		public string Type { get; set; } // auction, fixed price
 
 		public decimal Amount { get; set; } // Initial amount for auctions or the selling price for fixed price sales
 

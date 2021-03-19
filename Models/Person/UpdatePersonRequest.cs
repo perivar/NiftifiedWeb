@@ -10,12 +10,14 @@ namespace Niftified.Models.Accounts
 		private string _type;
 
 		// section for information used for the blockchain 
-		public string UniqueId { get; set; } // hash
-		public string PublicKey { get; set; }
 		public string PrivateKeyEncrypted { get; set; }
-		public string BlockchainAddress { get; set; } // where to send commision payments to?
+		public string PrivateKeyWIFEncrypted { get; set; }
+		public string PublicAddress { get; set; } // where to send commision payments to?
+		public string PublicKey { get; set; }
+		public string PublicKeyHash { get; set; }
 
-		public string Alias { get; set; } // might not want to use name, only hash
+		public string Alias { get; set; } // if not an creator, might not want to use this to remain anynomous, only hash
+		public bool IsAnonymous { get; set; } // don't show any information that might give this person away
 
 		public int AccountId { get; set; }
 
@@ -31,7 +33,7 @@ namespace Niftified.Models.Accounts
 		{
 			get => _type;
 			set => _type = replaceEmptyWithNull(value);
-		} // creator, co-creator?
+		}
 
 		// note that all commisions for co-creators cannot exceed 100%
 		// defaults to 100% of the sales commision defined in the Edition

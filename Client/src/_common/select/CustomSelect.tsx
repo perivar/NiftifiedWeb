@@ -26,10 +26,11 @@ export const CustomSelect = ({ className, placeholder, field, form, options, isM
 
   const getValue = () => {
     if (options) {
-      const value = field.value ? field.value : '';
-      return isMulti
+      const value = field.value ?? '';
+      const selOption = isMulti
         ? options.filter((option) => value.indexOf(option.value) >= 0)
         : options.find((option) => option.value === value);
+      return selOption;
     }
     return isMulti ? [] : ('' as any);
   };

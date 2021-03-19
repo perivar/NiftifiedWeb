@@ -21,6 +21,7 @@ namespace Niftified.Helpers
 		public DbSet<Tx> Txs { get; set; }
 		public DbSet<Address> Addresses { get; set; }
 		public DbSet<AddressTx> AddressTxs { get; set; }
+		public DbSet<Wallet> Wallets { get; set; }
 
 		private readonly IConfiguration Configuration;
 

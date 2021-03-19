@@ -196,12 +196,9 @@ namespace Niftified.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Created = table.Column<DateTime>(nullable: false),
                     Updated = table.Column<DateTime>(nullable: true),
-                    UniqueId = table.Column<string>(nullable: true),
-                    PublicKey = table.Column<string>(nullable: true),
-                    PrivateKeyEncrypted = table.Column<string>(nullable: true),
-                    BlockchainAddress = table.Column<string>(nullable: true),
-                    Alias = table.Column<string>(nullable: true),
                     AccountId = table.Column<int>(nullable: false),
+                    Alias = table.Column<string>(nullable: true),
+                    IsAnonymous = table.Column<bool>(nullable: false),
                     Status = table.Column<int>(nullable: false),
                     Type = table.Column<int>(nullable: false),
                     IsConfirmed = table.Column<bool>(nullable: false),
@@ -211,6 +208,12 @@ namespace Niftified.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Persons", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Persons_Accounts_AccountId",
+                        column: x => x.AccountId,
+                        principalTable: "Accounts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Persons_Editions_EditionId",
                         column: x => x.EditionId,
@@ -308,27 +311,31 @@ namespace Niftified.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Wallet",
+                name: "Wallets",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Created = table.Column<DateTime>(nullable: false),
                     Updated = table.Column<DateTime>(nullable: true),
-                    PublicKey = table.Column<string>(nullable: true),
+                    PersonId = table.Column<int>(nullable: false),
+                    Name = table.Column<string>(nullable: true),
+                    Type = table.Column<int>(nullable: false),
                     PrivateKeyEncrypted = table.Column<string>(nullable: true),
-                    ReceivingAddress = table.Column<string>(nullable: true),
-                    PersonId = table.Column<int>(nullable: true)
+                    PrivateKeyWIFEncrypted = table.Column<string>(nullable: true),
+                    PublicAddress = table.Column<string>(nullable: true),
+                    PublicKey = table.Column<string>(nullable: true),
+                    PublicKeyHash = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Wallet", x => x.Id);
+                    table.PrimaryKey("PK_Wallets", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Wallet_Persons_PersonId",
+                        name: "FK_Wallets_Persons_PersonId",
                         column: x => x.PersonId,
                         principalTable: "Persons",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -340,6 +347,11 @@ namespace Niftified.Migrations
                 name: "IX_Offers_PersonId",
                 table: "Offers",
                 column: "PersonId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Persons_AccountId",
+                table: "Persons",
+                column: "AccountId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Persons_EditionId",
@@ -367,8 +379,8 @@ namespace Niftified.Migrations
                 column: "OwnerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Wallet_PersonId",
-                table: "Wallet",
+                name: "IX_Wallets_PersonId",
+                table: "Wallets",
                 column: "PersonId");
         }
 
@@ -399,13 +411,13 @@ namespace Niftified.Migrations
                 name: "Volumes");
 
             migrationBuilder.DropTable(
-                name: "Wallet");
-
-            migrationBuilder.DropTable(
-                name: "Accounts");
+                name: "Wallets");
 
             migrationBuilder.DropTable(
                 name: "Persons");
+
+            migrationBuilder.DropTable(
+                name: "Accounts");
 
             migrationBuilder.DropTable(
                 name: "Editions");

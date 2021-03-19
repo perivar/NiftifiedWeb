@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using Niftified.Entities;
 
-namespace Niftified.Entities
+namespace Niftified.Models.Accounts
 {
-	public class Wallet
+	public class WalletResponse
 	{
 		public int Id { get; set; }
 		public DateTime Created { get; set; }

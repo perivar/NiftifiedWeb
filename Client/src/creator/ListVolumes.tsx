@@ -38,7 +38,7 @@ export const ListVolumes = ({ match }: { match: any }) => {
 
   return (
     <>
-      <Link className="btn btn-primary" to={`/creator/publish/${id}`}>
+      <Link className="btn btn-primary" to={`/creator/edition/publish/${id}`}>
         Publish / Mint
       </Link>
       <div className="container mt-4">

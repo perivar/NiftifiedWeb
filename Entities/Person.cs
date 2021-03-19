@@ -9,18 +9,11 @@ namespace Niftified.Entities
 		public DateTime Created { get; set; }
 		public DateTime? Updated { get; set; }
 
+		public Account Account { get; set; } // reference to account
+		public int AccountId { get; set; }
 
-		// section for information used for the blockchain 
-		// private and protected key
-		public string UniqueId { get; set; } // unique hash 
-		public string PublicKey { get; set; }
-		public string PrivateKeyEncrypted { get; set; }
-		public string BlockchainAddress { get; set; } // where to send commision payments to?
-
-
-		public string Alias { get; set; } // might not want to use name, only hash
-
-		public int AccountId { get; set; } // reference to account
+		public string Alias { get; set; } // if not an creator, might not want to use this to remain anynomous, only hash
+		public bool IsAnonymous { get; set; } // don't show any information that might give this person away
 
 		public Status Status { get; set; }
 

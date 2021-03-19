@@ -248,5 +248,47 @@ namespace Niftified.Controllers
 			}
 		}
 
+		[Authorize(Role.Admin)]
+		[HttpGet("/api/wallets/")]
+		public ActionResult<IEnumerable<WalletResponse>> GetWallets()
+		{
+			var wallets = _niftyService.GetWallets();
+			return Ok(wallets);
+		}
+
+		[Authorize]
+		[HttpGet("/api/wallet/{id:int}")]
+		public ActionResult<WalletResponse> GetWalletById(int id)
+		{
+			var wallet = _niftyService.GetWalletById(id);
+			return Ok(wallet);
+		}
+
+		[Authorize]
+		[HttpGet("/api/wallets/{personId:int}")]
+		public ActionResult<IEnumerable<WalletResponse>> GetWalletsByPersonId(int personId)
+		{
+			var wallets = _niftyService.GetWalletsByPersonId(personId);
+			return Ok(wallets);
+		}
+
+		[Authorize]
+		[HttpPost("/api/wallet/")]
+		public ActionResult<WalletResponse> CreateWallet(CreateWalletRequest model)
+		{
+			var wallet = _niftyService.CreateWallet(model);
+			return Ok(wallet);
+		}
+
+		[Authorize]
+		[HttpPut("/api/wallet/{id:int}")]
+		public ActionResult<WalletResponse> UpdateWallet(int id, UpdateWalletRequest model)
+		{
+			// TODO: only owners can update their own?
+
+			var wallet = _niftyService.UpdateWallet(id, model);
+			return Ok(wallet);
+		}
+
 	}
 }

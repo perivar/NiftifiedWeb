@@ -70,7 +70,7 @@ export const ListEditions = ({ match }: { match: any }) => {
 
   return (
     <>
-      <Link className="btn btn-primary" to={`${path}/new`}>
+      <Link className="btn btn-primary" to={`${path}/edition/new`}>
         Create New Edition
       </Link>
       <div className="container mt-4">
@@ -112,10 +112,10 @@ export const ListEditions = ({ match }: { match: any }) => {
                         </Link>
                       </td>
                       <td className="text-center">
-                        <Link to={`${path}/publish/${edition.id}`} className="btn btn-sm btn-primary mr-1">
+                        <Link to={`${path}/edition/publish/${edition.id}`} className="btn btn-sm btn-primary mr-1">
                           Publish
                         </Link>
-                        <Link to={`${path}/edit/${edition.id}`} className="btn btn-sm btn-secondary mr-1">
+                        <Link to={`${path}/edition/edit/${edition.id}`} className="btn btn-sm btn-secondary mr-1">
                           Edit
                         </Link>
                         {!isLoading ? (

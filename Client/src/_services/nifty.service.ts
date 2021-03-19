@@ -159,10 +159,28 @@ function createPerson(params: any) {
   const user = accountService.userValue;
 
   const body = {
-    languageCode: user && user.languageCode ? user.languageCode : 'no-NO',
-    description: params.description ? params.description : ''
+    accountId: user.id
   };
   // merge params
   const allParams = { ...params, ...body };
   return fetchWrapper.post(`${baseUrl}/person`, allParams);
+}
+
+function getWalletsByPersonId(personId: number) {
+  return fetchWrapper.get(`${baseUrl}/wallets/${personId}`);
+}
+
+function getWalletById(id: number) {
+  return fetchWrapper.get(`${baseUrl}/wallet/${id}`);
+}
+
+function createWallet(params: any) {
+  const user = accountService.userValue;
+
+  const body = {
+    accountId: user.id
+  };
+  // merge params
+  const allParams = { ...params, ...body };
+  return fetchWrapper.post(`${baseUrl}/wallet`, allParams);
 }

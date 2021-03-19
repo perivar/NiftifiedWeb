@@ -58,6 +58,14 @@ namespace Niftified.Services
 		LikesResponse CreateLikes(CreateLikesRequest model);
 		LikesResponse UpdateLikes(int id, UpdateLikesRequest model);
 		void DeleteLikes(int id);
+
+		// wallet
+		WalletResponse GetWalletById(int id);
+		WalletResponse CreateWallet(CreateWalletRequest model);
+		WalletResponse UpdateWallet(int id, UpdateWalletRequest model);
+		IEnumerable<WalletResponse> GetWallets();
+		IEnumerable<WalletResponse> GetWalletsByPersonId(int personId);
+		void DeleteWallet(int id);
 	}
 
 	public class NiftyService : INiftyService
@@ -207,7 +215,6 @@ namespace Niftified.Services
 					if (account == null) throw new KeyNotFoundException("Account not found");
 
 					owner.Alias = string.Format("{0} {1}", account.FirstName, account.LastName);
-					owner.UniqueId = "HASH_NOT_YET_GENERATED";
 					owner.Status = Status.Active;
 					owner.Type = PersonType.Owner;
 					owner.AccountId = account.Id;
@@ -215,7 +222,6 @@ namespace Niftified.Services
 
 					// create a person that is both the Sole Creator and original Owner of all volumes
 					// owners wallet
-					// var wallet = new Wallet();
 				}
 
 				// creators
@@ -269,9 +275,28 @@ namespace Niftified.Services
 			var edition = _context.Editions.Find(id);
 			if (edition == null) throw new KeyNotFoundException("Edition not found");
 
+			// Load the * related to a given edition 
+			_context.Entry(edition).Collection(p => p.Tags).Load();
+			_context.Entry(edition).Collection(p => p.Creators).Load();
+			_context.Entry(edition).Reference(p => p.Collection).Load();
+
 			// copy model to edition and save
 			_mapper.Map(model, edition);
 			edition.Updated = DateTime.UtcNow;
+
+			// add missing lists that the auto mapper didn't fix
+			if (model.CollectionId.HasValue)
+			{
+				var collection = _context.Collections.Find(model.CollectionId.Value);
+				if (collection != null) edition.Collection = collection;
+			}
+
+			if (model.TagIds.Any())
+			{
+				var tags = _context.Tags.Where(r => model.TagIds.Contains(r.Id)).ToList();
+				if (tags != null) edition.Tags = tags;
+			}
+
 			_context.Editions.Update(edition);
 			_context.SaveChanges();
 
@@ -412,6 +437,20 @@ namespace Niftified.Services
 			// map model to new object
 			var person = _mapper.Map<Person>(model);
 			person.Created = DateTime.UtcNow;
+
+			// create wallet
+			var wallet = new Wallet();
+			wallet.PrivateKeyEncrypted = model.PrivateKeyEncrypted;
+			wallet.PrivateKeyWIFEncrypted = model.PrivateKeyWIFEncrypted;
+			wallet.PublicAddress = model.PublicAddress;
+			wallet.PublicKey = model.PublicKey;
+			wallet.PublicKeyHash = model.PublicKeyHash;
+
+			var wallets = new List<Wallet>();
+			wallets.Add(wallet);
+
+			// and add to person
+			person.Wallets = wallets;
 
 			// save 
 			_context.Persons.Add(person);
@@ -562,6 +601,69 @@ namespace Niftified.Services
 			var volume = _context.Volumes.Find(id);
 			if (volume == null) throw new KeyNotFoundException("Volume not found");
 			_context.Volumes.Remove(volume);
+			_context.SaveChanges();
+		}
+
+		// wallet
+		public WalletResponse GetWalletById(int id)
+		{
+			var wallet = _context.Wallets.Find(id);
+			if (wallet == null) throw new KeyNotFoundException("Wallet not found");
+			return _mapper.Map<WalletResponse>(wallet);
+		}
+
+		public WalletResponse CreateWallet(CreateWalletRequest model)
+		{
+			// validate
+			if (_context.Wallets.Any(x => x.Name == model.Name))
+				throw new AppException($"Wallet '{model.Name}:{model.Name}' is already registered");
+
+			// map model to new object
+			var wallet = _mapper.Map<Wallet>(model);
+			wallet.Created = DateTime.UtcNow;
+
+			// save 
+			_context.Wallets.Add(wallet);
+			_context.SaveChanges();
+
+			return _mapper.Map<WalletResponse>(wallet);
+		}
+
+		public WalletResponse UpdateWallet(int id, UpdateWalletRequest model)
+		{
+			var wallet = _context.Wallets.Find(id);
+			if (wallet == null) throw new KeyNotFoundException("Wallet not found");
+
+			// validate
+			if (_context.Wallets.Any(x => x.Name == model.Name))
+				throw new AppException($"Wallet '{model.Name}:{model.Name}' is already registered");
+
+			// copy model to edition and save
+			_mapper.Map(model, wallet);
+			wallet.Updated = DateTime.UtcNow;
+			_context.Wallets.Update(wallet);
+			_context.SaveChanges();
+
+			return _mapper.Map<WalletResponse>(wallet);
+		}
+
+		public IEnumerable<WalletResponse> GetWallets()
+		{
+			var wallets = _context.Wallets;
+			return _mapper.Map<IList<WalletResponse>>(wallets);
+		}
+
+		public IEnumerable<WalletResponse> GetWalletsByPersonId(int personId)
+		{
+			var wallets = _context.Wallets.Where(entity => entity.PersonId == personId);
+			return _mapper.Map<IList<WalletResponse>>(wallets);
+		}
+
+		public void DeleteWallet(int id)
+		{
+			var wallet = _context.Wallets.Find(id);
+			if (wallet == null) throw new KeyNotFoundException("Wallet not found");
+			_context.Wallets.Remove(wallet);
 			_context.SaveChanges();
 		}
 	}
