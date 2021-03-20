@@ -10,10 +10,7 @@ import { App } from './app/Index';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.scss';
-
-// setup fake backend
-// import { configureFakeBackend } from './_helpers';
-// configureFakeBackend();
+// import './_common/bulma.scss';
 
 function startApp() {
   render(

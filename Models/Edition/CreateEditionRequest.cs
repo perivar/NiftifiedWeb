@@ -52,6 +52,14 @@ namespace Niftified.Models.Accounts
 
 		public decimal Amount { get; set; } // Initial amount for auctions or the selling price for fixed price sales
 		public string CurrencyUniqueId { get; set; }
+
+		// section for information used for the blockchain 
+		// private and protected key
+		public string PrivateKeyEncrypted { get; set; }
+		public string PrivateKeyWIFEncrypted { get; set; }
+		public string PublicAddress { get; set; } // where to send commision payments to?
+		public string PublicKey { get; set; }
+		public string PublicKeyHash { get; set; }
 		#endregion
 	}
 }

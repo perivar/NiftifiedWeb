@@ -219,9 +219,6 @@ namespace Niftified.Services
 					owner.Type = PersonType.Owner;
 					owner.AccountId = account.Id;
 					owner.SalesCommisionShare = 100;
-
-					// create a person that is both the Sole Creator and original Owner of all volumes
-					// owners wallet
 				}
 
 				// creators
@@ -230,6 +227,24 @@ namespace Niftified.Services
 			else
 			{
 				throw new NotImplementedException("Only AccountIsCreator is Supported at the moment!");
+			}
+
+			// check that the owner has a wallet
+			if (!(owner.Wallets != null && owner.Wallets.Count > 0))
+			{
+				// create wallet
+				var wallet = new Wallet();
+				wallet.PrivateKeyEncrypted = model.PrivateKeyEncrypted;
+				wallet.PrivateKeyWIFEncrypted = model.PrivateKeyWIFEncrypted;
+				wallet.PublicAddress = model.PublicAddress;
+				wallet.PublicKey = model.PublicKey;
+				wallet.PublicKeyHash = model.PublicKeyHash;
+
+				var wallets = new List<Wallet>();
+				wallets.Add(wallet);
+
+				// and add to person
+				owner.Wallets = wallets;
 			}
 
 			// add one volume up to VolumeTotal
@@ -411,7 +426,8 @@ namespace Niftified.Services
 		// persons
 		public IEnumerable<PersonResponse> GetPersons()
 		{
-			var persons = _context.Persons;
+			var persons = _context.Persons
+			.Include(p => p.Wallets);
 			return _mapper.Map<IList<PersonResponse>>(persons);
 		}
 
@@ -419,12 +435,17 @@ namespace Niftified.Services
 		{
 			var person = _context.Persons.Find(id);
 			if (person == null) throw new KeyNotFoundException("Person not found");
+
+			// Load the wallets related to a given person 
+			_context.Entry(person).Collection(p => p.Wallets).Load();
+
 			return _mapper.Map<PersonResponse>(person);
 		}
 
 		public IEnumerable<PersonResponse> GetPersonsByAccountId(int accountId)
 		{
-			var persons = _context.Persons.Where(entity => entity.AccountId == accountId);
+			var persons = _context.Persons.Where(entity => entity.AccountId == accountId)
+			.Include(p => p.Wallets);
 			return _mapper.Map<IList<PersonResponse>>(persons);
 		}
 

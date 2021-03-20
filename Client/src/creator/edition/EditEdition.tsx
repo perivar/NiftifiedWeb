@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Formik, FormikHelpers, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import { niftyService, alertService } from '../_services';
-import CustomCreatableSelect from '../_common/select/CustomCreatableSelect';
-import FocusError from '../_common/FocusError';
+import { niftyService, alertService } from '../../_services';
+import CustomCreatableSelect from '../../_common/select/CustomCreatableSelect';
+import FocusError from '../../_common/FocusError';
 import * as Scroll from 'react-scroll';
 
 const scroll = Scroll.animateScroll;

@@ -1,8 +1,11 @@
 import React from 'react';
 import { Navbar, Nav, Form, FormControl, Button } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom';
+import { accountService } from '../_services';
 
 export const Header = () => {
+  const user = accountService.userValue;
+
   return (
     <>
       <header>
@@ -16,16 +19,21 @@ export const Header = () => {
               <NavLink exact to="/" className="nav-item nav-link">
                 Home
               </NavLink>
-              <NavLink to="/account/register" className="nav-item nav-link">
-                Register
-              </NavLink>
-              <NavLink to="/account/login" className="nav-item nav-link">
-                Login
-              </NavLink>
-              <NavLink to="/about" className="nav-item nav-link">
-                About
-              </NavLink>
-              <NavLink to="/creator" className="nav-item nav-link">
+              {user ? (
+                <NavLink to="/creator/profile" className="nav-item nav-link mr-2">
+                  <i className="fa fa-user"></i>
+                </NavLink>
+              ) : (
+                <>
+                  <NavLink to="/account/register" className="btn btn-primary">
+                    Sign up
+                  </NavLink>
+                  <NavLink to="/account/login" className="btn btn-primary">
+                    Sign in
+                  </NavLink>
+                </>
+              )}
+              <NavLink to="/creator" className="btn btn-primary">
                 Sell your creations
               </NavLink>
               <Form inline className="ml-2 my-2 my-lg-0">

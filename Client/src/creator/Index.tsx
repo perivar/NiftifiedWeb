@@ -1,11 +1,13 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { NewEditionForm } from './NewEdition';
-import { EditEditionForm } from './EditEdition';
-import { ListEditions } from './ListEditions';
-import { ListVolumes } from './ListVolumes';
-import { PublishEdition } from './PublishEdition';
-import { NewPersonForm } from './NewPerson';
+import { NewEditionForm } from './edition/NewEdition';
+import { EditEditionForm } from './edition/EditEdition';
+import { ListEditions } from './edition/ListEditions';
+import { ListVolumes } from './volume/ListVolumes';
+import { PublishEdition } from './edition/PublishEdition';
+import { NewPersonForm } from './person/NewPerson';
+import { MyProfile } from './profile/MyProfile';
+import { ListWallets } from './wallet/ListWallets';
 
 function Creator({ history, match }: { history: any; match: any }) {
   const { path } = match;
@@ -18,6 +20,8 @@ function Creator({ history, match }: { history: any; match: any }) {
       <Route path={`${path}/edition/publish/:id`} component={PublishEdition} />
       <Route path={`${path}/volumes/:id`} component={ListVolumes} />
       <Route path={`${path}/person/new`} component={NewPersonForm} />
+      <Route path={`${path}/profile`} component={MyProfile} />
+      <Route path={`${path}/wallets/:id`} component={ListWallets} />
     </Switch>
   );
 }

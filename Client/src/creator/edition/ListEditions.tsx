@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { niftyService } from '../_services';
-import ConfirmModal from '../_common/ConfirmModal';
+import { niftyService } from '../../_services';
+import ConfirmModal from '../../_common/ConfirmModal';
 
 export const ListEditions = ({ match }: { match: any }) => {
   const { path } = match;

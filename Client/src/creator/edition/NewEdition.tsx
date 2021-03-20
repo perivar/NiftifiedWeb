@@ -1,12 +1,14 @@
 import React from 'react';
 import { Formik, FormikHelpers, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import { niftyService, alertService } from '../_services';
-import CustomCreatableSelect from '../_common/select/CustomCreatableSelect';
-import FocusError from '../_common/FocusError';
-import UploadImageComponent from '../_common/UploadComponent';
+import { niftyService, alertService } from '../../_services';
+import CustomCreatableSelect from '../../_common/select/CustomCreatableSelect';
+import FocusError from '../../_common/FocusError';
+import UploadImageComponent from '../../_common/UploadComponent';
 import * as Scroll from 'react-scroll';
 import { Link } from 'react-router-dom';
+import { makeWallet } from '../wallet/GenerateWallet';
+import { WalletType } from '../person/NewPerson';
 
 const scroll = Scroll.animateScroll;
 
@@ -25,6 +27,14 @@ interface FormValues {
   tags: string[];
   amount: number; // Initial amount for auctions or the selling price for fixed price sales
   currencyUniqueId: string;
+
+  // wallet info
+  walletType: WalletType;
+  privateKeyEncrypted: string;
+  privateKeyWIFEncrypted: string;
+  publicAddress: string;
+  publicKey: string;
+  publicKeyHash: string;
 }
 
 export const NewEditionForm = ({ history }: { history: any }) => {
@@ -42,7 +52,15 @@ export const NewEditionForm = ({ history }: { history: any }) => {
     volumesCount: 1,
     tags: [],
     amount: 1,
-    currencyUniqueId: 'NFY'
+    currencyUniqueId: 'NFY',
+
+    // wallet info
+    walletType: WalletType.Nifty,
+    privateKeyEncrypted: '',
+    privateKeyWIFEncrypted: '',
+    publicAddress: '',
+    publicKey: '',
+    publicKeyHash: ''
   };
 
   const validationSchema = Yup.object().shape({
@@ -59,20 +77,33 @@ export const NewEditionForm = ({ history }: { history: any }) => {
   const onSubmit = (values: FormValues, formikHelpers: FormikHelpers<FormValues>) => {
     // alert(JSON.stringify(values, null, 2));
     formikHelpers.setSubmitting(true);
-    niftyService
-      .createEdition(values)
-      .then(() => {
-        formikHelpers.setSubmitting(false);
-        alertService.success('Successfully created a new edition!', {
-          keepAfterRouteChange: true
+
+    try {
+      const wallet = makeWallet();
+      console.log(wallet);
+      values.publicKey = wallet.publicKey;
+      values.publicKeyHash = wallet.publicKeyHash;
+      values.publicAddress = wallet.publicAddress;
+      values.privateKeyEncrypted = wallet.privateKey;
+      values.privateKeyWIFEncrypted = wallet.privateKeyWIF;
+
+      niftyService
+        .createEdition(values)
+        .then(() => {
+          formikHelpers.setSubmitting(false);
+          alertService.success('Successfully created a new edition!', {
+            keepAfterRouteChange: true
+          });
+          history.push('/creator');
+        })
+        .catch((error) => {
+          formikHelpers.setSubmitting(false);
+          alertService.error(error, { autoClose: false });
+          scroll.scrollToTop();
         });
-        history.push('/creator');
-      })
-      .catch((error) => {
-        formikHelpers.setSubmitting(false);
-        alertService.error(error, { autoClose: false });
-        scroll.scrollToTop();
-      });
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   // mapper function

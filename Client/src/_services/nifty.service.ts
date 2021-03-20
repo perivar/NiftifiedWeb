@@ -23,7 +23,10 @@ export const niftyService = {
   getVolumeById,
   getVolumesByEditionId,
   getPersons,
-  createPerson
+  createPerson,
+  getWalletsByPersonId,
+  getWalletById,
+  createWallet
 };
 
 function getTags() {

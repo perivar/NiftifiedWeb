@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { niftyService } from '../_services';
+import { niftyService } from '../../_services';
 
 export const PublishEdition = ({ match }: { match: any }) => {
   const { path } = match;

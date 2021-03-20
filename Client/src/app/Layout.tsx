@@ -1,6 +1,8 @@
 import React from 'react';
 import { Header } from './Header';
 import { Footer } from './Footer';
+// import { HeaderBulma } from './HeaderBulma';
+// import { FooterBulma } from './FooterBulma';
 
 interface Props {
   children: React.ReactNode;
