@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Niftified.Entities;
 
-namespace Niftified.Models.Accounts
+namespace Niftified.Models.Collections
 {
 	public class CollectionResponse
 	{

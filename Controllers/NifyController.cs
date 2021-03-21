@@ -8,6 +8,15 @@ using Niftified.Models.Accounts;
 using Niftified.Services;
 using System.Linq;
 using System.Security.Claims;
+using Niftified.Helpers;
+
+using Niftified.Models.Persons;
+using Niftified.Models.Wallets;
+using Niftified.Models.Editions;
+using Niftified.Models.Volumes;
+using Niftified.Models.Tags;
+using Niftified.Models.Collections;
+using Niftified.Models.Likes;
 
 namespace Niftified.Controllers
 {
@@ -15,12 +24,12 @@ namespace Niftified.Controllers
 	[Route("[controller]")]
 	public class NiftyController : BaseController
 	{
-		private readonly IAccountService _accountService;
+		private readonly INiftyAccountService _accountService;
 		private readonly INiftyService _niftyService;
 		private readonly IMapper _mapper;
 
 		public NiftyController(
-  			IAccountService accountService,
+  			INiftyAccountService accountService,
 			INiftyService niftyService,
 			IMapper mapper)
 		{
@@ -162,9 +171,10 @@ namespace Niftified.Controllers
 		}
 
 		[HttpGet("/api/volumes/{editionId:int}")]
-		public ActionResult<IEnumerable<VolumeResponse>> GetVolumesByEditionId(int editionId)
+		public ActionResult<IEnumerable<VolumeResponse>> GetVolumesByEditionId(int editionId,
+			int? pageNumber, int? pageSize)
 		{
-			var volumes = _niftyService.GetVolumesByEditionId(editionId);
+			var volumes = _niftyService.GetVolumesByEditionId(editionId, pageNumber ?? 1, pageSize ?? 10);
 			return Ok(volumes);
 		}
 

@@ -12,6 +12,25 @@ import { Frontpage } from '../frontpage/Index';
 import { Creator } from '../creator/Index';
 import { Layout } from './Layout';
 
+// payments
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+
+// read from .env files
+const config = { stripeTestKey: process.env.REACT_APP_STRIPE_PK_TEST_KEY };
+
+// Make sure to call `loadStripe` outside of a component’s render to avoid
+// recreating the `Stripe` object on every render.
+const stripePromise = loadStripe(config.stripeTestKey || '');
+
+const STRIPE_ELEMENTS_OPTIONS = {
+  fonts: [
+    {
+      cssSrc: 'https://fonts.googleapis.com/css?family=Roboto'
+    }
+  ]
+};
+
 function App() {
   const { pathname } = useLocation();
   const [user, setUser] = useState<any | null>(null);
@@ -22,9 +41,8 @@ function App() {
   }, []);
 
   return (
-    <>
+    <Elements stripe={stripePromise} options={STRIPE_ELEMENTS_OPTIONS}>
       <Layout>
-        {/* <Nav /> */}
         <Alert />
         <Switch>
           <Redirect from="/:url*(/+)" to={pathname ? pathname.slice(0, -1) : '/'} />
@@ -37,7 +55,7 @@ function App() {
           <Redirect from="*" to="/frontpage" />
         </Switch>
       </Layout>
-    </>
+    </Elements>
   );
 }
 

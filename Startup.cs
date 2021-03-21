@@ -10,6 +10,8 @@ using Niftified.Middleware;
 using Niftified.Services;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Http;
+using Stripe;
+using System.Linq;
 
 namespace WebApi
 {
@@ -20,11 +22,26 @@ namespace WebApi
 		public Startup(IConfiguration configuration)
 		{
 			Configuration = configuration;
+
+			// load .env file
+			DotNetEnv.Env.Load();
+
+			// set config using env var
+			StripeConfiguration.ApiKey = System.Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
 		}
 
 		// add services to the DI container
 		public void ConfigureServices(IServiceCollection services)
 		{
+			services.Configure<StripeOptions>(options =>
+			{
+				options.PublishableKey = Environment.GetEnvironmentVariable("STRIPE_PUBLISHABLE_KEY");
+				options.SecretKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
+				options.WebhookSecret = Environment.GetEnvironmentVariable("STRIPE_WEBHOOK_SECRET");
+				options.PaymentMethodTypes = Environment.GetEnvironmentVariable("PAYMENT_METHOD_TYPES").Split(",").ToList();
+				options.Domain = Environment.GetEnvironmentVariable("DOMAIN");
+			});
+
 			services.AddDbContext<DataContext>();
 			services.AddCors();
 
@@ -75,7 +92,7 @@ namespace WebApi
 			services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
 			// configure DI for application services
-			services.AddScoped<IAccountService, AccountService>();
+			services.AddScoped<INiftyAccountService, NiftyAccountService>();
 			services.AddScoped<IEmailService, EmailService>();
 			services.AddScoped<INiftyService, NiftyService>();
 		}

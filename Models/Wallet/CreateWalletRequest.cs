@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Niftified.Entities;
 
-namespace Niftified.Models.Accounts
+namespace Niftified.Models.Wallets
 {
 	public class CreateWalletRequest
 	{

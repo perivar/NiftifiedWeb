@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
 using Niftified.Entities;
 
-namespace Niftified.Models.Accounts
+namespace Niftified.Models.Volumes
 {
 	public class UpdateVolumeRequest
 	{

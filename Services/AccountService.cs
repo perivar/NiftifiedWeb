@@ -15,7 +15,7 @@ using Niftified.Models.Accounts;
 
 namespace Niftified.Services
 {
-	public interface IAccountService
+	public interface INiftyAccountService
 	{
 		AuthenticateResponse Authenticate(AuthenticateRequest model, string ipAddress);
 		AuthenticateResponse RefreshToken(string token, string ipAddress);
@@ -32,14 +32,14 @@ namespace Niftified.Services
 		void Delete(int id);
 	}
 
-	public class AccountService : IAccountService
+	public class NiftyAccountService : INiftyAccountService
 	{
 		private readonly DataContext _context;
 		private readonly IMapper _mapper;
 		private readonly AppSettings _appSettings;
 		private readonly IEmailService _emailService;
 
-		public AccountService(
+		public NiftyAccountService(
 			DataContext context,
 			IMapper mapper,
 			IOptions<AppSettings> appSettings,

@@ -25,10 +25,10 @@ export const Header = () => {
                 </NavLink>
               ) : (
                 <>
-                  <NavLink to="/account/register" className="btn btn-primary">
+                  <NavLink to="/account/register" className="nav-item btn btn-secondary mr-2">
                     Sign up
                   </NavLink>
-                  <NavLink to="/account/login" className="btn btn-primary">
+                  <NavLink to="/account/login" className="nav-item btn btn-warning mr-2">
                     Sign in
                   </NavLink>
                 </>

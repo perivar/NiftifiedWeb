@@ -5,10 +5,17 @@ using System.Collections.Generic;
 using System.Text;
 using Niftified.Entities;
 using Niftified.Helpers;
-using Niftified.Models.Accounts;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
+
+using Niftified.Models.Persons;
+using Niftified.Models.Wallets;
+using Niftified.Models.Editions;
+using Niftified.Models.Volumes;
+using Niftified.Models.Tags;
+using Niftified.Models.Collections;
+using Niftified.Models.Likes;
 
 namespace Niftified.Services
 {
@@ -30,6 +37,8 @@ namespace Niftified.Services
 		VolumeResponse UpdateVolume(int id, UpdateVolumeRequest model);
 		IEnumerable<VolumeResponse> GetVolumes();
 		IEnumerable<VolumeResponse> GetVolumesByEditionId(int editionId);
+		IEnumerable<VolumeResponse> GetVolumesByEditionId(int editionId, int pageNumber, int pageSize);
+
 		void DeleteVolume(int id);
 
 		// collection
@@ -234,6 +243,7 @@ namespace Niftified.Services
 			{
 				// create wallet
 				var wallet = new Wallet();
+				wallet.Created = DateTime.UtcNow;
 				wallet.PrivateKeyEncrypted = model.PrivateKeyEncrypted;
 				wallet.PrivateKeyWIFEncrypted = model.PrivateKeyWIFEncrypted;
 				wallet.PublicAddress = model.PublicAddress;
@@ -461,6 +471,7 @@ namespace Niftified.Services
 
 			// create wallet
 			var wallet = new Wallet();
+			wallet.Created = DateTime.UtcNow;
 			wallet.PrivateKeyEncrypted = model.PrivateKeyEncrypted;
 			wallet.PrivateKeyWIFEncrypted = model.PrivateKeyWIFEncrypted;
 			wallet.PublicAddress = model.PublicAddress;
@@ -613,6 +624,15 @@ namespace Niftified.Services
 		public IEnumerable<VolumeResponse> GetVolumesByEditionId(int editionId)
 		{
 			var volumes = _context.Volumes.Where(entity => entity.EditionId == editionId)
+			.Include(v => v.Owner);
+			return _mapper.Map<IList<VolumeResponse>>(volumes);
+		}
+
+		public IEnumerable<VolumeResponse> GetVolumesByEditionId(int editionId, int pageIndex, int pageSize)
+		{
+			var volumes = _context.Volumes.Where(entity => entity.EditionId == editionId)
+			.Skip((pageIndex - 1) * pageSize)
+			.Take(pageSize)
 			.Include(v => v.Owner);
 			return _mapper.Map<IList<VolumeResponse>>(volumes);
 		}

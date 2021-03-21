@@ -111,7 +111,7 @@ export const NewPersonForm = ({ history }: { history: any }) => {
           alertService.success('Successfully created a new person!', {
             keepAfterRouteChange: true
           });
-          history.push('/creator');
+          history.push('/creator/profile');
         })
         .catch((error) => {
           formikHelpers.setSubmitting(false);

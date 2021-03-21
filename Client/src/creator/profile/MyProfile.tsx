@@ -42,48 +42,50 @@ export const MyProfile = ({ history, match }: { history: any; match: any }) => {
         <div className="row">
           <div className="col">
             <h4>Persons connected to you</h4>
-            <table className="table">
-              <thead>
-                <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Type</th>
-                  <th scope="col">Alias</th>
-                  <th scope="col">isAnonymous</th>
-                  <th scope="col">Commision Share</th>
-                  <th scope="col">Wallets</th>
-                </tr>
-              </thead>
-              <tbody>
-                {!isLoading &&
-                  persons &&
-                  persons.map((person: any) => (
-                    <tr key={person.id}>
-                      <td>{person.id}</td>
-                      <td>{Status[person.status]}</td>
-                      <td>{PersonType[person.type]}</td>
-                      <td>{person.alias}</td>
-                      <td>
-                        {person.isAnonymous ? (
-                          <i className="fas fa-user-secret"></i>
-                        ) : (
-                          <i className="fas fa-lock-open"></i>
-                        )}
-                      </td>
-                      <td>{person.salesCommisionShare}</td>
-                      <td>
-                        {person.wallets && person.wallets.length ? (
-                          <Link to={`/creator/wallets/${person.id}`} className="btn btn-sm btn-light btn-block">
-                            {person.wallets.length}
-                          </Link>
-                        ) : (
-                          'None'
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
+            <div className="table-responsive">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Alias</th>
+                    <th scope="col" className="text-center">
+                      Anonymous
+                    </th>
+                    <th scope="col">Commision Share</th>
+                    <th scope="col" className="text-center">
+                      Wallets
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {!isLoading &&
+                    persons &&
+                    persons.map((person: any) => (
+                      <tr key={person.id}>
+                        <td>{person.id}</td>
+                        <td>{Status[person.status]}</td>
+                        <td>{PersonType[person.type]}</td>
+                        <td>{person.alias}</td>
+                        <td className="text-center">
+                          {person.isAnonymous ? <i className="fas fa-user-secret"></i> : 'Open'}
+                        </td>
+                        <td>{person.salesCommisionShare}</td>
+                        <td className="text-center">
+                          {person.wallets && person.wallets.length ? (
+                            <Link to={`/creator/wallets/${person.id}`} className="btn btn-sm btn-light btn-block">
+                              {person.wallets.length}
+                            </Link>
+                          ) : (
+                            'None'
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

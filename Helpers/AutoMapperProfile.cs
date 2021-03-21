@@ -2,6 +2,13 @@ using System.Linq;
 using AutoMapper;
 using Niftified.Entities;
 using Niftified.Models.Accounts;
+using Niftified.Models.Persons;
+using Niftified.Models.Wallets;
+using Niftified.Models.Editions;
+using Niftified.Models.Volumes;
+using Niftified.Models.Tags;
+using Niftified.Models.Collections;
+using Niftified.Models.Likes;
 
 namespace Niftified.Helpers
 {

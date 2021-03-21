@@ -13,11 +13,11 @@ namespace Niftified.Controllers
 	[Route("[controller]")]
 	public class AccountsController : BaseController
 	{
-		private readonly IAccountService _accountService;
+		private readonly INiftyAccountService _accountService;
 		private readonly IMapper _mapper;
 
 		public AccountsController(
-			IAccountService accountService,
+			INiftyAccountService accountService,
 			IMapper mapper)
 		{
 			_accountService = accountService;
