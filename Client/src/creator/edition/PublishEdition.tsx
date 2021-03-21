@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { niftyService } from '../../_services';
-import { ProductList, Product, StripeCheckoutForm } from '../wallet/StripeCheckoutForm';
+import { StripeCheckoutForm } from '../wallet/StripeCheckoutForm';
+import { ProductList, Product } from '../wallet/types';
 
 export const PublishEdition = ({ match }: { match: any }) => {
   const { path } = match;
