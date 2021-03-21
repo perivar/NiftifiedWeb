@@ -23,7 +23,10 @@ export const niftyService = {
   getVolumeById,
   getVolumesByEditionId,
   getPersons,
+  getPersonById,
   createPerson,
+  updatePerson,
+  deletePerson,
   getWalletsByPersonId,
   getWalletById,
   createWallet
@@ -158,6 +161,10 @@ function getPersons() {
   return fetchWrapper.get(`${baseUrl}/persons/${accountId}`);
 }
 
+function getPersonById(id: number) {
+  return fetchWrapper.get(`${baseUrl}/person/${id}`);
+}
+
 function createPerson(params: any) {
   const user = accountService.userValue;
 
@@ -167,6 +174,30 @@ function createPerson(params: any) {
   // merge params
   const allParams = { ...params, ...body };
   return fetchWrapper.post(`${baseUrl}/person`, allParams);
+}
+
+function updatePerson(id: string, params: any) {
+  const user = accountService.userValue;
+  const accountId = user && user.id ? user.id : 1;
+
+  const body = {
+    accountId
+  };
+
+  // merge params
+  const allParams = { ...params, ...body };
+
+  return fetchWrapper.put(`${baseUrl}/person/${id}`, allParams).then((edition) => {
+    return edition;
+  });
+}
+
+function deletePerson(id: number) {
+  const user = accountService.userValue;
+  if (user && user.id) {
+    return fetchWrapper.delete(`${baseUrl}/person/delete/${id}`);
+  }
+  return Promise.reject('not logged in');
 }
 
 function getWalletsByPersonId(personId: number) {

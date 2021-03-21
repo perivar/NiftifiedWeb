@@ -7,6 +7,7 @@ import FocusError from '../../_common/FocusError';
 import * as Scroll from 'react-scroll';
 import { Link } from 'react-router-dom';
 import { makeWallet } from '../wallet/GenerateWallet';
+import { encrypt, decrypt } from '../wallet/webcrypto';
 
 const scroll = Scroll.animateScroll;
 
@@ -49,7 +50,7 @@ function ToOptionArray(enumme: any) {
 export const statusOptions = ToOptionArray(Status);
 export const typeOptions = ToOptionArray(PersonType);
 
-interface FormValues {
+export interface FormValues {
   alias: string;
   isAnonymous: boolean;
   accountId: number;
@@ -101,22 +102,35 @@ export const NewPersonForm = ({ history }: { history: any }) => {
       values.publicKey = wallet.publicKey;
       values.publicKeyHash = wallet.publicKeyHash;
       values.publicAddress = wallet.publicAddress;
-      values.privateKeyEncrypted = wallet.privateKey;
-      values.privateKeyWIFEncrypted = wallet.privateKeyWIF;
+      // values.privateKeyEncrypted = wallet.privateKey;
+      // values.privateKeyWIFEncrypted = wallet.privateKeyWIF;
 
-      niftyService
-        .createPerson(values)
-        .then(() => {
-          formikHelpers.setSubmitting(false);
-          alertService.success('Successfully created a new person!', {
-            keepAfterRouteChange: true
-          });
-          history.push('/creator/profile');
+      // TODO remove this
+      // but keep both the unencoded and the encoded private key WIF to check
+      values.privateKeyEncrypted = wallet.privateKeyWIF;
+
+      encrypt(wallet.privateKeyWIF)
+        .then((encryptedData) => {
+          values.privateKeyWIFEncrypted = encryptedData;
+
+          niftyService
+            .createPerson(values)
+            .then(() => {
+              formikHelpers.setSubmitting(false);
+              alertService.success('Successfully created a new person!', {
+                keepAfterRouteChange: true
+              });
+              history.push('/creator/profile');
+            })
+            .catch((error) => {
+              formikHelpers.setSubmitting(false);
+              alertService.error(error, { autoClose: false });
+              scroll.scrollToTop();
+            });
         })
-        .catch((error) => {
-          formikHelpers.setSubmitting(false);
-          alertService.error(error, { autoClose: false });
-          scroll.scrollToTop();
+        .catch((err) => {
+          // got error
+          return 'FAILED';
         });
     } catch (e) {
       console.log(e);

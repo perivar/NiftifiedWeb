@@ -228,6 +228,26 @@ namespace Niftified.Controllers
 		}
 
 		[Authorize]
+		[HttpDelete("/api/person/delete/{id:int}")]
+		public ActionResult<PersonResponse> DeletePerson(int id)
+		{
+			// get the current logged in user 
+			// and verify that the edition is owner by this user
+			var accountId = Account.Id;
+			var person = _niftyService.GetPersonById(id);
+			if (person.Account.Id != accountId)
+			{
+				throw new KeyNotFoundException("Cannot delete a person you don't own!");
+			}
+			else
+			{
+				_niftyService.DeletePerson(id);
+			}
+
+			return Ok(true);
+		}
+
+		[Authorize]
 		[HttpGet("/api/likes/{accountId:int}")]
 		public ActionResult<LikesResponse> GetLikesByAccountId(int accountId)
 		{
