@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { FieldProps } from 'formik';
 import { accountService, niftyService } from '../../_services';
 import { Status, PersonType } from '../person/NewPerson';
+import { AddPersonModal } from './AddPersonModal';
 
 import './AddPersonField.scss';
 
@@ -26,6 +27,8 @@ export const AddPersonsField = ({ field, form }: FieldProps) => {
   const [searchText, setSearchText] = useState<string>();
 
   const [salesCommisionShare, setSalesCommisionShare] = useState<string | null>(null);
+
+  const [showAddPersonModal, setShowAddPersonModal] = useState<boolean>(false);
 
   // load all person options async
   const fetchPersons = () => {
@@ -138,6 +141,9 @@ export const AddPersonsField = ({ field, form }: FieldProps) => {
   return (
     <>
       <div className="container">
+        <small id="addPersonHelpBlock1" className="form-text text-muted">
+          Search here if you already have a person you want to add
+        </small>
         <form className="form-inline my-2 my-lg-0" noValidate onSubmit={onFormSubmit}>
           <input
             className="form-control-sm mr-sm-2"
@@ -183,6 +189,7 @@ export const AddPersonsField = ({ field, form }: FieldProps) => {
             </table>
           )}
         </form>
+        <AddPersonModal show={showAddPersonModal} setShow={setShowAddPersonModal} />
         <form noValidate onSubmit={onFormSubmit} className="mt-2">
           <div className="table-responsive">
             <table className="table table-sm table-bordered">
@@ -262,6 +269,12 @@ export const AddPersonsField = ({ field, form }: FieldProps) => {
                   ))}
               </tbody>
             </table>
+            <small id="addPersonHelpBlock2" className="form-text text-muted">
+              If you don't find the persons among the existing persons, add them here.
+            </small>
+            <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowAddPersonModal(true)}>
+              Add New Person
+            </button>
           </div>
         </form>
       </div>

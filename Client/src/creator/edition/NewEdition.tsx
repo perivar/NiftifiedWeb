@@ -122,14 +122,9 @@ export const NewEditionForm = ({ history }: { history: any }) => {
   return (
     <div className="container-fluid">
       <h4>You are now just one step away from creating your own crypto art...</h4>
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        // validateOnChange={false}
-        // validateOnBlur={false}
-        onSubmit={onSubmit}>
+      <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
         {({ setFieldValue, values, errors, touched, isSubmitting }) => (
-          <Form noValidate>
+          <Form noValidate id="newEditionForm">
             <div className="form-row">
               <div className="col-4">
                 <div className="form-group">
@@ -308,7 +303,7 @@ export const NewEditionForm = ({ history }: { history: any }) => {
             </div>
 
             <div className="form-group">
-              <button type="submit" disabled={isSubmitting} className="btn btn-primary">
+              <button type="submit" disabled={isSubmitting} className="btn btn-primary" form="newEditionForm">
                 {isSubmitting && <span className="spinner-border spinner-border-sm mr-1"></span>}
                 Save Edition
               </button>
