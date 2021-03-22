@@ -9,6 +9,7 @@ import * as Scroll from 'react-scroll';
 import { Link } from 'react-router-dom';
 import { makeWallet } from '../wallet/GenerateWallet';
 import { WalletType } from '../person/NewPerson';
+import { AddPersonsField } from '../person/AddPersonsField';
 
 const scroll = Scroll.animateScroll;
 
@@ -75,6 +76,12 @@ export const NewEditionForm = ({ history }: { history: any }) => {
   });
 
   const onSubmit = (values: FormValues, formikHelpers: FormikHelpers<FormValues>) => {
+    // if setting formik validation to false, i.e.
+    // validateOnChange={false}
+    // validateOnBlur={false}
+    // do the validation here
+    // formikHelpers.validateForm(values);
+
     // alert(JSON.stringify(values, null, 2));
     formikHelpers.setSubmitting(true);
 
@@ -115,7 +122,12 @@ export const NewEditionForm = ({ history }: { history: any }) => {
   return (
     <div className="container-fluid">
       <h4>You are now just one step away from creating your own crypto art...</h4>
-      <Formik initialValues={initialValues} onSubmit={onSubmit} validationSchema={validationSchema}>
+      <Formik
+        initialValues={initialValues}
+        validationSchema={validationSchema}
+        // validateOnChange={false}
+        // validateOnBlur={false}
+        onSubmit={onSubmit}>
         {({ setFieldValue, values, errors, touched, isSubmitting }) => (
           <Form noValidate>
             <div className="form-row">
@@ -177,9 +189,14 @@ export const NewEditionForm = ({ history }: { history: any }) => {
                       full sales commision whenever sold
                     </small>
                   ) : (
-                    <p className="invalid-feedback show-block">
-                      Currently only Account holder as Sole Creator is Supported
-                    </p>
+                    // <p className="invalid-feedback show-block">
+                    //   Currently only Account holder as Sole Creator is Supported
+                    // </p>
+                    <div className="form-group">
+                      <label htmlFor="creatorPersonIds">Creators</label>
+                      <Field name="creatorPersonIds" className="form-control rounded-0" component={AddPersonsField} />
+                      <ErrorMessage name="creatorPersonIds" component="div" className="invalid-feedback  show-block" />
+                    </div>
                   )}
                 </div>
 

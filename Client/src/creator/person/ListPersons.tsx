@@ -26,7 +26,7 @@ export const ListPersons = ({ history, match }: { history: any; match: any }) =>
     setLoading(true);
 
     niftyService
-      .getPersons()
+      .getPersonsByAccountId()
       .then((res) => {
         setPersons(res);
         setLoading(false);

@@ -22,7 +22,7 @@ export const niftyService = {
   deleteEdition,
   getVolumeById,
   getVolumesByEditionId,
-  getPersons,
+  getPersonsByAccountId,
   getPersonById,
   createPerson,
   updatePerson,
@@ -154,7 +154,7 @@ function getVolumeById(id: number) {
   return fetchWrapper.get(`${baseUrl}/volume/${id}`);
 }
 
-function getPersons() {
+function getPersonsByAccountId() {
   const user = accountService.userValue;
   const accountId = user && user.id ? user.id : 1;
 
