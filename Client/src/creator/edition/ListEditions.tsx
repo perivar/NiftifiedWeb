@@ -99,7 +99,11 @@ export const ListEditions = ({ match }: { match: any }) => {
                   editions.map((edition: any) => (
                     <tr key={edition.id}>
                       <td>
-                        <img alt={edition.name} height="80" src={`/stored-images/${edition.dataSourceFileName}`}></img>
+                        <img
+                          alt={edition.name}
+                          height="80"
+                          width="80"
+                          src={`/stored-images/${edition.dataSourceFileName}`}></img>
                       </td>
                       <td>{edition.id}</td>
                       <td>{edition.name}</td>

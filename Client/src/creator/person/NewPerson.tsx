@@ -5,58 +5,20 @@ import { niftyService, alertService } from '../../_services';
 import CustomSelect from '../../_common/select/CustomSelect';
 import FocusError from '../../_common/FocusError';
 import * as Scroll from 'react-scroll';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 import { makeWallet } from '../wallet/GenerateWallet';
 import { encrypt, decrypt } from '../wallet/webcrypto';
+import { Status, statusOptions, WalletType } from '../../_common/enums';
 
 const scroll = Scroll.animateScroll;
-
-export enum PersonType {
-  Owner,
-  Creator,
-  CoCreator,
-  Publisher,
-  Producer,
-  Other
-}
-
-export enum Status {
-  Pending,
-  Active,
-  Cancelled,
-  Expired
-}
-
-export enum WalletType {
-  Nifty,
-  Other
-}
-
-// Helper
-const StringIsNumber = (value: any) => isNaN(Number(value)) === false;
-
-// Turn enum into array
-function ToOptionArray(enumme: any) {
-  return Object.keys(enumme)
-    .filter(StringIsNumber)
-    .map((key) => {
-      return {
-        label: enumme[key],
-        value: Number(key) // force as number
-      };
-    });
-}
-
-export const statusOptions = ToOptionArray(Status);
-export const typeOptions = ToOptionArray(PersonType);
 
 export interface FormValues {
   alias: string;
   isAnonymous: boolean;
   accountId: number;
   status: Status;
-  type: PersonType; // creator, co-creator?
-  salesCommisionShare: number;
+  // type: CreatorType; // creator, co-creator?
+  isConfirmed: boolean;
 
   // wallet info
   name: string;
@@ -74,8 +36,8 @@ export const NewPersonForm = ({ history }: { history: any }) => {
     isAnonymous: false,
     accountId: 0,
     status: Status.Pending,
-    type: PersonType.Creator,
-    salesCommisionShare: 100,
+    // type: CreatorType.Creator,
+    isConfirmed: false,
 
     // wallet info
     name: 'wallet',
@@ -88,7 +50,7 @@ export const NewPersonForm = ({ history }: { history: any }) => {
   };
 
   const validationSchema = Yup.object().shape({
-    // alias: Yup.string().required('Alias is required')
+    alias: Yup.string().required('Alias is required'),
     isAnonymous: Yup.boolean().required('Please choose wheter you want to be anonymous')
   });
 
@@ -98,7 +60,7 @@ export const NewPersonForm = ({ history }: { history: any }) => {
 
     try {
       const wallet = makeWallet();
-      console.log(wallet);
+      // console.log(wallet);
       values.publicKey = wallet.publicKey;
       values.publicKeyHash = wallet.publicKeyHash;
       values.publicAddress = wallet.publicAddress;
@@ -154,7 +116,7 @@ export const NewPersonForm = ({ history }: { history: any }) => {
                       className={`form-control${errors.alias && touched.alias ? ' is-invalid' : ''}`}
                     />
                     <small id="nameHelpBlock" className="form-text text-muted">
-                      Please choose a cool alias.
+                      Please enter a name or an alias.
                     </small>
                     <ErrorMessage name="alias" component="div" className="invalid-feedback" />
                   </div>
@@ -183,7 +145,7 @@ export const NewPersonForm = ({ history }: { history: any }) => {
                     <ErrorMessage name="status" component="div" className="invalid-feedback  show-block" />
                   </div>
 
-                  <div className="form-group">
+                  {/* <div className="form-group">
                     <label htmlFor="type">Type</label>
                     <Field
                       id="type"
@@ -195,23 +157,23 @@ export const NewPersonForm = ({ history }: { history: any }) => {
                       isMulti={false}
                     />
                     <ErrorMessage name="type" component="div" className="invalid-feedback  show-block" />
-                  </div>
+                  </div> */}
 
-                  <div className="form-group">
-                    <label htmlFor="theme">Sales Commision Share (out of 100)</label>
+                  {/* <div className="form-group">
+                    <label htmlFor="theme">Sales Commission Share (out of 100)</label>
                     <Field
-                      id="salesCommisionShare"
-                      name="salesCommisionShare"
+                      id="salesCommissionShare"
+                      name="salesCommissionShare"
                       type="number"
                       className={`form-control${
-                        errors.salesCommisionShare && touched.salesCommisionShare ? ' is-invalid' : ''
+                        errors.salesCommissionShare && touched.salesCommissionShare ? ' is-invalid' : ''
                       }`}
                     />
-                    <small id="salesCommisionShare" className="form-text text-muted">
+                    <small id="salesCommissionShare" className="form-text text-muted">
                       This is the share in percentage of creator. If Sole Creator, this is 100.
                     </small>
-                    <ErrorMessage name="salesCommisionShare" component="div" className="invalid-feedback" />
-                  </div>
+                    <ErrorMessage name="salesCommissionShare" component="div" className="invalid-feedback" />
+                  </div> */}
                 </div>
               </div>
               <div className="form-group">

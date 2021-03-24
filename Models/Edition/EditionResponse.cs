@@ -13,14 +13,16 @@ namespace Niftified.Models.Editions
 		public string HashId { get; set; } // connection to nifty chain
 		public string ExternalHashId { get; set; } // id on external block chain?
 
-		public List<Person> Creators { get; set; } // note the sales commision will have to add up to 100%
-
 		public DateTime Created { get; set; } // minted when?
 		public DateTime? ExternalCreated { get; set; } // minted in external block chain?
 		public DateTime? Updated { get; set; }
 
-		public double SalesCommisionToCreators { get; set; }
-		public double SalesCommisionToBlockchain { get; set; }
+
+		// creator and commission section
+		public decimal SalesCommissionToBlockchain { get; set; }
+		public decimal SalesCommissionToCreators { get; set; }
+		// note the sales commission will have to add up to 100%
+		public ICollection<Creator> Creators { get; set; } = new List<Creator>();
 
 		public int VolumesCount { get; set; }  // number of volumes, should be the same as Volumes.Count		
 		public List<Volume> Volumes { get; set; } // at least one needs to exist

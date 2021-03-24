@@ -16,13 +16,7 @@ namespace Niftified.Models.Persons
 		public Account Account { get; set; } // reference to account
 
 		public Status Status { get; set; }
-
-		public PersonType Type { get; set; } // creator, co-creator?
-
-		// note that all commisions for co-creators cannot exceed 100%
-		// defaults to 100% of the sales commision defined in the Edition
-		public double SalesCommisionShare { get; set; }
-
+		public bool IsConfirmed { get; set; } // is this person confirmed, used when being a confirmed Creator 
 		public List<Wallet> Wallets { get; set; }
 	}
 }

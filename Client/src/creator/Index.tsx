@@ -20,7 +20,7 @@ function Creator({ history, match }: { history: any; match: any }) {
       <Route path={`${path}/edition/edit/:id`} component={EditEditionForm} />
       <Route path={`${path}/edition/publish/:id`} component={PublishEdition} />
       <Route path={`${path}/volumes/:id`} component={ListVolumes} />
-      <Route path={`${path}/person/new`} component={NewPersonForm} />
+      {/* <Route path={`${path}/person/new`} component={NewPersonForm} /> */}
       <Route path={`${path}/person/edit/:id`} component={EditPersonForm} />
       <Route path={`${path}/profile`} component={MyProfile} />
       <Route path={`${path}/wallets/:id`} component={ListWallets} />

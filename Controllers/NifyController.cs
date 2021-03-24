@@ -137,6 +137,9 @@ namespace Niftified.Controllers
 			}
 
 			var edition = _niftyService.CreateEdition(model);
+			// to avoid the potential very large return
+			// remove the volumes before returning
+			edition.Volumes = null;
 			return Ok(edition);
 		}
 

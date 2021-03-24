@@ -42,19 +42,24 @@ namespace Niftified.Helpers
 		#region Custom Value Converter for Int Array Support 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-			var converter = new ValueConverter<int[], string>(
+			// create composite key for Creator
+			modelBuilder.Entity<Creator>()
+				   .HasKey(c => new { c.EditionId, c.PersonId });
+
+			// support int arrays
+			var intArrayConverter = new ValueConverter<int[], string>(
 							v => string.Join(";", v),
 							v => v.Split(";", StringSplitOptions.RemoveEmptyEntries).Select(val => int.Parse(val)).ToArray());
 
 			modelBuilder.Entity<Likes>()
 				.Property(e => e.LikedEditionIds)
-				.HasConversion(converter);
+				.HasConversion(intArrayConverter);
 			modelBuilder.Entity<Likes>()
 				.Property(e => e.LikedPersonIds)
-				.HasConversion(converter);
+				.HasConversion(intArrayConverter);
 			modelBuilder.Entity<Likes>()
 				.Property(e => e.LikedVolumeIds)
-				.HasConversion(converter);
+				.HasConversion(intArrayConverter);
 		}
 		#endregion
 	}

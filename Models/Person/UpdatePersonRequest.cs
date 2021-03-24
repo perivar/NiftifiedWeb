@@ -12,7 +12,7 @@ namespace Niftified.Models.Persons
 		// section for information used for the blockchain 
 		public string PrivateKeyEncrypted { get; set; }
 		public string PrivateKeyWIFEncrypted { get; set; }
-		public string PublicAddress { get; set; } // where to send commision payments to?
+		public string PublicAddress { get; set; } // where to send commission payments to?
 		public string PublicKey { get; set; }
 		public string PublicKeyHash { get; set; }
 
@@ -27,17 +27,7 @@ namespace Niftified.Models.Persons
 			get => _status;
 			set => _status = replaceEmptyWithNull(value);
 		}
-
-		[EnumDataType(typeof(PersonType))]
-		public string Type
-		{
-			get => _type;
-			set => _type = replaceEmptyWithNull(value);
-		}
-
-		// note that all commisions for co-creators cannot exceed 100%
-		// defaults to 100% of the sales commision defined in the Edition
-		public double SalesCommisionShare { get; set; }
+		public bool IsConfirmed { get; set; } // is this person confirmed, used when being a confirmed Creator 
 
 		public List<int> WalletIds { get; set; }
 

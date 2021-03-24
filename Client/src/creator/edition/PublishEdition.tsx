@@ -5,7 +5,7 @@ import { StripeCheckoutForm } from '../wallet/StripeCheckoutForm';
 import { ProductList, Product } from '../wallet/types';
 
 export const PublishEdition = ({ match }: { match: any }) => {
-  const { path } = match;
+  // const { path } = match;
   const { id } = match.params;
 
   const [isLoading, setLoading] = useState<boolean>(false);

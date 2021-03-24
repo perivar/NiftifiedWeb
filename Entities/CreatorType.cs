@@ -3,9 +3,8 @@ using System.Collections.Generic;
 
 namespace Niftified.Entities
 {
-	public enum PersonType
+	public enum CreatorType
 	{
-		Owner,
 		Creator,
 		CoCreator,
 		Publisher,

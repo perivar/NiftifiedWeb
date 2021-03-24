@@ -17,10 +17,14 @@ namespace Niftified.Models.Editions
 		public string HashId { get; set; } // connection to nifty chain
 		public string ExternalHashId { get; set; } // id on external block chain?
 
-		// note the sales commision will have to add up to 100%
-		public ICollection<int> CreatorIds { get; set; } = new List<int>();
+		public decimal SalesCommissionToCreators { get; set; }
 
-		public double SalesCommisionToCreators { get; set; }
+		// note that all commissions for creators cannot exceed 100%
+		// defaults to only one creator with 100% of the sales commission defined in SalesCommissionToCreators
+		public List<int> CreatorPersonIds { get; set; } = new List<int>();
+		public List<decimal> CreatorCommissionShares { get; set; } = new List<decimal>();
+		public List<string> CreatorPersonAliases { get; set; } = new List<string>();
+
 
 		[Required]
 		public int VolumesCount { get; set; }  // how many volumes to create, could be only one
@@ -48,7 +52,10 @@ namespace Niftified.Models.Editions
 		public IFormFile File { get; set; }
 
 		[Required]
-		public bool AccountIsCreator { get; set; } // whether the only creator is the account owner
+		// whether the only creator is the account owner
+		// if so the only entry in the CreatorIds list is the account person
+		// and the only entry in the CreatorsSalesCommissionShare is 100
+		public bool AccountIsCreator { get; set; }
 
 		public decimal Amount { get; set; } // Initial amount for auctions or the selling price for fixed price sales
 		public string CurrencyUniqueId { get; set; }
@@ -57,7 +64,7 @@ namespace Niftified.Models.Editions
 		// private and protected key
 		public string PrivateKeyEncrypted { get; set; }
 		public string PrivateKeyWIFEncrypted { get; set; }
-		public string PublicAddress { get; set; } // where to send commision payments to?
+		public string PublicAddress { get; set; } // where to send commission payments to?
 		public string PublicKey { get; set; }
 		public string PublicKeyHash { get; set; }
 		#endregion

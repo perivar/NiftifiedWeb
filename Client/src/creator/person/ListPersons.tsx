@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { accountService, niftyService } from '../../_services';
-import { Status, PersonType } from '../person/NewPerson';
+import { Status } from '../../_common/enums';
 import ConfirmModal from '../../_common/ConfirmModal';
+import { AddPersonModal } from './AddPersonModal';
+
+import './AddPersonField.scss';
 
 export const ListPersons = ({ history, match }: { history: any; match: any }) => {
   const { path } = match;
@@ -13,6 +16,9 @@ export const ListPersons = ({ history, match }: { history: any; match: any }) =>
 
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<number>(0);
+
+  // add a new person using a modal
+  const [showAddPersonModal, setShowAddPersonModal] = useState<boolean>(false);
 
   useEffect(() => {
     // redirect to home if not logged in
@@ -36,6 +42,22 @@ export const ListPersons = ({ history, match }: { history: any; match: any }) =>
         setLoading(false);
       });
   }, []);
+
+  const onAddPersonSuccess = (person: any) => {
+    // reload and add to selected list
+    setLoading(true);
+
+    niftyService
+      .getPersonsByAccountId()
+      .then((res) => {
+        setPersons(res);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setLoading(false);
+      });
+  };
 
   const onCancelDeletePerson = () => {
     // make sure to set confirm delete id to zero
@@ -61,6 +83,9 @@ export const ListPersons = ({ history, match }: { history: any; match: any }) =>
 
   return (
     <>
+      <button type="button" className="btn btn-primary" onClick={() => setShowAddPersonModal(true)}>
+        Add New Person
+      </button>
       <div className="container mt-4">
         <div className="row">
           <div className="col">
@@ -71,12 +96,14 @@ export const ListPersons = ({ history, match }: { history: any; match: any }) =>
                   <tr>
                     <th scope="col">#</th>
                     <th scope="col">Status</th>
-                    <th scope="col">Type</th>
+                    <th scope="col" className="text-center">
+                      Confirmed
+                    </th>
+                    {/* <th scope="col">Type</th> */}
                     <th scope="col">Alias</th>
                     <th scope="col" className="text-center">
                       Anonymous
                     </th>
-                    <th scope="col">Commision Share</th>
                     <th scope="col" className="text-center">
                       Wallets
                     </th>
@@ -90,12 +117,14 @@ export const ListPersons = ({ history, match }: { history: any; match: any }) =>
                       <tr key={person.id}>
                         <td>{person.id}</td>
                         <td>{Status[person.status]}</td>
-                        <td>{PersonType[person.type]}</td>
+                        <td className="text-center">
+                          {person.isConfirmed ? <i className="fas fa-certificate icon-confirmed"></i> : 'No'}
+                        </td>
+                        {/* <td>{PersonType[person.type]}</td> */}
                         <td>{person.alias}</td>
                         <td className="text-center">
                           {person.isAnonymous ? <i className="fas fa-user-secret"></i> : 'Open'}
                         </td>
-                        <td>{person.salesCommisionShare}</td>
                         <td className="text-center">
                           {person.wallets && person.wallets.length ? (
                             <Link to={`/creator/wallets/${person.id}`} className="btn btn-sm btn-light btn-block">
@@ -128,6 +157,12 @@ export const ListPersons = ({ history, match }: { history: any; match: any }) =>
           </div>
         </div>
       </div>
+      <AddPersonModal
+        show={showAddPersonModal}
+        setShow={setShowAddPersonModal}
+        onSuccess={onAddPersonSuccess}
+        onFailure={(e: any) => console.log(e)}
+      />
       <ConfirmModal
         show={showConfirmModal}
         setShow={setShowConfirmModal}

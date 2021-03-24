@@ -70,7 +70,7 @@ export const EditEditionForm = ({ history, match }: { history: any; match: any }
         const values: EditFormValues = {
           dataSourcePath: res.dataSourcePath,
           dataSourceFileName: res.dataSourceFileName,
-          accountIsCreator: res.creators.every((c: any) => c.accountId === res.accountId),
+          accountIsCreator: res.creators.every((c: any) => c.person.accountId === res.accountId),
           name: res.name,
           description: res.description,
           version: res.version,
@@ -181,7 +181,7 @@ export const EditEditionForm = ({ history, match }: { history: any; match: any }
                       {values.accountIsCreator ? (
                         <small id="accountIsCreatorHelpBlock" className="form-text text-muted">
                           If this is checked, the account holder (logged in user) is also the Sole Creator and receives
-                          the full sales commision whenever sold
+                          the full sales commission whenever sold
                         </small>
                       ) : (
                         <p className="invalid-feedback show-block">

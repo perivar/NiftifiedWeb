@@ -20,7 +20,7 @@ namespace Niftified.Models.Wallets
 		// private and protected key
 		public string PrivateKeyEncrypted { get; set; }
 		public string PrivateKeyWIFEncrypted { get; set; }
-		public string PublicAddress { get; set; } // where to send commision payments to?
+		public string PublicAddress { get; set; } // where to send commission payments to?
 		public string PublicKey { get; set; }
 		public string PublicKeyHash { get; set; }
 	}

@@ -16,8 +16,8 @@ namespace Niftified.Helpers
 
 		// edition parameters
 		public string StoredFilesPath { get; set; }
-		public double DefaultSalesCommissionToCreators { get; set; }
-		public double DefaultSalesCommissionToBlockchain { get; set; }
+		public decimal DefaultSalesCommissionToCreators { get; set; }
+		public decimal DefaultSalesCommissionToBlockchain { get; set; }
 
 	}
 }

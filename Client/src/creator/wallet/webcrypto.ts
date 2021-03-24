@@ -9,13 +9,16 @@ const enc = new TextEncoder();
 const dec = new TextDecoder();
 
 export async function encrypt(data: any) {
-  const password = window.prompt('Password') || '';
+  const password = window.prompt('Please provide a pass phrase to protect the private crypto keys') || '';
+  if (password === '') {
+    throw Error(`Provided password cannot be empty!`);
+  }
   const encryptedData = await encryptData(data, password);
   return encryptedData;
 }
 
 export async function decrypt(encryptedData: any) {
-  const password = window.prompt('Password') || '';
+  const password = window.prompt('Please provide a pass phrase to read the private crypto keys') || '';
   const decryptedData = await decryptData(encryptedData, password);
   return decryptedData;
 }

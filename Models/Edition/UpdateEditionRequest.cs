@@ -13,7 +13,15 @@ namespace Niftified.Models.Editions
 		public string HashId { get; set; } // connection to nifty chain
 		public string ExternalHashId { get; set; } // id on external block chain?
 
-		public ICollection<int> CreatorIds { get; set; } = new List<int>();
+
+		public decimal SalesCommissionToCreators { get; set; }
+
+		// note that all commissions for creators cannot exceed 100%
+		// defaults to only one creator with 100% of the sales commission defined in SalesCommissionToCreators
+		public List<int> CreatorPersonIds { get; set; } = new List<int>();
+		public List<decimal> CreatorCommissionShares { get; set; } = new List<decimal>();
+		public List<string> CreatorPersonAliases { get; set; } = new List<string>();
+
 
 		// TODO: how can we update the volumes after they are created?
 		// public List<Volume> Volumes { get; set; } // at least one needs to exist

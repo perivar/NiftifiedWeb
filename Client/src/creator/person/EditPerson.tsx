@@ -8,7 +8,8 @@ import * as Scroll from 'react-scroll';
 import { Link } from 'react-router-dom';
 import { makeWallet } from '../wallet/GenerateWallet';
 import { encrypt, decrypt } from '../wallet/webcrypto';
-import { FormValues, Status, PersonType, WalletType, statusOptions, typeOptions } from './NewPerson';
+import { FormValues } from './NewPerson';
+import { Status, WalletType, statusOptions } from '../../_common/enums';
 
 const scroll = Scroll.animateScroll;
 
@@ -30,8 +31,8 @@ export const EditPersonForm = ({ history, match }: { history: any; match: any })
           isAnonymous: res.isAnonymous,
           accountId: res.accountId,
           status: res.status,
-          type: res.type,
-          salesCommisionShare: res.salesCommisionShare,
+          // type: res.type,
+          isConfirmed: res.isConfirmed,
 
           // wallet info
           name: res.name,
@@ -56,8 +57,8 @@ export const EditPersonForm = ({ history, match }: { history: any; match: any })
     isAnonymous: person.isAnonymous,
     accountId: person.accountId,
     status: person.status,
-    type: person.type,
-    salesCommisionShare: person.salesCommisionShare,
+    // type: person.type,
+    isConfirmed: person.isConfirmed,
 
     // wallet info
     name: person.name,
@@ -118,7 +119,7 @@ export const EditPersonForm = ({ history, match }: { history: any; match: any })
                         className={`form-control${errors.alias && touched.alias ? ' is-invalid' : ''}`}
                       />
                       <small id="nameHelpBlock" className="form-text text-muted">
-                        Please choose a cool alias.
+                        Please enter a name or an alias.
                       </small>
                       <ErrorMessage name="alias" component="div" className="invalid-feedback" />
                     </div>
@@ -130,6 +131,16 @@ export const EditPersonForm = ({ history, match }: { history: any; match: any })
                           Anonymous
                         </label>
                         <ErrorMessage name="isAnonymous" component="div" className="invalid-feedback" />
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <div className="form-check">
+                        <Field className="form-check-input" type="checkbox" name="isConfirmed" />
+                        <label className="form-check-label" htmlFor="isConfirmed">
+                          Confirmed
+                        </label>
+                        <ErrorMessage name="isConfirmed" component="div" className="invalid-feedback" />
                       </div>
                     </div>
 
@@ -147,7 +158,7 @@ export const EditPersonForm = ({ history, match }: { history: any; match: any })
                       <ErrorMessage name="status" component="div" className="invalid-feedback  show-block" />
                     </div>
 
-                    <div className="form-group">
+                    {/* <div className="form-group">
                       <label htmlFor="type">Type</label>
                       <Field
                         id="type"
@@ -159,23 +170,23 @@ export const EditPersonForm = ({ history, match }: { history: any; match: any })
                         isMulti={false}
                       />
                       <ErrorMessage name="type" component="div" className="invalid-feedback  show-block" />
-                    </div>
+                    </div> */}
 
-                    <div className="form-group">
-                      <label htmlFor="theme">Sales Commision Share (out of 100)</label>
+                    {/* <div className="form-group">
+                      <label htmlFor="theme">Sales Commission Share (out of 100)</label>
                       <Field
-                        id="salesCommisionShare"
-                        name="salesCommisionShare"
+                        id="salesCommissionShare"
+                        name="salesCommissionShare"
                         type="number"
                         className={`form-control${
-                          errors.salesCommisionShare && touched.salesCommisionShare ? ' is-invalid' : ''
+                          errors.salesCommissionShare && touched.salesCommissionShare ? ' is-invalid' : ''
                         }`}
                       />
-                      <small id="salesCommisionShare" className="form-text text-muted">
+                      <small id="salesCommissionShare" className="form-text text-muted">
                         This is the share in percentage of creator. If Sole Creator, this is 100.
                       </small>
-                      <ErrorMessage name="salesCommisionShare" component="div" className="invalid-feedback" />
-                    </div>
+                      <ErrorMessage name="salesCommissionShare" component="div" className="invalid-feedback" />
+                    </div> */}
                   </div>
                 </div>
                 <div className="form-group">

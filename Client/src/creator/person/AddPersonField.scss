@@ -5,6 +5,10 @@
     display: inline;
 }
 
+.is-invalid {
+    color: #d9534f;
+}
+
 button.is-icon-button {
     background: none;
     color: inherit;
@@ -44,4 +48,8 @@ button.is-icon-button {
 
 .icon-close {
     color: #ffffff;
+}
+
+.icon-confirmed {
+    color: #5cb85c;
 }

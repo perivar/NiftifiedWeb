@@ -148,7 +148,14 @@ namespace Niftified.Services
 
 			// Load the * related to a given edition 
 			_context.Entry(edition).Collection(p => p.Tags).Load();
-			_context.Entry(edition).Collection(p => p.Creators).Load();
+
+			// load creator with person
+			_context.Entry(edition).Collection(p => p.Creators)
+			.Query()
+			.Include(c => c.Person)
+			.Load();
+
+			// and collection
 			_context.Entry(edition).Reference(p => p.Collection).Load();
 
 			return _mapper.Map<EditionResponse>(edition);
@@ -157,17 +164,18 @@ namespace Niftified.Services
 		public EditionResponse CreateEdition(CreateEditionRequest model)
 		{
 			// validate
-			if (_context.Editions.Any(x => x.Name == model.Name))
-				throw new AppException($"Name '{model.Name}' is already registered");
-
-			// map model to new edition object
-			var edition = _mapper.Map<Edition>(model);
-			edition.Created = DateTime.UtcNow;
-
 			if (model.AccountId == 0)
 			{
 				throw new AppException($"AccountId '{model.AccountId}' cannot be zero");
 			}
+			if (_context.Editions.Any(x => x.Name == model.Name && x.AccountId == model.AccountId))
+			{
+				throw new AppException($"Name '{model.Name}' has already been registered by the same account");
+			}
+
+			// map model to new edition object
+			var edition = _mapper.Map<Edition>(model);
+			edition.Created = DateTime.UtcNow;
 
 			// store file
 			if (model.File.Length > 0)
@@ -204,42 +212,24 @@ namespace Niftified.Services
 				if (tags != null) edition.Tags = tags;
 			}
 
-			// owner and creators
-			var owner = new Person();
-			owner.Created = DateTime.UtcNow;
-			var creators = new List<Person>();
-			if (model.AccountIsCreator)
+			/// OWNER
+			// make sure there is a person created for this account, since this person / account
+			// will be the initial owner 
+			var ownerPerson = _context.Persons.Where(p => p.AccountId == model.AccountId).FirstOrDefault();
+			if (ownerPerson == null)
 			{
-				// check if the person object isn't already created
-				var person = _context.Persons.Where(p => p.AccountId == model.AccountId).FirstOrDefault();
-				if (person != null)
-				{
-					// reuse existing
-					owner = person;
-				}
-				else
-				{
-					// create
-					var account = _context.Accounts.Find(model.AccountId);
-					if (account == null) throw new KeyNotFoundException("Account not found");
+				// create a new person
+				var account = _context.Accounts.Find(model.AccountId);
+				if (account == null) throw new KeyNotFoundException("Account not found");
 
-					owner.Alias = string.Format("{0} {1}", account.FirstName, account.LastName);
-					owner.Status = Status.Active;
-					owner.Type = PersonType.Owner;
-					owner.AccountId = account.Id;
-					owner.SalesCommisionShare = 100;
-				}
-
-				// creators
-				creators.Add(owner);
-			}
-			else
-			{
-				throw new NotImplementedException("Only AccountIsCreator is Supported at the moment!");
+				ownerPerson.Created = DateTime.UtcNow;
+				ownerPerson.Alias = string.Format("{0} {1}", account.FirstName, account.LastName);
+				ownerPerson.Status = Status.Active;
+				ownerPerson.Account = account;
 			}
 
 			// check that the owner has a wallet
-			if (!(owner.Wallets != null && owner.Wallets.Count > 0))
+			if (!(ownerPerson.Wallets != null && ownerPerson.Wallets.Count > 0))
 			{
 				// create wallet
 				var wallet = new Wallet();
@@ -254,10 +244,51 @@ namespace Niftified.Services
 				wallets.Add(wallet);
 
 				// and add to person
-				owner.Wallets = wallets;
+				ownerPerson.Wallets = wallets;
 			}
 
-			// add one volume up to VolumeTotal
+			// CREATORS
+			var creators = new List<Creator>();
+			if (model.AccountIsCreator)
+			{
+				var creatorPerson = ownerPerson;
+
+				// create one creator with 100% share
+				var creator = new Creator();
+				creator.Edition = edition;
+				creator.Person = creatorPerson;
+				creator.SalesCommissionShare = 100;
+				creators.Add(creator);
+			}
+			else
+			{
+				if (model.CreatorPersonIds.Any() &&
+					model.CreatorCommissionShares.Any() &&
+					model.CreatorPersonIds.Count == model.CreatorCommissionShares.Count)
+				{
+					// we don't need to check if any creators already exist, since the edition and person id is unique
+					for (int i = 0; i < model.CreatorPersonIds.Count; i++)
+					{
+						var personId = model.CreatorPersonIds[i];
+						var salesCommissionShare = model.CreatorCommissionShares[i];
+
+						var creatorPerson = _context.Persons.Find(personId);
+
+						var creator = new Creator();
+						creator.Edition = edition;
+						creator.PersonId = personId;
+						creator.SalesCommissionShare = salesCommissionShare;
+						creators.Add(creator);
+					}
+				}
+				else
+				{
+					// something is wrong
+					throw new AppException("The creators ids and the creators shares needs to exist and have the same count!");
+				}
+			}
+
+			// add volumes up to VolumeTotal
 			var volumes = new List<Volume>();
 			for (int i = 0; i < model.VolumesCount; i++)
 			{
@@ -265,7 +296,7 @@ namespace Niftified.Services
 				volume.Created = DateTime.UtcNow;
 				volume.EditionNumber = i + 1;
 
-				volume.Owner = owner;
+				volume.Owner = ownerPerson;
 				volume.Status = VolumeStatus.Pending;
 				volume.Type = VolumeType.Auction;
 				volume.CurrencyUniqueId = model.CurrencyUniqueId;
@@ -284,9 +315,9 @@ namespace Niftified.Services
 			// set account
 			edition.AccountId = model.AccountId;
 
-			// set commision
-			edition.SalesCommisionToCreators = edition.SalesCommisionToCreators > 0 ? edition.SalesCommisionToCreators : _appSettings.DefaultSalesCommissionToCreators;
-			edition.SalesCommisionToBlockchain = _appSettings.DefaultSalesCommissionToBlockchain;
+			// set commission
+			edition.SalesCommissionToCreators = edition.SalesCommissionToCreators > 0 ? edition.SalesCommissionToCreators : _appSettings.DefaultSalesCommissionToCreators;
+			edition.SalesCommissionToBlockchain = _appSettings.DefaultSalesCommissionToBlockchain;
 
 			// save edition
 			_context.Editions.Add(edition);
@@ -497,8 +528,8 @@ namespace Niftified.Services
 			if (person == null) throw new KeyNotFoundException("Person not found");
 
 			// validate
-			if (_context.Persons.Any(x => x.Alias == model.Alias))
-				throw new AppException($"Alias '{model.Alias}' is already registered");
+			// if (_context.Persons.Any(x => x.Alias == model.Alias))
+			// 	throw new AppException($"Alias '{model.Alias}' is already registered");
 
 			// copy model to edition and save
 			_mapper.Map(model, person);

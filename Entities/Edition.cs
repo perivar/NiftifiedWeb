@@ -6,23 +6,35 @@ namespace Niftified.Entities
 	public class Edition
 	{
 		public int Id { get; set; }
-		public int AccountId { get; set; } // account
+
+		// account
+		public Account Account { get; set; }
+		public int AccountId { get; set; }
 
 		public string LanguageCode { get; set; }
 		public string HashId { get; set; } // connection to nifty chain
 		public string ExternalHashId { get; set; } // id on external block chain?
 
-		public List<Person> Creators { get; set; } // note the sales commision will have to add up to 100%
-		public double SalesCommisionToCreators { get; set; }
-		public double SalesCommisionToBlockchain { get; set; }
 
+		// creator and commission section
+		public decimal SalesCommissionToBlockchain { get; set; }
+		public decimal SalesCommissionToCreators { get; set; }
+
+		// note that all commissions for creators cannot exceed 100%
+		// defaults to only one creator with 100% of the sales commission defined in SalesCommissionToCreators
+		public List<Creator> Creators { get; set; }
+
+		// dates
 		public DateTime Created { get; set; } // minted when?
-		public DateTime? ExternalCreated { get; set; } // minted in external block chain?
+		public DateTime? ExternalCreate { get; set; } // minted in external block chain?
+
 		public DateTime? Updated { get; set; }
 
-		public int VolumesCount { get; set; } // should be the same as Volumes.Count
-		public List<Volume> Volumes { get; set; } // all volumes of this one edition, could be only one
+		// volumes
+		public int VolumesCount { get; set; } // should be thesame as Volumes.Count
+		public List<Volume> Volumes { get; set; } // all volumes of this one edition, coud be only one
 
+		// meta-data
 		public string Name { get; set; }
 		public string Description { get; set; }
 		public string Version { get; set; }
@@ -36,11 +48,11 @@ namespace Niftified.Entities
 
 		public List<Tag> Tags { get; set; } // relevant tags for grouping
 
-		public string DataSourcePath { get; set; } // copy of the source when the data is stored in the blockchain
+		public string DataSourcePath { get; set; } // copy of the source when the dat
 		public string DataSourceFileType { get; set; }
 		public string DataSourceFileName { get; set; }
 		public long DataSourceFileSize { get; set; }
-		public byte[] DataSourceRawData { get; set; } // raw source data (i.e. an image or the protocol that references externally)
+		public byte[] DataSourceRawData { get; set; } // raw source data (i.e. an image or the protocol that refernces externally)
 
 		public string ExternalDataSourcePath { get; set; } // source if the data is external to the blockchain (not stored in the blockchain)
 		public string ExternalDataSourceFileType { get; set; }
@@ -48,6 +60,7 @@ namespace Niftified.Entities
 		public long ExternalDataSourceFileSize { get; set; }
 
 		// Other owners
+		// 4 editions on sale for 0.4 ETH by razzilcrypto
 		// 4 editions on sale for 0.4 ETH by razzilcrypto
 		// 3 editions in wallet. Not for sale by Janus-Faced
 		// => find out through same edition id
@@ -71,6 +84,6 @@ namespace Niftified.Entities
 		// 1.01 WETH expired by 0x9fd2f92b9...3600
 
 		// Service fee 2.5%. 0.246 ETH $430.37
+		// Service fee 2.5%. 0.246 ETH $430.37
 	}
-
 }

@@ -54,22 +54,6 @@ function Register({ history }: { history: any }) {
           <div className="card-body">
             <div className="form-row">
               <div className="form-group col">
-                <label htmlFor="languageCode">Language</label>
-                <Field
-                  id="languageCode"
-                  name="languageCode"
-                  type="text"
-                  options={languageOptions}
-                  component={CustomSelect}
-                  placeholder="Select language..."
-                  isMulti={false}
-                />
-                <ErrorMessage name="languageCode" component="div" className="invalid-feedback show-block" />
-                <small>This is the preferred language you want to use.</small>
-              </div>
-            </div>
-            <div className="form-row">
-              <div className="form-group col">
                 <label htmlFor="firstName">First Name</label>
                 <Field
                   id="firstName"
@@ -100,6 +84,7 @@ function Register({ history }: { history: any }) {
               />
               <ErrorMessage name="email" component="div" className="invalid-feedback" />
             </div>
+
             <div className="form-row">
               <div className="form-group col">
                 <label htmlFor="password">Password</label>
@@ -122,6 +107,24 @@ function Register({ history }: { history: any }) {
                 <ErrorMessage name="confirmPassword" component="div" className="invalid-feedback" />
               </div>
             </div>
+
+            <div className="form-row">
+              <div className="form-group col">
+                <label htmlFor="languageCode">Language</label>
+                <Field
+                  id="languageCode"
+                  name="languageCode"
+                  type="text"
+                  options={languageOptions}
+                  component={CustomSelect}
+                  placeholder="Select language..."
+                  isMulti={false}
+                />
+                <ErrorMessage name="languageCode" component="div" className="invalid-feedback show-block" />
+                <small>Choose the preferred language you want to use</small>
+              </div>
+            </div>
+
             <div className="form-group form-check">
               <Field
                 type="checkbox"
