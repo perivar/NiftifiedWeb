@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { FieldProps } from 'formik';
-import { accountService, niftyService } from '../../_services';
+import { niftyService } from '../../_services';
 import { AddPersonModal } from './AddPersonModal';
 import { Status, creatorTypeOptions, CreatorType } from '../../_common/enums';
 import Select from 'react-select';
 
-import './AddPersonField.scss';
+import './AddCreatorsField.scss';
 
 interface Creator {
   personId: number;
@@ -26,12 +26,12 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
   const [personOptions, setPersonOptions] = useState<any>([]); // the full list of persons
   const [filteredPersons, setFilteredPersons] = useState<any>([]); // the filtered list when searching
   const [creators, setCreators] = useState<Creator[]>([]); // the final list of persons
+  const [creatorsCommissionSum, setCreatorsCommissionSum] = useState<number>(0);
   const [searchValue, setSearchValue] = useState<string>();
   const [showAddPersonModal, setShowAddPersonModal] = useState<boolean>(false);
 
   // formik values
   // const hasError = form.touched[field.name] && form.errors[field.name];
-  const comissionSum = creators.reduce((prev: any, p: Creator) => prev + p.salesCommissionShare, 0);
 
   // load all person options async
   const fetchPersons = () => {
@@ -92,6 +92,10 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
     });
   };
 
+  const calculateCommissionSum = (creators: Creator[]) => {
+    return creators.reduce((prev: any, p: Creator) => prev + p.salesCommissionShare, 0);
+  };
+
   const updateCreator = (personId: number, itemAttributes: any) => {
     const index = creators.findIndex((c: Creator) => c.personId === personId);
     if (index === -1) {
@@ -104,11 +108,16 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
         ...creators.slice(index + 1)
       ];
 
+      // and calculate total commission sum
+      const commissionSum = calculateCommissionSum(newCreators);
+
       // set values
       setCreators(newCreators);
+      setCreatorsCommissionSum(commissionSum);
 
-      // and set formik field
+      // and set formik fields
       form.setFieldValue(field.name, newCreators);
+      form.setFieldValue(`${field.name}CommissionSum`, commissionSum);
     }
   };
 
@@ -121,7 +130,7 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
         editionId: 0,
         alias: person.alias,
         type: CreatorType.Creator,
-        salesCommissionShare: 0
+        salesCommissionShare: 100
       };
       setCreators([...creators, creator]);
     }
@@ -295,10 +304,13 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
                 {!isLoading && creators && (
                   <tr>
                     <td colSpan={3} className="text-right">
-                      Total commison (should be 100)
+                      Total commission (should be 100)
                     </td>
-                    <td className={`text-center ${comissionSum < 100 || comissionSum > 100 ? 'is-invalid' : ''}`}>
-                      <strong>{comissionSum}</strong>
+                    <td
+                      className={`text-center ${
+                        creatorsCommissionSum < 100 || creatorsCommissionSum > 100 ? 'is-invalid' : ''
+                      }`}>
+                      <strong>{creatorsCommissionSum}</strong>
                     </td>
                     <td></td>
                   </tr>

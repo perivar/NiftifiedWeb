@@ -215,7 +215,7 @@ namespace Niftified.Services
 			/// OWNER
 			// make sure there is a person created for this account, since this person / account
 			// will be the initial owner 
-			var ownerPerson = _context.Persons.Where(p => p.AccountId == model.AccountId).FirstOrDefault();
+			var ownerPerson = _context.Persons.Where(p => p.AccountId == model.AccountId).Include(p => p.Wallets).FirstOrDefault();
 			if (ownerPerson == null)
 			{
 				// create a new person
@@ -231,6 +231,8 @@ namespace Niftified.Services
 			// check that the owner has a wallet
 			if (!(ownerPerson.Wallets != null && ownerPerson.Wallets.Count > 0))
 			{
+				// TODO: we don't support this yet?!
+
 				// create wallet
 				var wallet = new Wallet();
 				wallet.Created = DateTime.UtcNow;
