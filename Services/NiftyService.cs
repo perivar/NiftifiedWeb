@@ -103,10 +103,21 @@ namespace Niftified.Services
 
 		public IEnumerable<EditionResponse> GetEditionsByAccountId(int accountId)
 		{
-			var editions = _context.Editions.Where(entity => entity.AccountId == accountId)
-			// .Include(a => a.Volumes)
-			;
-			return _mapper.Map<IList<EditionResponse>>(editions);
+			var editionsByAccountId = _context.Editions.Where(entity => entity.AccountId == accountId);
+
+			// return with volume count instead of the actual volumes
+			var editionsVolumeCount = editionsByAccountId.Select(e => new { Edition = e, VolumeCount = e.Volumes.Count() }).ToList();
+
+			var editionsRes = new List<EditionResponse>();
+			foreach (var editionGroup in editionsVolumeCount)
+			{
+				// map model to new edition object
+				var editionRes = _mapper.Map<EditionResponse>(editionGroup.Edition);
+				editionRes.VolumeCount = editionGroup.VolumeCount;
+				editionsRes.Add(editionRes);
+			}
+
+			return editionsRes;
 		}
 
 		public IEnumerable<EditionResponse> GetEditionsByQuery(string query)
@@ -143,8 +154,10 @@ namespace Niftified.Services
 			var edition = _context.Editions.Find(id);
 			if (edition == null) throw new KeyNotFoundException("Edition not found");
 
-			// Load the volumes related to a given edition 
+			// Don't load the volumes related to a given edition 
 			// _context.Entry(edition).Collection(p => p.Volumes).Load();
+			// but load the count
+			var volumeCount = _context.Entry(edition).Collection(p => p.Volumes).Query().Count();
 
 			// Load the * related to a given edition 
 			_context.Entry(edition).Collection(p => p.Tags).Load();
@@ -158,7 +171,10 @@ namespace Niftified.Services
 			// and collection
 			_context.Entry(edition).Reference(p => p.Collection).Load();
 
-			return _mapper.Map<EditionResponse>(edition);
+			var response = _mapper.Map<EditionResponse>(edition);
+			response.VolumeCount = volumeCount;
+
+			return response;
 		}
 
 		public EditionResponse CreateEdition(CreateEditionRequest model)
@@ -216,83 +232,40 @@ namespace Niftified.Services
 			// make sure there is a person created for this account, since this person / account
 			// will be the initial owner 
 			var ownerPerson = _context.Persons.Where(p => p.AccountId == model.AccountId).Include(p => p.Wallets).FirstOrDefault();
-			if (ownerPerson == null)
-			{
-				// create a new person
-				var account = _context.Accounts.Find(model.AccountId);
-				if (account == null) throw new KeyNotFoundException("Account not found");
 
-				ownerPerson.Created = DateTime.UtcNow;
-				ownerPerson.Alias = string.Format("{0} {1}", account.FirstName, account.LastName);
-				ownerPerson.Status = Status.Active;
-				ownerPerson.Account = account;
-			}
-
-			// check that the owner has a wallet
-			if (!(ownerPerson.Wallets != null && ownerPerson.Wallets.Count > 0))
-			{
-				// TODO: we don't support this yet?!
-
-				// create wallet
-				var wallet = new Wallet();
-				wallet.Created = DateTime.UtcNow;
-				wallet.PrivateKeyEncrypted = model.PrivateKeyEncrypted;
-				wallet.PrivateKeyWIFEncrypted = model.PrivateKeyWIFEncrypted;
-				wallet.PublicAddress = model.PublicAddress;
-				wallet.PublicKey = model.PublicKey;
-				wallet.PublicKeyHash = model.PublicKeyHash;
-
-				var wallets = new List<Wallet>();
-				wallets.Add(wallet);
-
-				// and add to person
-				ownerPerson.Wallets = wallets;
-			}
 
 			// CREATORS
 			var creators = new List<Creator>();
-			if (model.AccountIsCreator)
+			if (model.CreatorPersonIds.Any() &&
+				model.CreatorCommissionShares.Any() &&
+				model.CreatorPersonIds.Count == model.CreatorCommissionShares.Count)
 			{
-				var creatorPerson = ownerPerson;
+				// we don't need to check if any creators already exist, since the edition and person id is unique
+				for (int i = 0; i < model.CreatorPersonIds.Count; i++)
+				{
+					var personId = model.CreatorPersonIds[i];
+					var salesCommissionShare = model.CreatorCommissionShares[i];
+					var creatorType = model.CreatorPersonTypes[i];
 
-				// create one creator with 100% share
-				var creator = new Creator();
-				creator.Edition = edition;
-				creator.Person = creatorPerson;
-				creator.SalesCommissionShare = 100;
-				creators.Add(creator);
+					var creatorPerson = _context.Persons.Find(personId);
+
+					var creator = new Creator();
+					creator.Edition = edition;
+					creator.PersonId = personId;
+					creator.SalesCommissionShare = salesCommissionShare;
+					creator.Type = (CreatorType)creatorType;
+					creators.Add(creator);
+				}
 			}
 			else
 			{
-				if (model.CreatorPersonIds.Any() &&
-					model.CreatorCommissionShares.Any() &&
-					model.CreatorPersonIds.Count == model.CreatorCommissionShares.Count)
-				{
-					// we don't need to check if any creators already exist, since the edition and person id is unique
-					for (int i = 0; i < model.CreatorPersonIds.Count; i++)
-					{
-						var personId = model.CreatorPersonIds[i];
-						var salesCommissionShare = model.CreatorCommissionShares[i];
-
-						var creatorPerson = _context.Persons.Find(personId);
-
-						var creator = new Creator();
-						creator.Edition = edition;
-						creator.PersonId = personId;
-						creator.SalesCommissionShare = salesCommissionShare;
-						creators.Add(creator);
-					}
-				}
-				else
-				{
-					// something is wrong
-					throw new AppException("The creators ids and the creators shares needs to exist and have the same count!");
-				}
+				// something is wrong
+				throw new AppException("The creators ids and the creators shares needs to exist and have the same count!");
 			}
 
 			// add volumes up to VolumeTotal
 			var volumes = new List<Volume>();
-			for (int i = 0; i < model.VolumesCount; i++)
+			for (int i = 0; i < model.VolumeCount; i++)
 			{
 				var volume = new Volume();
 				volume.Created = DateTime.UtcNow;
@@ -354,6 +327,37 @@ namespace Niftified.Services
 				var tags = _context.Tags.Where(r => model.TagIds.Contains(r.Id)).ToList();
 				if (tags != null) edition.Tags = tags;
 			}
+
+			var creators = new List<Creator>();
+			if (model.CreatorPersonIds.Any() &&
+				model.CreatorCommissionShares.Any() &&
+				model.CreatorPersonIds.Count == model.CreatorCommissionShares.Count)
+			{
+				// we don't need to check if any creators already exist, since the edition and person id is unique
+				for (int i = 0; i < model.CreatorPersonIds.Count; i++)
+				{
+					var personId = model.CreatorPersonIds[i];
+					var salesCommissionShare = model.CreatorCommissionShares[i];
+					var creatorType = model.CreatorPersonTypes[i];
+
+					var creatorPerson = _context.Persons.Find(personId);
+
+					var creator = new Creator();
+					creator.Edition = edition;
+					creator.PersonId = personId;
+					creator.SalesCommissionShare = salesCommissionShare;
+					creator.Type = (CreatorType)creatorType;
+					creators.Add(creator);
+				}
+
+				if (creators.Count > 0) edition.Creators = creators;
+			}
+			else
+			{
+				// something is wrong
+				throw new AppException("The creators ids and the creators shares needs to exist and have the same count!");
+			}
+
 
 			_context.Editions.Update(edition);
 			_context.SaveChanges();

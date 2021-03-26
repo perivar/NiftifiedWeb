@@ -86,7 +86,7 @@ export const ListEditions = ({ match }: { match: any }) => {
                   <th scope="col">Description</th>
                   <th scope="col">Version</th>
                   <th scope="col" className="text-center">
-                    Show / Mint Volumes
+                    Show Volumes
                   </th>
                   <th scope="col" className="text-center">
                     Publish / Edit / Delete
@@ -112,7 +112,7 @@ export const ListEditions = ({ match }: { match: any }) => {
                       {/* <td>{edition.volumes.length}</td> */}
                       <td>
                         <Link to={`${path}/volumes/${edition.id}`} className="btn btn-sm btn-light btn-block">
-                          {edition.volumesCount}
+                          View the {edition.volumeCount} volumes
                         </Link>
                       </td>
                       <td className="text-center">

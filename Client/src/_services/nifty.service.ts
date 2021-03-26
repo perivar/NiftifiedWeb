@@ -105,7 +105,8 @@ function createEdition(params: any) {
     collectionId: params.collection ? params.collection.value : '',
     creatorPersonIds: params.creators.map((a: any) => a.personId),
     creatorCommissionShares: params.creators.map((a: any) => a.salesCommissionShare),
-    creatorPersonAliases: params.creators.map((a: any) => a.alias)
+    creatorPersonAliases: params.creators.map((a: any) => a.alias),
+    creatorPersonTypes: params.creators.map((a: any) => a.type)
   };
 
   // delete params that should not be included in the post
@@ -127,12 +128,17 @@ function updateEdition(id: string, params: any) {
     languageCode: user && user.languageCode ? user.languageCode : 'no-NO',
     currencyUniqueId: params.currencyUniqueId ? params.currencyUniqueId : 'NFY',
     tagIds: params.tags.map((a: any) => a.value),
-    collectionId: params.collection ? params.collection.value : ''
+    collectionId: params.collection ? params.collection.value : '',
+    creatorPersonIds: params.creators.map((a: any) => a.personId),
+    creatorCommissionShares: params.creators.map((a: any) => a.salesCommissionShare),
+    creatorPersonAliases: params.creators.map((a: any) => a.alias),
+    creatorPersonTypes: params.creators.map((a: any) => a.type)
   };
 
   // delete params that should not be included in the post
   delete params['tags'];
   delete params['collection'];
+  delete params['creators'];
 
   // merge params
   const allParams = { ...params, ...body };

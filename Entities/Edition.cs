@@ -31,7 +31,6 @@ namespace Niftified.Entities
 		public DateTime? Updated { get; set; }
 
 		// volumes
-		public int VolumesCount { get; set; } // should be thesame as Volumes.Count
 		public List<Volume> Volumes { get; set; } // all volumes of this one edition, coud be only one
 
 		// meta-data

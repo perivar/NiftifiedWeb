@@ -14,7 +14,7 @@ namespace Niftified.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.8");
+                .HasAnnotation("ProductVersion", "3.1.13");
 
             modelBuilder.Entity("Niftified.Entities.Account", b =>
                 {
@@ -248,9 +248,6 @@ namespace Niftified.Migrations
 
                     b.Property<string>("Version")
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("VolumesCount")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 

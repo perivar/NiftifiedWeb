@@ -7,7 +7,7 @@ import Select from 'react-select';
 
 import './AddCreatorsField.scss';
 
-interface Creator {
+export interface Creator {
   personId: number;
   editionId: number;
   alias: string;
@@ -51,6 +51,25 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
 
   useEffect(() => {
     fetchPersons();
+
+    if (field.value) {
+      const newCreators = field.value;
+
+      // add the alias to the main object
+      newCreators.forEach((cre: any) => {
+        cre.alias = cre.person.alias;
+      });
+
+      const commissionSum = calculateCommissionSum(newCreators);
+
+      // set values
+      setCreators(newCreators);
+      setCreatorsCommissionSum(commissionSum);
+
+      // and set formik fields
+      form.setFieldValue(field.name, newCreators);
+      form.setFieldValue(`${field.name}CommissionSum`, commissionSum);
+    }
   }, []);
 
   const getMatchedPersonsList = (searchText: string | undefined) => {
@@ -132,7 +151,17 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
         type: CreatorType.Creator,
         salesCommissionShare: 100
       };
-      setCreators([...creators, creator]);
+
+      const newCreators = [...creators, creator];
+      const commissionSum = calculateCommissionSum(newCreators);
+
+      // set values
+      setCreators(newCreators);
+      setCreatorsCommissionSum(commissionSum);
+
+      // and set formik fields
+      form.setFieldValue(field.name, newCreators);
+      form.setFieldValue(`${field.name}CommissionSum`, commissionSum);
     }
   };
 
@@ -164,9 +193,20 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
             editionId: 0,
             alias: person.alias,
             type: CreatorType.Creator,
-            salesCommissionShare: 0
+            salesCommissionShare: 100
           };
-          setCreators([...creators, creator]);
+
+          const newCreators = [...creators, creator];
+
+          const commissionSum = calculateCommissionSum(newCreators);
+
+          // set values
+          setCreators(newCreators);
+          setCreatorsCommissionSum(commissionSum);
+
+          // and set formik fields
+          form.setFieldValue(field.name, newCreators);
+          form.setFieldValue(`${field.name}CommissionSum`, commissionSum);
         }
       })
       .catch((error) => {

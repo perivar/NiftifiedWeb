@@ -7,7 +7,7 @@ namespace Niftified.Models.Persons
 	public class UpdatePersonRequest
 	{
 		private string _status;
-		private string _type;
+
 
 		// section for information used for the blockchain 
 		public string PrivateKeyEncrypted { get; set; }

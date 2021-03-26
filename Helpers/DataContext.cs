@@ -3,6 +3,8 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using Niftified.Entities;
 using Pomelo.EntityFrameworkCore.MySql.Storage;
 
@@ -23,6 +25,9 @@ namespace Niftified.Helpers
 		public DbSet<AddressTx> AddressTxs { get; set; }
 		public DbSet<Wallet> Wallets { get; set; }
 
+		public static readonly ILoggerFactory _loggerFactory
+			= LoggerFactory.Create(builder => { builder.AddConsole(); });
+
 		private readonly IConfiguration Configuration;
 
 		public DataContext(IConfiguration configuration)
@@ -30,13 +35,20 @@ namespace Niftified.Helpers
 			Configuration = configuration;
 		}
 
-		protected override void OnConfiguring(DbContextOptionsBuilder options)
+		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
+			// logger
+			// TODO: remove this from production
+			optionsBuilder.UseLoggerFactory(_loggerFactory);
+			optionsBuilder.EnableSensitiveDataLogging();
+
 			// connect to sqlite database
-			options.UseSqlite(Configuration.GetConnectionString("NiftifiedDatabase"));
+			optionsBuilder.UseSqlite(Configuration.GetConnectionString("NiftifiedDatabase"));
 
 			// or to mysql database
-			// options.UseMySQL(Configuration.GetConnectionString("DefaultConnection"));
+			// optionsBuilder.UseMySQL(Configuration.GetConnectionString("DefaultConnection"));
+
+			base.OnConfiguring(optionsBuilder);
 		}
 
 		#region Custom Value Converter for Int Array Support 

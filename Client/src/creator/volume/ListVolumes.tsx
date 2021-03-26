@@ -50,7 +50,7 @@ export const ListVolumes = ({ match }: { match: any }) => {
                 <tr>
                   <th scope="col">#</th>
                   <th scope="col">Status</th>
-                  <th scope="col">Amount</th>
+                  <th scope="col">Start Price</th>
                   <th scope="col">Currency</th>
                   <th scope="col">Type</th>
                   <th scope="col">Current Owner</th>

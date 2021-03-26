@@ -10,6 +10,8 @@ using Niftified.Middleware;
 using Niftified.Services;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore;
 using Stripe;
 using System.Linq;
 
@@ -101,7 +103,21 @@ namespace WebApi
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DataContext context)
 		{
 			// migrate database changes on startup (includes initial db creation)
+			// You would either call EnsureCreated() or Migrate(). 
+			// EnsureCreated() is an alternative that completely skips the migrations pipeline and just creates a database that matches you current model. 
+			// It's good for unit testing or very early prototyping, when you are happy just to delete and re-create the database when the model changes.
+			// db.Database.EnsureDeleted();
+			// db.Database.EnsureCreated();
+
+			// Note! Therefore don't use EnsureDeleted() and EnsureCreated() but Migrate();
 			context.Database.Migrate();
+
+			if (env.IsDevelopment())
+			{
+				app.UseRequestResponseLogging();
+				app.UseDeveloperExceptionPage();
+				app.UseDatabaseErrorPage();
+			}
 
 			// generated swagger json and swagger ui middleware
 			app.UseSwagger();

@@ -24,7 +24,7 @@ namespace Niftified.Models.Editions
 		// note the sales commission will have to add up to 100%
 		public ICollection<Creator> Creators { get; set; } = new List<Creator>();
 
-		public int VolumesCount { get; set; }  // number of volumes, should be the same as Volumes.Count		
+		public int VolumeCount { get; set; }  // number of volumes, should be the same as Volumes.Count		
 		public List<Volume> Volumes { get; set; } // at least one needs to exist
 
 		public string Name { get; set; }

@@ -9,14 +9,14 @@ using Niftified.Helpers;
 namespace Niftified.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20210323200139_InitialDatabase")]
+    [Migration("20210326111140_InitialDatabase")]
     partial class InitialDatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.8");
+                .HasAnnotation("ProductVersion", "3.1.13");
 
             modelBuilder.Entity("Niftified.Entities.Account", b =>
                 {
@@ -250,9 +250,6 @@ namespace Niftified.Migrations
 
                     b.Property<string>("Version")
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("VolumesCount")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 

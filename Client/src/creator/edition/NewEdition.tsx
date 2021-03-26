@@ -8,6 +8,7 @@ import UploadImageComponent from '../../_common/UploadComponent';
 import * as Scroll from 'react-scroll';
 // import { Link } from 'react-router-dom';
 import { AddCreatorsField } from '../person/AddCreatorsField';
+import { AddOwnerField } from '../person/AddOwnerField';
 
 const scroll = Scroll.animateScroll;
 
@@ -21,13 +22,15 @@ interface FormValues {
   boxName: string;
   theme: string;
   collection: string;
-  volumesCount: number;
+  volumeCount: number;
   tags: string[];
   amount: number; // Initial amount for auctions or the selling price for fixed price sales
   currencyUniqueId: string;
 
   creators: any; // added here as an object array, and modified in nifty-service.ts before being sent
   creatorsCommissionSum: number;
+
+  owner: any; // owner does not exist on edition after creation, only volumes
 }
 
 // mapper function
@@ -41,15 +44,13 @@ const validationSchema = Yup.object().shape({
   tags: Yup.array().min(1, 'At least one tag is required'),
   name: Yup.string().required('Name is required'),
   description: Yup.string().required('Description is required'),
-  volumesCount: Yup.number()
-    .integer()
-    .min(1, 'At least one volume is required')
-    .max(1000, 'Cannot exceed 1000 volumes'),
+  volumeCount: Yup.number().integer().min(1, 'At least one volume is required').max(1000, 'Cannot exceed 1000 volumes'),
   creators: Yup.array().min(1, 'At least one creator is required'),
   creatorsCommissionSum: Yup.number()
     .integer()
     .min(100, 'Commission must be a total of 100')
-    .max(100, 'Commission must be a total of 100')
+    .max(100, 'Commission must be a total of 100'),
+  owner: Yup.mixed().required('An owner is required')
 });
 
 // check https://medium.com/fotontech/forms-with-formik-typescript-d8154cc24f8a
@@ -87,23 +88,31 @@ const InnerForm = (props: any & FormikProps<FormValues>) => {
           <div className="form-group">
             <label htmlFor="theme">Number of volumes (versions)</label>
             <Field
-              id="volumesCount"
-              name="volumesCount"
+              id="volumeCount"
+              name="volumeCount"
               type="number"
-              className={`form-control${errors.volumesCount && touched.volumesCount ? ' is-invalid' : ''}`}
+              className={`form-control${errors.volumeCount && touched.volumeCount ? ' is-invalid' : ''}`}
             />
-            <small id="volumesCountHelpBlock" className="form-text text-muted">
+            <small id="volumeCountHelpBlock" className="form-text text-muted">
               This is the total number of volumes to be produced for this edition
             </small>
-            <ErrorMessage name="volumesCount" component="div" className="invalid-feedback" />
+            <ErrorMessage name="volumeCount" component="div" className="invalid-feedback" />
+          </div>
+
+          <div className="form-group">
+            <div className="form-group">
+              <label htmlFor="creators">Owner</label>
+              <Field name="owner" className="form-control rounded-0" component={AddOwnerField} />
+              <ErrorMessage name="owner" component="div" className="invalid-feedback show-block" />
+            </div>
           </div>
 
           <div className="form-group">
             <div className="form-group">
               <label htmlFor="creators">Creators</label>
               <Field name="creators" className="form-control rounded-0" component={AddCreatorsField} />
-              <ErrorMessage name="creators" component="div" className="invalid-feedback  show-block" />
-              <ErrorMessage name="creatorsCommissionSum" component="div" className="invalid-feedback  show-block" />
+              <ErrorMessage name="creators" component="div" className="invalid-feedback show-block" />
+              <ErrorMessage name="creatorsCommissionSum" component="div" className="invalid-feedback show-block" />
             </div>
           </div>
 
@@ -118,7 +127,7 @@ const InnerForm = (props: any & FormikProps<FormValues>) => {
               createOption={niftyService.createTag}
               readOptions={niftyService.getTags}
             />
-            <ErrorMessage name="tags" component="div" className="invalid-feedback  show-block" />
+            <ErrorMessage name="tags" component="div" className="invalid-feedback show-block" />
           </div>
 
           <div className="form-group">
@@ -235,13 +244,15 @@ const initialValues: FormValues = {
   boxName: '',
   theme: '',
   collection: '',
-  volumesCount: 1,
+  volumeCount: 1,
   tags: [],
   amount: 1,
   currencyUniqueId: 'NFY',
 
   creators: [],
-  creatorsCommissionSum: 0
+  creatorsCommissionSum: 0,
+
+  owner: null // owner does not exist on edition after creation, only volumes
 };
 
 const enhanceWithFormik = withFormik<any, FormValues>({

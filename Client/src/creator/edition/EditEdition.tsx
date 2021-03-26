@@ -5,13 +5,14 @@ import { niftyService, alertService } from '../../_services';
 import CustomCreatableSelect from '../../_common/select/CustomCreatableSelect';
 import FocusError from '../../_common/FocusError';
 import * as Scroll from 'react-scroll';
+import { Creator, AddCreatorsField } from '../person/AddCreatorsField';
+import { Link } from 'react-router-dom';
 
 const scroll = Scroll.animateScroll;
 
 export interface EditFormValues {
   dataSourcePath: string;
   dataSourceFileName: string;
-  accountIsCreator: boolean;
   name: string;
   description: string;
   version: string;
@@ -20,12 +21,14 @@ export interface EditFormValues {
   boxName: string;
   theme: string;
   collection: string;
-  volumesCount: number;
+  volumeCount: number;
   tags: string[];
+  creators: Creator[];
+  // owner does not create on edition after creation
 }
 
 export const EditEditionForm = ({ history, match }: { history: any; match: any }) => {
-  // const { path } = match;
+  const { path } = match;
   const { id } = match.params;
 
   const [isLoading, setLoading] = useState<boolean>(false);
@@ -35,10 +38,15 @@ export const EditEditionForm = ({ history, match }: { history: any; match: any }
     tags: Yup.array().min(1, 'At least one tag is required'),
     name: Yup.string().required('Name is required'),
     description: Yup.string().required('Description is required'),
-    volumesCount: Yup.number()
+    volumeCount: Yup.number()
       .integer()
       .min(1, 'At least one volume is required')
-      .max(1000, 'Cannot exceed 1000 volumes')
+      .max(1000, 'Cannot exceed 1000 volumes'),
+    creators: Yup.array().min(1, 'At least one creator is required'),
+    creatorsCommissionSum: Yup.number()
+      .integer()
+      .min(100, 'Commission must be a total of 100')
+      .max(100, 'Commission must be a total of 100')
   });
 
   const onSubmit = (values: EditFormValues, formikHelpers: FormikHelpers<EditFormValues>) => {
@@ -70,7 +78,6 @@ export const EditEditionForm = ({ history, match }: { history: any; match: any }
         const values: EditFormValues = {
           dataSourcePath: res.dataSourcePath,
           dataSourceFileName: res.dataSourceFileName,
-          accountIsCreator: res.creators.every((c: any) => c.person.accountId === res.accountId),
           name: res.name,
           description: res.description,
           version: res.version,
@@ -79,11 +86,12 @@ export const EditEditionForm = ({ history, match }: { history: any; match: any }
           boxName: res.boxName,
           theme: res.theme,
           collection: optionsMapper(res.collection),
-          volumesCount: res.volumesCount,
+          volumeCount: res.volumeCount,
           tags: res.tags.map((obj: any) => {
             const newOption = optionsMapper(obj);
             return newOption;
-          })
+          }),
+          creators: res.creators
         };
         setEdition(values);
         setLoading(false);
@@ -97,7 +105,6 @@ export const EditEditionForm = ({ history, match }: { history: any; match: any }
   const initialValues: EditFormValues = {
     dataSourcePath: edition.dataSourcePath,
     dataSourceFileName: edition.dataSourceFileName,
-    accountIsCreator: edition.accountIsCreator,
     name: edition.name,
     description: edition.description,
     version: edition.version,
@@ -106,8 +113,10 @@ export const EditEditionForm = ({ history, match }: { history: any; match: any }
     boxName: edition.boxName,
     theme: edition.theme,
     collection: edition.collection,
-    volumesCount: edition.volumesCount,
-    tags: edition.tags
+    volumeCount: edition.volumeCount,
+    tags: edition.tags,
+    creators: edition.creators
+    // owner does not exist on edition after creation
   };
 
   // mapper function
@@ -127,7 +136,7 @@ export const EditEditionForm = ({ history, match }: { history: any; match: any }
       ) : (
         <div className="container-fluid">
           <Formik initialValues={initialValues} onSubmit={onSubmit} validationSchema={validationSchema}>
-            {({ setFieldValue, values, errors, touched, isSubmitting }) => (
+            {({ errors, touched, isSubmitting }) => (
               <Form noValidate>
                 <div className="form-row">
                   <div className="col-4">
@@ -156,38 +165,38 @@ export const EditEditionForm = ({ history, match }: { history: any; match: any }
 
                     <div className="form-group">
                       <label htmlFor="theme">Number of volumes (versions)</label>
-                      <input className="form-control" type="text" placeholder={edition.volumesCount} readOnly />
-                      <small id="volumesCountHelpBlock" className="form-text text-muted">
+                      <input className="form-control" type="text" placeholder={edition.volumeCount} readOnly />
+                      <small id="volumeCountHelpBlock" className="form-text text-muted">
                         You cannot modify the volumes after creation. If none are minted, you can delete the edition and
                         recreate it.
                       </small>
-                      <ErrorMessage name="volumesCount" component="div" className="invalid-feedback" />
+                      <ErrorMessage name="volumeCount" component="div" className="invalid-feedback" />
                     </div>
 
                     <div className="form-group">
-                      <Field
-                        type="checkbox"
-                        name="accountIsCreator"
-                        id="accountIsCreator"
-                        className={`form-check-input ${
-                          errors.accountIsCreator && touched.accountIsCreator ? ' is-invalid' : ''
-                        }`}
-                        onChange={() => setFieldValue('accountIsCreator', !values.accountIsCreator)}
-                      />
-                      <label htmlFor="accountIsCreator" className="form-check-label">
-                        Account holder is Sole Creator
-                      </label>
-                      <ErrorMessage name="accountIsCreator" component="div" className="invalid-feedback" />
-                      {values.accountIsCreator ? (
-                        <small id="accountIsCreatorHelpBlock" className="form-text text-muted">
-                          If this is checked, the account holder (logged in user) is also the Sole Creator and receives
-                          the full sales commission whenever sold
+                      <div className="form-group">
+                        <label htmlFor="creators">Owner</label>
+                        <Link to={`/creator/volumes/${id}`} className="btn btn-sm btn-light btn-block">
+                          View who owns the {edition.volumeCount} volumes
+                        </Link>
+                        <small id="ownerHelpBlock" className="form-text text-muted">
+                          You cannot modify the owner after creation. If none are minted, you can delete the edition and
+                          rest the owner.
                         </small>
-                      ) : (
-                        <p className="invalid-feedback show-block">
-                          Currently only Account holder as Sole Creator is Supported
-                        </p>
-                      )}
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <div className="form-group">
+                        <label htmlFor="creators">Creators</label>
+                        <Field name="creators" className="form-control rounded-0" component={AddCreatorsField} />
+                        <ErrorMessage name="creators" component="div" className="invalid-feedback show-block" />
+                        <ErrorMessage
+                          name="creatorsCommissionSum"
+                          component="div"
+                          className="invalid-feedback show-block"
+                        />
+                      </div>
                     </div>
 
                     <div className="form-group">

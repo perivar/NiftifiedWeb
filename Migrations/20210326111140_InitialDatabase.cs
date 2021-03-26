@@ -183,7 +183,6 @@ namespace Niftified.Migrations
                     Created = table.Column<DateTime>(nullable: false),
                     ExternalCreate = table.Column<DateTime>(nullable: true),
                     Updated = table.Column<DateTime>(nullable: true),
-                    VolumesCount = table.Column<int>(nullable: false),
                     Name = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
                     Version = table.Column<string>(nullable: true),

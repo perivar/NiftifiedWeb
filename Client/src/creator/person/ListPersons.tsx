@@ -5,10 +5,10 @@ import { Status } from '../../_common/enums';
 import ConfirmModal from '../../_common/ConfirmModal';
 import { AddPersonModal } from './AddPersonModal';
 
-import './AddPersonField.scss';
+import './AddCreatorsField.scss';
 
-export const ListPersons = ({ history, match }: { history: any; match: any }) => {
-  const { path } = match;
+export const ListPersons = ({ history }: { history: any; match: any }) => {
+  // const { path } = match;
   const user = accountService.userValue;
 
   const [isLoading, setLoading] = useState<boolean>(false);

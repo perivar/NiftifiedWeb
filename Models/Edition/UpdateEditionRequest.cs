@@ -16,16 +16,10 @@ namespace Niftified.Models.Editions
 
 		public decimal SalesCommissionToCreators { get; set; }
 
-		// note that all commissions for creators cannot exceed 100%
-		// defaults to only one creator with 100% of the sales commission defined in SalesCommissionToCreators
-		public List<int> CreatorPersonIds { get; set; } = new List<int>();
-		public List<decimal> CreatorCommissionShares { get; set; } = new List<decimal>();
-		public List<string> CreatorPersonAliases { get; set; } = new List<string>();
-
 
 		// TODO: how can we update the volumes after they are created?
 		// public List<Volume> Volumes { get; set; } // at least one needs to exist
-		public int VolumesCount { get; set; }  // number of volumes, should be the same as Volumes.Count		
+		// public int VolumeCount { get; set; }  // number of volumes, should be the same as Volumes.Count		
 
 		public string Name { get; set; }
 		public string Description { get; set; }
@@ -41,6 +35,19 @@ namespace Niftified.Models.Editions
 
 		public ICollection<int> TagIds { get; set; } = new List<int>(); // relevant tags for grouping
 
+
+		#region Elements not included in the final edition, but to create the intitial volumes, owners, etc.
+		// used to create file reference
 		public IFormFile File { get; set; }
+
+		// used to set creators
+		// note that all commissions for creators cannot exceed 100%
+		// defaults to only one creator with 100% of the sales commission defined in SalesCommissionToCreators
+		public List<int> CreatorPersonIds { get; set; } = new List<int>();
+		public List<decimal> CreatorCommissionShares { get; set; } = new List<decimal>();
+		public List<string> CreatorPersonAliases { get; set; } = new List<string>();
+		public List<int> CreatorPersonTypes { get; set; } = new List<int>();
+
+		#endregion
 	}
 }

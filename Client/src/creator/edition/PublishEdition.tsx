@@ -32,7 +32,7 @@ export const PublishEdition = ({ match }: { match: any }) => {
         const product: Product = {
           name: res.name,
           dataSourceFileName: res.dataSourceFileName,
-          quantity: res.volumesCount,
+          quantity: res.volumeCount,
           unitPrice: 0.5
         };
         const products = [product];
