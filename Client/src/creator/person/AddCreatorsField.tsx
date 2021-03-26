@@ -30,8 +30,18 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
   const [searchValue, setSearchValue] = useState<string>();
   const [showAddPersonModal, setShowAddPersonModal] = useState<boolean>(false);
 
-  // formik values
-  // const hasError = form.touched[field.name] && form.errors[field.name];
+  const updateValues = (values: Creator[]) => {
+    // calculate total commission sum
+    const commissionSum = calculateCommissionSum(values);
+
+    // set local values
+    setCreators(values);
+    setCreatorsCommissionSum(commissionSum);
+
+    // and set formik fields
+    form.setFieldValue(field.name, values);
+    form.setFieldValue(`${field.name}CommissionSum`, commissionSum);
+  };
 
   // load all person options async
   const fetchPersons = () => {
@@ -60,15 +70,7 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
         cre.alias = cre.person.alias;
       });
 
-      const commissionSum = calculateCommissionSum(newCreators);
-
-      // set values
-      setCreators(newCreators);
-      setCreatorsCommissionSum(commissionSum);
-
-      // and set formik fields
-      form.setFieldValue(field.name, newCreators);
-      form.setFieldValue(`${field.name}CommissionSum`, commissionSum);
+      updateValues(newCreators);
     }
   }, []);
 
@@ -127,16 +129,7 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
         ...creators.slice(index + 1)
       ];
 
-      // and calculate total commission sum
-      const commissionSum = calculateCommissionSum(newCreators);
-
-      // set values
-      setCreators(newCreators);
-      setCreatorsCommissionSum(commissionSum);
-
-      // and set formik fields
-      form.setFieldValue(field.name, newCreators);
-      form.setFieldValue(`${field.name}CommissionSum`, commissionSum);
+      updateValues(newCreators);
     }
   };
 
@@ -153,23 +146,16 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
       };
 
       const newCreators = [...creators, creator];
-      const commissionSum = calculateCommissionSum(newCreators);
 
-      // set values
-      setCreators(newCreators);
-      setCreatorsCommissionSum(commissionSum);
-
-      // and set formik fields
-      form.setFieldValue(field.name, newCreators);
-      form.setFieldValue(`${field.name}CommissionSum`, commissionSum);
+      updateValues(newCreators);
     }
   };
 
   const onRemove = (id: any) => {
     // remove from selected creators list
-    const newCreatorsList = creators.filter((p: Creator) => p.personId !== id);
-    if (newCreatorsList) {
-      setCreators([...newCreatorsList]);
+    const newCreators = creators.filter((p: Creator) => p.personId !== id);
+    if (newCreators) {
+      updateValues(newCreators);
     }
   };
 
@@ -198,15 +184,7 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
 
           const newCreators = [...creators, creator];
 
-          const commissionSum = calculateCommissionSum(newCreators);
-
-          // set values
-          setCreators(newCreators);
-          setCreatorsCommissionSum(commissionSum);
-
-          // and set formik fields
-          form.setFieldValue(field.name, newCreators);
-          form.setFieldValue(`${field.name}CommissionSum`, commissionSum);
+          updateValues(newCreators);
         }
       })
       .catch((error) => {

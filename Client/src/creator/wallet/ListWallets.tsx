@@ -46,7 +46,7 @@ export const ListWallets = ({ match }: { match: any }) => {
                   <div className="card" key={wallet.id}>
                     <div className="card-body">
                       <h5 className="card-title"># {wallet.id}</h5>
-                      <p className="card-text">
+                      <div className="card-text">
                         <ul className="list-group list-group-flush">
                           <li className="list-group-item">
                             <strong>Type:</strong> {WalletType[wallet.type]}
@@ -67,7 +67,7 @@ export const ListWallets = ({ match }: { match: any }) => {
                             <strong>PublicKeyHash:</strong> {wallet.publicKeyHash}
                           </li>
                         </ul>
-                      </p>
+                      </div>
                       <p className="card-text">
                         <small className="text-muted">Created {wallet.created}</small>
                       </p>

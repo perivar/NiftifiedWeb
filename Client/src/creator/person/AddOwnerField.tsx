@@ -38,8 +38,13 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
   const [searchValue, setSearchValue] = useState<string>();
   const [showAddPersonModal, setShowAddPersonModal] = useState<boolean>(false);
 
-  // formik values
-  // const hasError = form.touched[field.name] && form.errors[field.name];
+  const updateValue = (owner: Owner | null) => {
+    // set values
+    setOwner(owner);
+
+    // and set formik fields
+    form.setFieldValue(field.name, owner);
+  };
 
   // load all person options async
   const fetchPersons = () => {
@@ -56,6 +61,17 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
         setLoading(false);
       });
   };
+
+  useEffect(() => {
+    fetchPersons();
+
+    if (field.value) {
+      const newOwner = field.value;
+      newOwner.alias = newOwner.person.alias;
+
+      updateValue(newOwner);
+    }
+  }, []);
 
   const getMatchedPersonsList = (searchText: string | undefined) => {
     if (searchText && searchText !== '') {
@@ -93,17 +109,12 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
   const onAdd = (id: any) => {
     // add from option list to selected person
     const person = personOptions.find((p: any) => p.id === id);
-
-    // set values
-    setOwner(person);
-
-    // and set formik fields
-    form.setFieldValue(field.name, person);
+    updateValue(person);
   };
 
   const onRemove = (id: any) => {
     // remove selected owner
-    setOwner(null);
+    updateValue(null);
   };
 
   const onAddPersonSuccess = (person: any) => {
@@ -120,11 +131,7 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
         // add from result list to selected person list
         // have to use res since the person option list isn't yet loaded
         const person = res.find((p: any) => p.id === id);
-
-        setOwner(person);
-
-        // and set formik fields
-        form.setFieldValue(field.name, person);
+        updateValue(person);
       })
       .catch((error) => {
         console.log(error);
