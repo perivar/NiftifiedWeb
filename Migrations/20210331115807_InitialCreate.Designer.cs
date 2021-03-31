@@ -9,8 +9,8 @@ using Niftified.Helpers;
 namespace Niftified.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20210326111140_InitialDatabase")]
-    partial class InitialDatabase
+    [Migration("20210331115807_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

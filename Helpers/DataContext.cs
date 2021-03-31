@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -55,24 +58,52 @@ namespace Niftified.Helpers
 		#region Custom Value Converter for Int Array Support 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
+			// support for int arrays
+			var intArrayConverter = new ValueConverter<int[], string>(
+							v => string.Join(";", v),
+							v => v.Split(";", StringSplitOptions.RemoveEmptyEntries)
+							.Select(val => int.Parse(val))
+							.ToArray());
+
+			var intArrayComparer = new ValueComparer<int[]>(
+				(c1, c2) => c1.SequenceEqual(c2),
+				c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+				c => c.ToArray());
+
+			// support for string arrays
+			var stringArrayConverter = new ValueConverter<ICollection<string>, string>(
+				v => JsonSerializer.Serialize(v, null),
+				v => JsonSerializer.Deserialize<List<string>>(v, null)
+			);
+
+			var stringArrayComparer = new ValueComparer<ICollection<string>>(
+				(c1, c2) => c1.SequenceEqual(c2),
+				c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+				c => (ICollection<string>)c.ToList());
+
+
 			// create composite key for Creator
 			modelBuilder.Entity<Creator>()
 				   .HasKey(c => new { c.EditionId, c.PersonId });
 
-			// support int arrays
-			var intArrayConverter = new ValueConverter<int[], string>(
-							v => string.Join(";", v),
-							v => v.Split(";", StringSplitOptions.RemoveEmptyEntries).Select(val => int.Parse(val)).ToArray());
-
+			// build model
 			modelBuilder.Entity<Likes>()
 				.Property(e => e.LikedEditionIds)
-				.HasConversion(intArrayConverter);
+				.HasConversion(intArrayConverter)
+				.Metadata
+				.SetValueComparer(intArrayComparer);
+
 			modelBuilder.Entity<Likes>()
 				.Property(e => e.LikedPersonIds)
-				.HasConversion(intArrayConverter);
+				.HasConversion(intArrayConverter)
+				.Metadata
+				.SetValueComparer(intArrayComparer);
+
 			modelBuilder.Entity<Likes>()
 				.Property(e => e.LikedVolumeIds)
-				.HasConversion(intArrayConverter);
+				.HasConversion(intArrayConverter)
+				.Metadata
+				.SetValueComparer(intArrayComparer);
 		}
 		#endregion
 	}
