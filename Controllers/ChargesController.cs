@@ -8,6 +8,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
+using Niftified.Helpers;
 
 namespace Niftified.Controllers
 {
@@ -53,7 +54,7 @@ namespace Niftified.Controllers
 			}
 			catch (System.Exception e)
 			{
-				return BadRequest(e.Message);
+				throw new AppException(e.Message);
 			}
 		}
 
@@ -105,7 +106,7 @@ namespace Niftified.Controllers
 			}
 			catch (System.Exception e)
 			{
-				return BadRequest(e.Message);
+				throw new AppException(e.Message);
 			}
 		}
 
@@ -126,7 +127,7 @@ namespace Niftified.Controllers
 			catch (Exception e)
 			{
 				Console.WriteLine($"Something failed {e}");
-				return BadRequest();
+				throw new AppException(e.Message);
 			}
 
 			// Handle the event

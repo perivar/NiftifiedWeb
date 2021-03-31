@@ -17,26 +17,38 @@ function authHeader(url: string): HeadersInit {
 }
 
 function handleResponse(response: any) {
-  return response.text().then((text: string) => {
-    const data = text && JSON.parse(text);
-
+  return handleResponseStatusAndContentType(response).then((data: any) => {
     if (!response.ok) {
-      if ([401, 403].includes(response.status) && accountService.userValue) {
-        // auto logout if 401 Unauthorized or 403 Forbidden response returned from api
-        accountService.logout();
-      }
-
       // extract error message and convert to string
       const error =
         (data && data.errors && Object.values(data.errors).join(' ')) || // typical 400 errors
         (data && data.title) ||
         (data && data.message) ||
         response.statusText;
-      return Promise.reject(error);
+      throw new Error(error);
     }
 
     return data;
   });
+}
+
+function handleResponseStatusAndContentType(response: any) {
+  const contentType = response.headers.get('content-type')!;
+
+  if ([401, 403].includes(response.status) && accountService.userValue) {
+    // auto logout if 401 Unauthorized or 403 Forbidden response returned from api
+    accountService.logout();
+    throw new Error('Request was not authorized.');
+  }
+
+  if (contentType === null) {
+    return Promise.resolve(null);
+  } else if (contentType.startsWith('application/json')) {
+    return response.json();
+  } else if (contentType.startsWith('text/plain')) {
+    return response.text();
+  }
+  throw new Error(`Unsupported response content-type: ${contentType}`);
 }
 
 function get(url: string) {

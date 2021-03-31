@@ -189,11 +189,11 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
     <>
       <div className="container">
         <small id="addPersonHelpBlock1" className="form-text text-muted">
-          Search here for persons you have already added
+          Search here for persons you have already added (use * to show all)
         </small>
         <form className="form-inline my-2 my-lg-0" noValidate>
           <input
-            className="form-control-sm mr-sm-2"
+            className="form-control mr-sm-2"
             type="search"
             placeholder="Find ..."
             aria-label="Find"
@@ -276,13 +276,12 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
                       <td className="align-middle">{creator.personId}</td>
                       <td className="align-middle">{creator.alias}</td>
                       {/* <td>{Status[person.status]}</td> */}
-                      <td className="align-middle">
+                      <td className="align-middle col-4">
                         <Select
                           name="type"
                           options={creatorTypeOptions}
                           defaultValue={{ label: CreatorType[creator.type], value: creator.type }}
                           onChange={(value: any) => {
-                            // alert(value.value);
                             updateCreator(creator.personId, { type: Number(value?.value) });
                           }}
                         />
@@ -290,7 +289,7 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
                       {/* <td className="text-center">
                         {person.isAnonymous ? <i className="fas fa-user-secret"></i> : 'Open'}
                       </td> */}
-                      <td className="align-middle" style={{ width: '80px' }}>
+                      <td className="align-middle">
                         <input
                           className="form-control"
                           name="salesCommissionShare"
@@ -304,9 +303,9 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
                         <button
                           tabIndex={-1}
                           type="button"
-                          className="btn btn-sm btn-secondary"
+                          className="btn btn-sm btn-outline-secondary"
                           onClick={() => onRemove(creator.personId)}>
-                          Remove
+                          <i className="fas fa-user-minus"></i>
                         </button>
                       </td>
                     </tr>
@@ -314,13 +313,15 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
                 {!isLoading && creators && (
                   <tr>
                     <td colSpan={3} className="text-right">
-                      Total commission (should be 100)
+                      <small className="text-muted">Total commission (must be 100)</small>
                     </td>
                     <td
                       className={`text-center ${
                         creatorsCommissionSum < 100 || creatorsCommissionSum > 100 ? 'is-invalid' : ''
                       }`}>
-                      <strong>{creatorsCommissionSum}</strong>
+                      <small>
+                        <strong>{creatorsCommissionSum}</strong>
+                      </small>
                     </td>
                     <td></td>
                   </tr>

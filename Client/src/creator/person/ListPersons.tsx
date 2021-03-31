@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { accountService, niftyService } from '../../_services';
+import { accountService, niftyService, alertService } from '../../_services';
 import { Status } from '../../_common/enums';
 import ConfirmModal from '../../_common/ConfirmModal';
 import { AddPersonModal } from './AddPersonModal';
@@ -161,7 +161,7 @@ export const ListPersons = ({ history }: { history: any; match: any }) => {
         show={showAddPersonModal}
         setShow={setShowAddPersonModal}
         onSuccess={onAddPersonSuccess}
-        onFailure={(e: any) => console.log(e)}
+        onFailure={(error: any) => alertService.error(error)}
       />
       <ConfirmModal
         show={showConfirmModal}

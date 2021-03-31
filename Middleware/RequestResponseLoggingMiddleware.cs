@@ -13,6 +13,7 @@ namespace Niftified.Middleware
 	public class RequestResponseLoggingMiddleware
 	{
 		const int MAX_BYTES_TO_READ = 500;
+		const bool DO_RESPONSE_HEXDUMP = false;
 
 		private readonly RequestDelegate _next;
 		private readonly ILogger _logger;
@@ -130,11 +131,20 @@ namespace Niftified.Middleware
 				buffer = memStream.ToArray();
 			}
 
-			// var bodyAsText = await new StreamReader(response.Body).ReadToEndAsync();
-			// dump the first bytes as a hex editor output
-			// see http://illegalargumentexception.blogspot.com/2008/04/c-file-hex-dump-application.html
+			string bodyAsText = null;
+			if (DO_RESPONSE_HEXDUMP)
+			{
+				// var bodyAsText = await new StreamReader(response.Body).ReadToEndAsync();
+				// dump the first bytes as a hex editor output
+				// see http://illegalargumentexception.blogspot.com/2008/04/c-file-hex-dump-application.html
 
-			var bodyAsText = (buffer.Length > 0) ? StringUtils.ToHexAndAsciiString(buffer, false) : null;
+				bodyAsText = (buffer.Length > 0) ? StringUtils.ToHexAndAsciiString(buffer, false) : null;
+			}
+			else
+			{
+				// we convert the byte[] into a string using UTF8 encoding...
+				bodyAsText = (buffer.Length > 0) ? Encoding.UTF8.GetString(buffer) : null;
+			}
 
 			// get the body byte length
 			long byteLength = response.Body.Length;
@@ -145,7 +155,7 @@ namespace Niftified.Middleware
 			if (!string.IsNullOrEmpty(bodyAsText))
 			{
 				sb.AppendLine("-------HTTP RESPONSE BODY -------");
-				sb.AppendLine($"Showing first {MAX_BYTES_TO_READ} of total {byteLength} bytes.");
+				sb.AppendLine($"Showing first {buffer.Length} of total {byteLength} bytes.");
 				sb.AppendLine($"{bodyAsText}");
 			}
 

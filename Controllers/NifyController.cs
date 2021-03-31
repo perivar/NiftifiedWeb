@@ -148,7 +148,6 @@ namespace Niftified.Controllers
 		public ActionResult<EditionResponse> UpdateEdition(int id, UpdateEditionRequest model)
 		{
 			// TODO: only owners can update their own?
-
 			var edition = _niftyService.UpdateEdition(id, model);
 			return Ok(edition);
 		}
@@ -318,7 +317,6 @@ namespace Niftified.Controllers
 		public ActionResult<WalletResponse> UpdateWallet(int id, UpdateWalletRequest model)
 		{
 			// TODO: only owners can update their own?
-
 			var wallet = _niftyService.UpdateWallet(id, model);
 			return Ok(wallet);
 		}

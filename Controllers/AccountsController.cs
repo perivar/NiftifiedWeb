@@ -49,7 +49,9 @@ namespace Niftified.Controllers
 			var token = model.Token ?? Request.Cookies["refreshToken"];
 
 			if (string.IsNullOrEmpty(token))
+			{
 				return BadRequest(new { message = "Token is required" });
+			}
 
 			// users can revoke their own tokens and admins can revoke any tokens
 			if (!Account.OwnsToken(token) && Account.Role != Role.Admin)

@@ -518,7 +518,8 @@ namespace Niftified.Services
 				model.PublicKey,
 				model.PublicKeyHash};
 
-			if (inputs.Any(cryptoValue => string.IsNullOrWhiteSpace(cryptoValue)))
+
+			if (!_appSettings.IgnoreWindowsCryptoHttpsRequirement && inputs.Any(cryptoValue => string.IsNullOrWhiteSpace(cryptoValue)))
 			{
 				throw new AppException($"None of the wallet crypto values can be empty", model);
 			}

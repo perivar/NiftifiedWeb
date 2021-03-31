@@ -19,5 +19,8 @@ namespace Niftified.Helpers
 		public decimal DefaultSalesCommissionToCreators { get; set; }
 		public decimal DefaultSalesCommissionToBlockchain { get; set; }
 
+		// windows.crypto only works in safe contexts (like localhost and https)
+		// ignore this when testing in non https server settings
+		public bool IgnoreWindowsCryptoHttpsRequirement { get; set; }
 	}
 }

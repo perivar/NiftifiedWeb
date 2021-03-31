@@ -62,7 +62,7 @@ const InnerForm = (props: any & FormikProps<FormValues>) => {
   return (
     <Form>
       <div className="form-row">
-        <div className="col-4">
+        <div className="col-lg-4">
           <div className="form-group">
             <Field id="file" name="file" component={UploadImageComponent} />
             <div className="ml-3">
@@ -70,7 +70,7 @@ const InnerForm = (props: any & FormikProps<FormValues>) => {
             </div>
           </div>
         </div>
-        <div className="col">
+        <div className="col-lg">
           <div className="form-group">
             <label htmlFor="name">Name</label>
             <Field
@@ -150,7 +150,7 @@ const InnerForm = (props: any & FormikProps<FormValues>) => {
       </div>
 
       <div className="form-row">
-        <div className="form-group col">
+        <div className="form-group col-lg">
           <label htmlFor="theme">Collection</label>
           <Field
             name="collection"
@@ -164,7 +164,7 @@ const InnerForm = (props: any & FormikProps<FormValues>) => {
           <ErrorMessage name="collection" component="div" className="invalid-feedback" />
         </div>
 
-        <div className="form-group col">
+        <div className="form-group col-lg">
           <label htmlFor="version">Version</label>
           <Field
             id="version"
@@ -177,7 +177,7 @@ const InnerForm = (props: any & FormikProps<FormValues>) => {
       </div>
 
       <div className="form-row">
-        <div className="form-group col">
+        <div className="form-group col-lg">
           <label htmlFor="notes">Notes</label>
           <Field
             id="notes"
@@ -188,7 +188,7 @@ const InnerForm = (props: any & FormikProps<FormValues>) => {
           <ErrorMessage name="notes" component="div" className="invalid-feedback" />
         </div>
 
-        <div className="form-group col">
+        <div className="form-group col-lg">
           <label htmlFor="series">Series</label>
           <Field
             id="series"
@@ -201,7 +201,7 @@ const InnerForm = (props: any & FormikProps<FormValues>) => {
       </div>
 
       <div className="form-row">
-        <div className="form-group col">
+        <div className="form-group col-lg">
           <label htmlFor="boxName">Box Name</label>
           <Field
             id="boxName"
@@ -212,7 +212,7 @@ const InnerForm = (props: any & FormikProps<FormValues>) => {
           <ErrorMessage name="series" component="div" className="invalid-feedback" />
         </div>
 
-        <div className="form-group col">
+        <div className="form-group col-lg">
           <label htmlFor="theme">Theme</label>
           <Field
             id="theme"

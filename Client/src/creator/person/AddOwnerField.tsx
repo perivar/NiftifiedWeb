@@ -139,11 +139,11 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
     <>
       <div className="container">
         <small id="addPersonHelpBlock1" className="form-text text-muted">
-          Search here for persons you have already added
+          Search here for persons you have already added (use * to show all)
         </small>
         <form className="form-inline my-2 my-lg-0" noValidate>
           <input
-            className="form-control-sm mr-sm-2"
+            className="form-control mr-sm-2"
             type="search"
             placeholder="Find ..."
             aria-label="Find"
@@ -221,9 +221,9 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
                       <button
                         tabIndex={-1}
                         type="button"
-                        className="btn btn-sm btn-secondary"
+                        className="btn btn-sm btn-outline-secondary"
                         onClick={() => onRemove(owner.id)}>
-                        Remove
+                        <i className="fas fa-user-minus"></i>
                       </button>
                     </td>
                   </tr>
