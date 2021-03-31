@@ -12,7 +12,7 @@ namespace Niftified.Middleware
 {
 	public class RequestResponseLoggingMiddleware
 	{
-		const int MAX_BYTES_TO_READ = 50;
+		const int MAX_BYTES_TO_READ = 500;
 
 		private readonly RequestDelegate _next;
 		private readonly ILogger _logger;

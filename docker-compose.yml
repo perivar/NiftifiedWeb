@@ -10,9 +10,13 @@ services:
     restart: always
 
     environment:
-      ASPNETCORE_ENVIRONMENT: "Production"
+      ASPNETCORE_ENVIRONMENT: "Development"
       ASPNETCORE_URLS: "http://+:5050"
+      Logging__LogLevel__Default: "Information"
+      Logging__LogLevel__Microsoft: "Information"
+      Logging__LogLevel__Niftified: "Debug"
       AppSettings__StoredFilesPath: "docker-images"
+      ConnectionStrings__DefaultConnection: "Data Source=./db/NiftifiedDatabase.db"
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
