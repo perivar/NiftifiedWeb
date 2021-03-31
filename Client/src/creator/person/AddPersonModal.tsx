@@ -43,7 +43,7 @@ const initialValues: FormValues = {
 // check https://medium.com/fotontech/forms-with-formik-typescript-d8154cc24f8a
 // and https://stackoverflow.com/questions/65001954/formik-form-not-submitting-from-modal-component
 const InnerForm = (props: OtherProps & FormikProps<FormValues>) => {
-  const { values, errors, touched, handleChange, handleBlur, handleSubmit, submitForm, isSubmitting } = props;
+  const { errors, touched, handleChange, handleBlur, handleSubmit, submitForm, isSubmitting } = props;
   const { show, setShow } = props;
 
   const handleClose = () => {
@@ -82,7 +82,7 @@ const InnerForm = (props: OtherProps & FormikProps<FormValues>) => {
               </p>
               <p className="text-danger">
                 If you forget this, you will <strong>NEVER</strong> get access to the wallet, and any sales commission
-                income for this person will be lost <strong>FOREVER</strong>
+                income for this person will be lost <strong>FOREVER!</strong>
               </p>
               {/* <div className="form-group">
                 <div className="form-check">

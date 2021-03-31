@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import Table from '../../_components/Table';
 import { niftyService } from '../../_services';
 
 export enum VolumeType {
@@ -13,28 +14,110 @@ export enum VolumeStatus {
   NotForSale // not set to be sold
 }
 
-export const ListVolumes = ({ match }: { match: any }) => {
-  const { path } = match;
-  const { id } = match.params;
-
+// custom hook for volumes that support pagination
+export default function useVolumes(id: number, page: number, perPage: number) {
   const [isLoading, setLoading] = useState<boolean>(false);
   const [volumes, setVolumes] = useState<any>([]);
+  const [totalCount, setTotalCount] = useState<number>(0);
 
   // load volumes async
-  React.useEffect(() => {
+  const fetchVolumes = (id: number, page: number, perPage: number) => {
     setLoading(true);
 
     niftyService
-      .getVolumesByEditionId(id)
+      .getVolumesByEditionId(id, page, perPage)
       .then((res) => {
-        setVolumes(res);
+        setTotalCount(res.key);
+        setVolumes(res.value);
         setLoading(false);
       })
       .catch((error) => {
         console.log(error);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchVolumes(id, page, perPage);
+  }, [id, page, perPage]);
+
+  return useMemo(
+    () => ({
+      volumes,
+      isLoading,
+      totalCount
+    }),
+    [volumes, isLoading, totalCount]
+  );
+}
+
+export const ListVolumes = ({ match }: { match: any }) => {
+  // const { path } = match;
+  const { id } = match.params;
+
+  // default values for paging
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+  const { volumes, totalCount, isLoading } = useVolumes(id, page, perPage);
+
+  const numberOfPages = Math.ceil(totalCount / perPage);
+
+  const [isLoadingEdition, setLoadingEdition] = useState<boolean>(false);
+  const [edition, setEdition] = useState<any>([]);
+
+  // load edition async
+  React.useEffect(() => {
+    setLoadingEdition(true);
+
+    niftyService
+      .getEditionById(id)
+      .then((res) => {
+        setEdition(res);
+        setLoadingEdition(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setLoadingEdition(false);
+      });
   }, [id]);
+
+  const statusAccessor = (column: any) => {
+    return VolumeStatus[column.status];
+  };
+
+  const typeAccessor = (column: any) => {
+    return VolumeType[column.type];
+  };
+
+  const columns = useMemo(
+    () => [
+      {
+        Header: '#',
+        accessor: 'editionNumber'
+      },
+      {
+        Header: 'Status',
+        accessor: statusAccessor
+      },
+      {
+        Header: 'Start Price',
+        accessor: 'amount'
+      },
+      {
+        Header: 'Currency',
+        accessor: 'currencyUniqueId'
+      },
+      {
+        Header: 'Type',
+        accessor: typeAccessor
+      },
+      {
+        Header: 'Current Owner',
+        accessor: 'owner.alias'
+      }
+    ],
+    []
+  );
 
   return (
     <>
@@ -44,33 +127,17 @@ export const ListVolumes = ({ match }: { match: any }) => {
       <div className="container mt-4">
         <div className="row">
           <div className="col">
-            <h4>Your volumes</h4>
-            <table className="table">
-              <thead>
-                <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Start Price</th>
-                  <th scope="col">Currency</th>
-                  <th scope="col">Type</th>
-                  <th scope="col">Current Owner</th>
-                </tr>
-              </thead>
-              <tbody>
-                {!isLoading &&
-                  volumes &&
-                  volumes.map((volume: any) => (
-                    <tr key={volume.id}>
-                      <td>{volume.editionNumber}</td>
-                      <td>{VolumeStatus[volume.status]}</td>
-                      <td>{volume.amount}</td>
-                      <td>{volume.currencyUniqueId}</td>
-                      <td>{VolumeType[volume.type]}</td>
-                      <td>{volume.owner.alias ? volume.owner.alias : volume.owner.uniqueId}</td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
+            {!isLoadingEdition && <h5>Showing volumes for {`${edition.name} - ${edition.description}`}</h5>}
+            {!isLoading && (
+              <Table
+                columns={columns}
+                data={volumes}
+                currentpage={page}
+                setPage={setPage}
+                perPage={perPage}
+                setPerPage={setPerPage}
+                totalPage={numberOfPages}></Table>
+            )}
           </div>
         </div>
       </div>

@@ -9,6 +9,7 @@ import * as Scroll from 'react-scroll';
 // import { Link } from 'react-router-dom';
 import { AddCreatorsField } from '../person/AddCreatorsField';
 import { AddOwnerField } from '../person/AddOwnerField';
+import { Link } from 'react-router-dom';
 
 const scroll = Scroll.animateScroll;
 
@@ -40,7 +41,7 @@ const optionsMapper = (obj: any): any => ({
 });
 
 const validationSchema = Yup.object().shape({
-  file: Yup.mixed().required('File is required'),
+  file: Yup.mixed().required('A file is required'),
   tags: Yup.array().min(1, 'At least one tag is required'),
   name: Yup.string().required('Name is required'),
   description: Yup.string().required('Description is required'),
@@ -228,6 +229,9 @@ const InnerForm = (props: any & FormikProps<FormValues>) => {
           {isSubmitting && <span className="spinner-border spinner-border-sm mr-1"></span>}
           Save Edition
         </button>
+        <Link to={`/creator`} className="ml-2 btn btn-secondary">
+          Cancel
+        </Link>
       </div>
       <FocusError />
     </Form>

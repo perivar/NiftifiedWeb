@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { FieldProps } from 'formik';
 import { niftyService } from '../../_services';
 import { AddPersonModal } from './AddPersonModal';
 import { Status } from '../../_common/enums';
+import { useCreatorContext } from '../CreatorContext';
 
 import './AddCreatorsField.scss';
 
@@ -31,8 +32,15 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
   // const user = accountService.userValue;
 
   // local state
-  const [isLoading, setLoading] = useState<boolean>(false);
-  const [personOptions, setPersonOptions] = useState<any>([]); // the full list of persons
+  // const [isLoading, setLoading] = useState<boolean>(false);
+  // const [personOptions, setPersonOptions] = useState<any>([]); // the full list of persons
+  const {
+    personOptions,
+    setPersonOptions,
+    isLoadingPersonOptions: isLoading,
+    setLoadingPersonOptions: setLoading,
+    fetchPersons
+  } = useCreatorContext();
   const [filteredPersons, setFilteredPersons] = useState<any>([]); // the filtered list when searching
   const [owner, setOwner] = useState<Owner | null>(null); // the owner
   const [searchValue, setSearchValue] = useState<string>();
@@ -44,22 +52,6 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
 
     // and set formik fields
     form.setFieldValue(field.name, owner);
-  };
-
-  // load all person options async
-  const fetchPersons = () => {
-    setLoading(true);
-
-    niftyService
-      .getPersonsByAccountId()
-      .then((res) => {
-        setPersonOptions(res);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.log(error);
-        setLoading(false);
-      });
   };
 
   useEffect(() => {
@@ -110,6 +102,10 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
     // add from option list to selected person
     const person = personOptions.find((p: any) => p.id === id);
     updateValue(person);
+
+    // close the search box since we only add one owner
+    setSearchValue('');
+    setFilteredPersons(getMatchedPersonsList(''));
   };
 
   const onRemove = (id: any) => {
@@ -143,7 +139,7 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
     <>
       <div className="container">
         <small id="addPersonHelpBlock1" className="form-text text-muted">
-          Search here if you already have a person you want to add
+          Search here for persons you have already added
         </small>
         <form className="form-inline my-2 my-lg-0" noValidate>
           <input
@@ -235,7 +231,7 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
               </tbody>
             </table>
             <small id="addPersonHelpBlock2" className="form-text text-muted">
-              If you don't find the persons among the existing persons when searching, add them here.
+              Add new person here if you don't find the person you are looking when searching.
             </small>
             <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowAddPersonModal(true)}>
               Add New Person

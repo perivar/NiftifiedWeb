@@ -1,10 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Navbar, Nav, Form, FormControl, Button } from 'react-bootstrap';
-import { NavLink } from 'react-router-dom';
+import { useHistory, NavLink } from 'react-router-dom';
 import { accountService } from '../_services';
 
 export const Header = () => {
   const user = accountService.userValue;
+
+  const history = useHistory();
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  const handleSubmit = (e: any) => {
+    if (searchQuery.length > 0) history.push(`/creator/editions/${searchQuery}`);
+    e.preventDefault();
+  };
 
   return (
     <>
@@ -36,9 +44,16 @@ export const Header = () => {
               <NavLink to="/creator" className="btn btn-primary">
                 Sell your creations
               </NavLink>
-              <Form inline className="ml-2 my-2 my-lg-0">
-                <FormControl type="text" placeholder="Search" className="mr-sm-2" />
-                <Button className="my-2 my-sm-0" variant="outline-primary">
+              <Form inline className="ml-2 my-2 my-lg-0" onSubmit={handleSubmit}>
+                <input
+                  className="form-control mr-sm-2"
+                  type="search"
+                  placeholder="Find ..."
+                  aria-label="Find"
+                  value={searchQuery}
+                  onInput={(e: any) => setSearchQuery(e.target.value)}
+                />
+                <Button type="submit" className="my-2 my-sm-0" variant="outline-primary">
                   Search
                 </Button>
               </Form>

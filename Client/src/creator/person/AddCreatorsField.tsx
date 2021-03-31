@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { FieldProps } from 'formik';
 import { niftyService } from '../../_services';
 import { AddPersonModal } from './AddPersonModal';
 import { Status, creatorTypeOptions, CreatorType } from '../../_common/enums';
 import Select from 'react-select';
+import { useCreatorContext } from '../CreatorContext';
 
 import './AddCreatorsField.scss';
 
@@ -22,8 +23,15 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
   // const user = accountService.userValue;
 
   // local state
-  const [isLoading, setLoading] = useState<boolean>(false);
-  const [personOptions, setPersonOptions] = useState<any>([]); // the full list of persons
+  // const [isLoading, setLoading] = useState<boolean>(false);
+  // const [personOptions, setPersonOptions] = useState<any>([]); // the full list of persons
+  const {
+    personOptions,
+    setPersonOptions,
+    isLoadingPersonOptions: isLoading,
+    setLoadingPersonOptions: setLoading,
+    fetchPersons
+  } = useCreatorContext();
   const [filteredPersons, setFilteredPersons] = useState<any>([]); // the filtered list when searching
   const [creators, setCreators] = useState<Creator[]>([]); // the final list of persons
   const [creatorsCommissionSum, setCreatorsCommissionSum] = useState<number>(0);
@@ -41,22 +49,6 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
     // and set formik fields
     form.setFieldValue(field.name, values);
     form.setFieldValue(`${field.name}CommissionSum`, commissionSum);
-  };
-
-  // load all person options async
-  const fetchPersons = () => {
-    setLoading(true);
-
-    niftyService
-      .getPersonsByAccountId()
-      .then((res) => {
-        setPersonOptions(res);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.log(error);
-        setLoading(false);
-      });
   };
 
   useEffect(() => {
@@ -197,7 +189,7 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
     <>
       <div className="container">
         <small id="addPersonHelpBlock1" className="form-text text-muted">
-          Search here if you already have a person you want to add
+          Search here for persons you have already added
         </small>
         <form className="form-inline my-2 my-lg-0" noValidate>
           <input
@@ -336,7 +328,7 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
               </tbody>
             </table>
             <small id="addPersonHelpBlock2" className="form-text text-muted">
-              If you don't find the persons among the existing persons when searching, add them here.
+              Add new person here if you don't find the person you are looking when searching.
             </small>
             <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowAddPersonModal(true)}>
               Add New Person

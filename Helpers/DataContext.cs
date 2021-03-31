@@ -25,30 +25,31 @@ namespace Niftified.Helpers
 		public DbSet<AddressTx> AddressTxs { get; set; }
 		public DbSet<Wallet> Wallets { get; set; }
 
-		public static readonly ILoggerFactory _loggerFactory
-			= LoggerFactory.Create(builder => { builder.AddConsole(); });
+		private readonly ILoggerFactory _loggerFactory;
+		// 	= LoggerFactory.Create(builder => { builder.AddConsole(); });
 
-		private readonly IConfiguration Configuration;
+		private readonly IConfiguration _configuration;
 
-		public DataContext(IConfiguration configuration)
+		public DataContext(IConfiguration configuration, ILoggerFactory loggerFactory)
 		{
-			Configuration = configuration;
+			_loggerFactory = loggerFactory;
+			_configuration = configuration;
 		}
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
+			base.OnConfiguring(optionsBuilder);
+
 			// logger
 			// TODO: remove this from production
 			optionsBuilder.UseLoggerFactory(_loggerFactory);
 			optionsBuilder.EnableSensitiveDataLogging();
 
 			// connect to sqlite database
-			optionsBuilder.UseSqlite(Configuration.GetConnectionString("NiftifiedDatabase"));
+			optionsBuilder.UseSqlite(_configuration.GetConnectionString("NiftifiedDatabase"));
 
 			// or to mysql database
 			// optionsBuilder.UseMySQL(Configuration.GetConnectionString("DefaultConnection"));
-
-			base.OnConfiguring(optionsBuilder);
 		}
 
 		#region Custom Value Converter for Int Array Support 

@@ -37,7 +37,7 @@ namespace Niftified.Services
 		VolumeResponse UpdateVolume(int id, UpdateVolumeRequest model);
 		IEnumerable<VolumeResponse> GetVolumes();
 		IEnumerable<VolumeResponse> GetVolumesByEditionId(int editionId);
-		IEnumerable<VolumeResponse> GetVolumesByEditionId(int editionId, int pageNumber, int pageSize);
+		KeyValuePair<int, IEnumerable<VolumeResponse>> GetVolumesByEditionId(int editionId, int pageNumber, int pageSize);
 
 		void DeleteVolume(int id);
 
@@ -126,10 +126,10 @@ namespace Niftified.Services
 
 			var editions = _context.Editions
 			.Where(
-				e => EF.Functions.Like(e.Name, query)
-				|| EF.Functions.Like(e.Description, query)
-				|| EF.Functions.Like(e.Series, query)
-				|| EF.Functions.Like(e.Collection.Name, query)
+				e => EF.Functions.Like(e.Name, $"%{query}%")
+				|| EF.Functions.Like(e.Description, $"%{query}%")
+				|| EF.Functions.Like(e.Series, $"%{query}%")
+				|| EF.Functions.Like(e.Collection.Name, $"%{query}%")
 			)
 			// .Include(a => a.Volumes)
 			;
@@ -509,6 +509,20 @@ namespace Niftified.Services
 			// create wallet
 			var wallet = new Wallet();
 			wallet.Created = DateTime.UtcNow;
+
+			// check that all the crypto values exist
+			string[] inputs = {
+				model.PrivateKeyEncrypted,
+				model.PrivateKeyWIFEncrypted,
+				model.PublicAddress,
+				model.PublicKey,
+				model.PublicKeyHash};
+
+			if (inputs.Any(cryptoValue => string.IsNullOrWhiteSpace(cryptoValue)))
+			{
+				throw new AppException($"None of the wallet crypto values can be empty", model);
+			}
+
 			wallet.PrivateKeyEncrypted = model.PrivateKeyEncrypted;
 			wallet.PrivateKeyWIFEncrypted = model.PrivateKeyWIFEncrypted;
 			wallet.PublicAddress = model.PublicAddress;
@@ -665,13 +679,23 @@ namespace Niftified.Services
 			return _mapper.Map<IList<VolumeResponse>>(volumes);
 		}
 
-		public IEnumerable<VolumeResponse> GetVolumesByEditionId(int editionId, int pageIndex, int pageSize)
+		public KeyValuePair<int, IEnumerable<VolumeResponse>> GetVolumesByEditionId(int editionId, int pageIndex, int pageSize)
 		{
-			var volumes = _context.Volumes.Where(entity => entity.EditionId == editionId)
+			// this method supports paging, and returns the total count as well
+			var query = _context.Volumes.Where(entity => entity.EditionId == editionId);
+
+			// get total result count prior to sorting
+			int count = query.Count();
+
+			// sort and paginate
+			var page = query.OrderBy(v => v.EditionNumber)
 			.Skip((pageIndex - 1) * pageSize)
 			.Take(pageSize)
 			.Include(v => v.Owner);
-			return _mapper.Map<IList<VolumeResponse>>(volumes);
+
+			var volumes = page.Select(p => p);
+
+			return new KeyValuePair<int, IEnumerable<VolumeResponse>>(count, _mapper.Map<IList<VolumeResponse>>(volumes));
 		}
 
 		public void DeleteVolume(int id)

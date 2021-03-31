@@ -127,6 +127,7 @@ export const EditEditionForm = ({ history, match }: { history: any; match: any }
         value: obj.id
       };
     }
+    return {};
   };
 
   return (
@@ -311,6 +312,9 @@ export const EditEditionForm = ({ history, match }: { history: any; match: any }
                     {isSubmitting && <span className="spinner-border spinner-border-sm mr-1"></span>}
                     Save Edition
                   </button>
+                  <Link to={`/creator`} className="ml-2 btn btn-secondary">
+                    Cancel
+                  </Link>
                 </div>
                 <FocusError />
               </Form>

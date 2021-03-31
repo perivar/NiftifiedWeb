@@ -156,8 +156,12 @@ function deleteEdition(id: number) {
   return Promise.reject('not logged in');
 }
 
-function getVolumesByEditionId(editionId: number) {
-  return fetchWrapper.get(`${baseUrl}/volumes/${editionId}`);
+function getVolumesByEditionId(editionId: number, pageNumber: number, pageSize: number) {
+  return fetchWrapper.get(
+    `${baseUrl}/volumes/${editionId}?pageNumber=${encodeURIComponent(pageNumber)}&pageSize=${encodeURIComponent(
+      pageSize
+    )}`
+  );
 }
 
 function getVolumeById(id: number) {
