@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
@@ -48,8 +50,20 @@ namespace Niftified.Helpers
 			optionsBuilder.UseLoggerFactory(_loggerFactory);
 			optionsBuilder.EnableSensitiveDataLogging();
 
+			var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+			// create a sub directory for the database
+			var builder = new DbConnectionStringBuilder();
+			builder.ConnectionString = connectionString;
+			string dataSource = builder["Data Source"] as string;
+			string dataSourcePath = Path.GetDirectoryName(dataSource);
+			if (!Directory.Exists(dataSourcePath))
+			{
+				Directory.CreateDirectory(dataSourcePath);
+			}
+
 			// connect to sqlite database
-			optionsBuilder.UseSqlite(_configuration.GetConnectionString("DefaultConnection"));
+			optionsBuilder.UseSqlite(connectionString);
 
 			// or to mysql database
 			// optionsBuilder.UseMySQL()
