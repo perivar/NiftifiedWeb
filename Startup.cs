@@ -40,8 +40,8 @@ namespace WebApi
 				options.PublishableKey = Environment.GetEnvironmentVariable("STRIPE_PUBLISHABLE_KEY");
 				options.SecretKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
 				options.WebhookSecret = Environment.GetEnvironmentVariable("STRIPE_WEBHOOK_SECRET");
-				options.PaymentMethodTypes = Environment.GetEnvironmentVariable("PAYMENT_METHOD_TYPES").Split(",").ToList();
-				options.Domain = Environment.GetEnvironmentVariable("DOMAIN");
+				options.PaymentMethodTypes = Environment.GetEnvironmentVariable("STRIPE_PAYMENT_TYPES").Split(",").ToList();
+				options.Domain = Environment.GetEnvironmentVariable("STRIPE_DOMAIN");
 			});
 
 			services.AddDbContext<DataContext>();
@@ -61,6 +61,9 @@ namespace WebApi
 
 			services.AddSwaggerGen(c =>
 				{
+					// add support for account model (otherwise it crashes with stripe account model)
+					c.CustomSchemaIds(type => type.ToString());
+
 					c.SwaggerDoc("v1", new OpenApiInfo { Title = "Niftified-Service", Version = "v1" });
 
 					c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme

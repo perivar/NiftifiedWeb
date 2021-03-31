@@ -6,10 +6,19 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
+
     restart: always
+
     environment:
       ASPNETCORE_ENVIRONMENT: "Production"
-      ASPNETCORE_URLS: http://+:5050
+      ASPNETCORE_URLS: "http://+:5050"
+      AppSettings__StoredFilesPath: "docker-images"
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      STRIPE_PAYMENT_TYPES: ${STRIPE_PAYMENT_TYPES}
+      STRIPE_DOMAIN: ${STRIPE_DOMAIN}
+
     expose:
       - "5050"
     ports:
@@ -20,7 +29,9 @@ services:
     build:
       context: ./Client
       dockerfile: Dockerfile
+
     restart: always
+
     expose:
       - "5151"
     ports:

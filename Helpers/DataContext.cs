@@ -46,10 +46,10 @@ namespace Niftified.Helpers
 			optionsBuilder.EnableSensitiveDataLogging();
 
 			// connect to sqlite database
-			optionsBuilder.UseSqlite(_configuration.GetConnectionString("NiftifiedDatabase"));
+			optionsBuilder.UseSqlite(_configuration.GetConnectionString("DefaultConnection"));
 
 			// or to mysql database
-			// optionsBuilder.UseMySQL(Configuration.GetConnectionString("DefaultConnection"));
+			// optionsBuilder.UseMySQL()
 		}
 
 		#region Custom Value Converter for Int Array Support 
