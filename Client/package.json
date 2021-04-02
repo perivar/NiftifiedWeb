@@ -78,6 +78,7 @@
     "eslint-plugin-react-hooks": "^4.2.0",
     "immer": "^8.0.4",
     "prettier": "^2.2.1",
+    "react-app-rewired": "^2.1.8",
     "sass-mq": "^5.0.1",
     "stylelint": "^13.11.0",
     "stylelint-config-prettier": "^8.0.2",
@@ -88,9 +89,9 @@
     "use-immer": "^0.4.2"
   },
   "scripts": {
-    "start": "rimraf ./build && react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start": "rimraf ./build && react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test",
     "eject": "react-scripts eject",
     "lint-autofix": "eslint --config .eslintrc.js --parser-options={tsconfigRootDir:null} --quiet --fix --ext .js,.ts,.tsx src",
     "lint-check": "eslint --config .eslintrc.js --parser-options={tsconfigRootDir:null} --ext .js,.ts,.tsx src",

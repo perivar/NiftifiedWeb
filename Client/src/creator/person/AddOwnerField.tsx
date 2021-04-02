@@ -147,56 +147,58 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
           Search here for persons you have already added (use * to show all)
         </small>
         {/* <form className="form-inline my-2 my-lg-0" noValidate id="addOwnerFieldFilter"> */}
-        <input
-          className="form-control mr-sm-2"
-          type="search"
-          placeholder="Find ..."
-          aria-label="Find"
-          value={searchValue}
-          onChange={onSearchChange}
-          onKeyPress={onSearchKeyPress}
-          onBlur={onSearchBlur}
-        />
-        {!isLoading && filteredPersons && filteredPersons.length > 0 && (
-          <table className="table table-sm table-dark">
-            <thead className="thead">
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Alias</th>
-                <th scope="col">Status</th>
-                <th scope="col" className="text-center">
-                  Confirmed
-                </th>
-                {/* <th scope="col">Type</th> */}
-                <th scope="col">Add</th>
-                <th scope="col" className="text-right">
-                  <button type="button" tabIndex={-1} className="is-icon-button mr-1" onClick={() => onCloseSearch()}>
-                    <i className="fas fa-window-close icon-close"></i>
-                  </button>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredPersons.map((person: any) => (
-                <tr key={person.id}>
-                  <td>{person.id}</td>
-                  <td>{person.alias}</td>
-                  <td>{Status[person.status]}</td>
-                  <td className="text-center">
-                    {person.isConfirmed ? <i className="fas fa-certificate icon-confirmed"></i> : 'No'}
-                  </td>
-                  {/* <td>{PersonType[person.type]}</td> */}
-                  <td>
-                    <button type="button" className="btn btn-sm btn-success" onClick={() => onAdd(person.id)}>
-                      Add
+        <div className="form-inline my-2 my-lg-0">
+          <input
+            className="form-control mr-sm-2"
+            type="search"
+            placeholder="Find ..."
+            aria-label="Find"
+            value={searchValue}
+            onChange={onSearchChange}
+            onKeyPress={onSearchKeyPress}
+            onBlur={onSearchBlur}
+          />
+          {!isLoading && filteredPersons && filteredPersons.length > 0 && (
+            <table className="table table-sm table-dark">
+              <thead className="thead">
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Alias</th>
+                  <th scope="col">Status</th>
+                  <th scope="col" className="text-center">
+                    Confirmed
+                  </th>
+                  {/* <th scope="col">Type</th> */}
+                  <th scope="col">Add</th>
+                  <th scope="col" className="text-right">
+                    <button type="button" tabIndex={-1} className="is-icon-button mr-1" onClick={() => onCloseSearch()}>
+                      <i className="fas fa-window-close icon-close"></i>
                     </button>
-                  </td>
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-        {/* </form> */}
+              </thead>
+              <tbody>
+                {filteredPersons.map((person: any) => (
+                  <tr key={person.id}>
+                    <td>{person.id}</td>
+                    <td>{person.alias}</td>
+                    <td>{Status[person.status]}</td>
+                    <td className="text-center">
+                      {person.isConfirmed ? <i className="fas fa-certificate icon-confirmed"></i> : 'No'}
+                    </td>
+                    {/* <td>{PersonType[person.type]}</td> */}
+                    <td>
+                      <button type="button" className="btn btn-sm btn-success" onClick={() => onAdd(person.id)}>
+                        Add
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          {/* </form> */}
+        </div>
         <AddPersonModal
           show={showAddPersonModal}
           setShow={setShowAddPersonModal}
@@ -204,43 +206,45 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
           onFailure={onCreatePersonFailure}
         />
         {/* <form noValidate className="mt-2" id="addOwnerField"> */}
-        <div>
-          <table className="table table-sm table-bordered">
-            <thead className="thead-light">
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Alias</th>
-                <th scope="col">Status</th>
-                <th scope="col" className="text-center">
-                  Remove
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {!isLoading && owner && (
-                <tr key={owner.id}>
-                  <td className="align-middle">{owner.id}</td>
-                  <td className="align-middle">{owner.alias}</td>
-                  <td className="align-middle">{Status[owner.status]}</td>
-                  <td className="text-center align-middle">
-                    <button
-                      type="button"
-                      tabIndex={-1}
-                      className="btn btn-sm btn-outline-secondary"
-                      onClick={() => onRemove(owner.id)}>
-                      <i className="fas fa-user-minus"></i>
-                    </button>
-                  </td>
+        <div className="mt-2">
+          <div>
+            <table className="table table-sm table-bordered">
+              <thead className="thead-light">
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Alias</th>
+                  <th scope="col">Status</th>
+                  <th scope="col" className="text-center">
+                    Remove
+                  </th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-          <small id="addPersonHelpBlock2" className="form-text text-muted">
-            Add new person here if you don't find the person you are looking when searching.
-          </small>
-          <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowAddPersonModal(true)}>
-            Add New Person
-          </button>
+              </thead>
+              <tbody>
+                {!isLoading && owner && (
+                  <tr key={owner.id}>
+                    <td className="align-middle">{owner.id}</td>
+                    <td className="align-middle">{owner.alias}</td>
+                    <td className="align-middle">{Status[owner.status]}</td>
+                    <td className="text-center align-middle">
+                      <button
+                        type="button"
+                        tabIndex={-1}
+                        className="btn btn-sm btn-outline-secondary"
+                        onClick={() => onRemove(owner.id)}>
+                        <i className="fas fa-user-minus"></i>
+                      </button>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+            <small id="addPersonHelpBlock2" className="form-text text-muted">
+              Add new person here if you don't find the person you are looking when searching.
+            </small>
+            <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowAddPersonModal(true)}>
+              Add New Person
+            </button>
+          </div>
         </div>
         {/* </form> */}
       </div>

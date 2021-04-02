@@ -48,8 +48,8 @@ export const EditEditionForm = ({ history, match }: { history: any; match: any }
     creators: Yup.array().min(1, 'At least one creator is required'),
     creatorsCommissionSum: Yup.number()
       .integer()
-      .min(100, 'Commission must be a total of 100')
-      .max(100, 'Commission must be a total of 100')
+      .min(100, 'Commission must sum up to 100 (percent)')
+      .max(100, 'Commission must sum up to 100 (percent)')
   });
 
   const onSubmit = (values: EditFormValues, formikHelpers: FormikHelpers<EditFormValues>) => {

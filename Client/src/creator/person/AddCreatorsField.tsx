@@ -137,7 +137,28 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
         salesCommissionShare: 100
       };
 
-      const newCreators = [...creators, creator];
+      // check if creators is non empty, and not changed
+      let tmpCreators = creators;
+      if (creators.length > 0) {
+        // check if the previous commissions are split evenly?
+        const commissionShare = 100 / creators.length;
+        const isSplitEvenly = creators.every((creator) => {
+          return creator.salesCommissionShare === commissionShare;
+        });
+        if (isSplitEvenly) {
+          // split the commission across the creators
+          const newCommissionShare = 100 / (creators.length + 1);
+          tmpCreators = creators.map((creator) => {
+            creator.salesCommissionShare = newCommissionShare;
+            return creator;
+          });
+
+          // and update the newly added
+          creator.salesCommissionShare = newCommissionShare;
+        }
+      }
+
+      const newCreators = [...tmpCreators, creator];
 
       updateValues(newCreators);
     }
@@ -197,55 +218,57 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
           Search here for persons you have already added (use * to show all)
         </small>
         {/* <form className="form-inline my-2 my-lg-0" noValidate id="addCreatorsFieldFilter"> */}
-        <input
-          className="form-control mr-sm-2"
-          type="search"
-          placeholder="Find ..."
-          aria-label="Find"
-          value={searchValue}
-          onChange={onSearchChange}
-          onKeyPress={onSearchKeyPress}
-          onBlur={onSearchBlur}
-        />
-        {!isLoading && filteredPersons && filteredPersons.length > 0 && (
-          <table className="table table-sm table-dark">
-            <thead className="thead">
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Alias</th>
-                <th scope="col">Status</th>
-                <th scope="col" className="text-center">
-                  Confirmed
-                </th>
-                {/* <th scope="col">Type</th> */}
-                <th scope="col">Add</th>
-                <th scope="col" className="text-right">
-                  <button type="button" tabIndex={-1} className="is-icon-button mr-1" onClick={() => onCloseSearch()}>
-                    <i className="fas fa-window-close icon-close"></i>
-                  </button>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredPersons.map((person: any) => (
-                <tr key={person.id}>
-                  <td>{person.id}</td>
-                  <td>{person.alias}</td>
-                  <td>{Status[person.status]}</td>
-                  <td className="text-center">
-                    {person.isConfirmed ? <i className="fas fa-certificate icon-confirmed"></i> : 'No'}
-                  </td>
-                  {/* <td>{PersonType[person.type]}</td> */}
-                  <td>
-                    <button type="button" className="btn btn-sm btn-success" onClick={() => onAdd(person.id)}>
-                      Add
+        <div className="form-inline my-2 my-lg-0">
+          <input
+            className="form-control mr-sm-2"
+            type="search"
+            placeholder="Find ..."
+            aria-label="Find"
+            value={searchValue}
+            onChange={onSearchChange}
+            onKeyPress={onSearchKeyPress}
+            onBlur={onSearchBlur}
+          />
+          {!isLoading && filteredPersons && filteredPersons.length > 0 && (
+            <table className="table table-sm table-dark">
+              <thead className="thead">
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Alias</th>
+                  <th scope="col">Status</th>
+                  <th scope="col" className="text-center">
+                    Confirmed
+                  </th>
+                  {/* <th scope="col">Type</th> */}
+                  <th scope="col">Add</th>
+                  <th scope="col" className="text-right">
+                    <button type="button" tabIndex={-1} className="is-icon-button mr-1" onClick={() => onCloseSearch()}>
+                      <i className="fas fa-window-close icon-close"></i>
                     </button>
-                  </td>
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+              </thead>
+              <tbody>
+                {filteredPersons.map((person: any) => (
+                  <tr key={person.id}>
+                    <td>{person.id}</td>
+                    <td>{person.alias}</td>
+                    <td>{Status[person.status]}</td>
+                    <td className="text-center">
+                      {person.isConfirmed ? <i className="fas fa-certificate icon-confirmed"></i> : 'No'}
+                    </td>
+                    {/* <td>{PersonType[person.type]}</td> */}
+                    <td>
+                      <button type="button" className="btn btn-sm btn-success" onClick={() => onAdd(person.id)}>
+                        Add
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
         {/* </form> */}
         <AddPersonModal
           show={showAddPersonModal}
@@ -254,93 +277,95 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
           onFailure={onCreatePersonFailure}
         />
         {/* <form noValidate className="mt-2" id="addCreatorsField"> */}
-        <div>
-          <table className="table table-sm table-bordered">
-            <thead className="thead-light">
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Alias</th>
-                {/* <th scope="col">Status</th> */}
-                <th scope="col">Type</th>
-                {/* <th scope="col" className="text-center">
+        <div className="mt-2">
+          <div>
+            <table className="table table-sm table-bordered">
+              <thead className="thead-light">
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Alias</th>
+                  {/* <th scope="col">Status</th> */}
+                  <th scope="col">Type</th>
+                  {/* <th scope="col" className="text-center">
                     Anonymous
                   </th> */}
-                <th scope="col" className="text-center">
-                  Commission
-                </th>
-                <th scope="col" className="text-center">
-                  Remove
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {!isLoading &&
-                creators &&
-                creators.map((creator: Creator) => (
-                  <tr key={creator.personId}>
-                    <td className="align-middle">{creator.personId}</td>
-                    <td className="align-middle">{creator.alias}</td>
-                    {/* <td>{Status[person.status]}</td> */}
-                    <td className="align-middle col-4">
-                      <Select
-                        name="type"
-                        options={creatorTypeOptions}
-                        defaultValue={{ label: CreatorType[creator.type], value: creator.type }}
-                        onChange={(value: any) => {
-                          updateCreator(creator.personId, { type: Number(value?.value) });
-                        }}
-                      />
-                    </td>
-                    {/* <td className="text-center">
+                  <th scope="col" className="text-center">
+                    Commission
+                  </th>
+                  <th scope="col" className="text-center">
+                    Remove
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {!isLoading &&
+                  creators &&
+                  creators.map((creator: Creator) => (
+                    <tr key={creator.personId}>
+                      <td className="align-middle">{creator.personId}</td>
+                      <td className="align-middle">{creator.alias}</td>
+                      {/* <td>{Status[person.status]}</td> */}
+                      <td className="align-middle col-4">
+                        <Select
+                          name="type"
+                          options={creatorTypeOptions}
+                          defaultValue={{ label: CreatorType[creator.type], value: creator.type }}
+                          onChange={(value: any) => {
+                            updateCreator(creator.personId, { type: Number(value?.value) });
+                          }}
+                        />
+                      </td>
+                      {/* <td className="text-center">
                         {person.isAnonymous ? <i className="fas fa-user-secret"></i> : 'Open'}
                       </td> */}
-                    <td className="align-middle">
-                      <input
-                        className="form-control"
-                        name="salesCommissionShare"
-                        value={creator.salesCommissionShare}
-                        onChange={(event) =>
-                          updateCreator(creator.personId, { salesCommissionShare: Number(event.target.value) })
-                        }
-                      />
+                      <td className="align-middle">
+                        <input
+                          className="form-control"
+                          name="salesCommissionShare"
+                          value={creator.salesCommissionShare}
+                          onChange={(event) =>
+                            updateCreator(creator.personId, { salesCommissionShare: Number(event.target.value) })
+                          }
+                        />
+                      </td>
+                      <td className="text-center align-middle">
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          className="btn btn-sm btn-outline-secondary"
+                          onClick={() => onRemove(creator.personId)}>
+                          <i className="fas fa-user-minus"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                {!isLoading && creators && (
+                  <tr>
+                    <td colSpan={3} className="text-right">
+                      <small className="text-muted">Total commission (must be 100)</small>
                     </td>
-                    <td className="text-center align-middle">
-                      <button
-                        type="button"
-                        tabIndex={-1}
-                        className="btn btn-sm btn-outline-secondary"
-                        onClick={() => onRemove(creator.personId)}>
-                        <i className="fas fa-user-minus"></i>
-                      </button>
+                    <td
+                      className={`text-center ${
+                        creatorsCommissionSum < 100 || creatorsCommissionSum > 100 ? 'is-invalid' : ''
+                      }`}>
+                      <small>
+                        <strong>{creatorsCommissionSum}</strong>
+                      </small>
                     </td>
+                    <td></td>
                   </tr>
-                ))}
-              {!isLoading && creators && (
-                <tr>
-                  <td colSpan={3} className="text-right">
-                    <small className="text-muted">Total commission (must be 100)</small>
-                  </td>
-                  <td
-                    className={`text-center ${
-                      creatorsCommissionSum < 100 || creatorsCommissionSum > 100 ? 'is-invalid' : ''
-                    }`}>
-                    <small>
-                      <strong>{creatorsCommissionSum}</strong>
-                    </small>
-                  </td>
-                  <td></td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-          <small id="addPersonHelpBlock2" className="form-text text-muted">
-            Add new person here if you don't find the person you are looking when searching.
-          </small>
-          <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowAddPersonModal(true)}>
-            Add New Person
-          </button>
+                )}
+              </tbody>
+            </table>
+            <small id="addPersonHelpBlock2" className="form-text text-muted">
+              Add new person here if you don't find the person you are looking when searching.
+            </small>
+            <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowAddPersonModal(true)}>
+              Add New Person
+            </button>
+          </div>
+          {/* </form> */}
         </div>
-        {/* </form> */}
       </div>
     </>
   );

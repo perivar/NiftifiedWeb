@@ -4,7 +4,8 @@ import * as Yup from 'yup';
 import { niftyService, alertService } from '../../_services';
 import CustomCreatableSelect from '../../_common/select/CustomCreatableSelect';
 import FocusError from '../../_common/FocusError';
-import UploadImageComponent from '../../_common/UploadComponent';
+// import UploadImageComponent from '../../_common/UploadComponent';
+import MyUploadComponent from '../../_common/MyUploadComponent';
 import * as Scroll from 'react-scroll';
 import { AddCreatorsField } from '../person/AddCreatorsField';
 import { AddOwnerField } from '../person/AddOwnerField';
@@ -48,8 +49,8 @@ const validationSchema = Yup.object().shape({
   creators: Yup.array().min(1, 'At least one creator is required'),
   creatorsCommissionSum: Yup.number()
     .integer()
-    .min(100, 'Commission must be a total of 100')
-    .max(100, 'Commission must be a total of 100'),
+    .min(100, 'Commission must sum up to 100 (percent)')
+    .max(100, 'Commission must sum up to 100 (percent)'),
   owner: Yup.mixed().required('An owner is required')
 });
 
@@ -63,7 +64,8 @@ const InnerForm = (props: any & FormikProps<FormValues>) => {
       <div className="form-row">
         <div className="col-lg-4">
           <div className="form-group">
-            <Field id="file" name="file" component={UploadImageComponent} />
+            {/* <Field id="file" name="file" component={UploadImageComponent} /> */}
+            <Field id="file" name="file" component={MyUploadComponent} />
             <div className="ml-3">
               <ErrorMessage name="file" component="div" className="invalid-feedback show-block" />
             </div>
