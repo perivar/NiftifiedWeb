@@ -194,7 +194,7 @@ namespace Niftified.Services
 			edition.Created = DateTime.UtcNow;
 
 			// store file
-			if (model.File.Length > 0)
+			if (model.File != null && model.File.Length > 0)
 			{
 				edition.DataSourceFileType = model.File.ContentType;
 				edition.DataSourceFileSize = model.File.Length;
@@ -206,13 +206,21 @@ namespace Niftified.Services
 				var fileName = string.Format("{0}{1}", Path.GetRandomFileName().Replace(".", string.Empty), extension);
 				var filePath = Path.Combine(_appSettings.StoredFilesPath, fileName);
 
+				// create the StoredFilesPath directory, if it doesn't already exist
+				string storedFilesPath = Path.GetDirectoryName(_appSettings.StoredFilesPath);
+				if (!Directory.Exists(storedFilesPath))
+				{
+					Directory.CreateDirectory(storedFilesPath);
+				}
+
 				using (var stream = System.IO.File.Create(filePath))
 				{
 					model.File.CopyTo(stream);
 				}
 
 				edition.DataSourceFileName = fileName;
-				edition.DataSourcePath = filePath;
+				// TODO: why would we store the full path?
+				// edition.DataSourcePath = filePath;
 			}
 
 			// add missing lists that the auto mapper didn't fix
@@ -229,10 +237,16 @@ namespace Niftified.Services
 			}
 
 			/// OWNER
-			// make sure there is a person created for this account, since this person / account
-			// will be the initial owner 
-			var ownerPerson = _context.Persons.Where(p => p.AccountId == model.AccountId).Include(p => p.Wallets).FirstOrDefault();
-
+			Person owner = null;
+			if (model.OwnerPersonId > 0)
+			{
+				owner = _context.Persons.Find(model.OwnerPersonId);
+			}
+			if (owner == null)
+			{
+				// var owner = _context.Persons.Where(p => p.AccountId == model.AccountId).Include(p => p.Wallets).FirstOrDefault();
+				throw new AppException("Owner not found!");
+			}
 
 			// CREATORS
 			var creators = new List<Creator>();
@@ -260,7 +274,7 @@ namespace Niftified.Services
 			else
 			{
 				// something is wrong
-				throw new AppException("The creators ids and the creators shares needs to exist and have the same count!");
+				throw new AppException("The Creators ids and the Creators commision shares needs to exist and have the same count!");
 			}
 
 			// add volumes up to VolumeTotal
@@ -271,7 +285,7 @@ namespace Niftified.Services
 				volume.Created = DateTime.UtcNow;
 				volume.EditionNumber = i + 1;
 
-				volume.Owner = ownerPerson;
+				volume.Owner = owner;
 				volume.Status = VolumeStatus.Pending;
 				volume.Type = VolumeType.Auction;
 				volume.CurrencyUniqueId = model.CurrencyUniqueId;

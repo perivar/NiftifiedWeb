@@ -140,7 +140,10 @@ export const ListPersons = ({ history }: { history: any; match: any }) => {
                             Edit
                           </Link>
                           {!isLoading ? (
-                            <button onClick={() => confirmDelete(person.id)} className="btn btn-sm btn-danger">
+                            <button
+                              type="button"
+                              onClick={() => confirmDelete(person.id)}
+                              className="btn btn-sm btn-danger">
                               Delete
                             </button>
                           ) : (

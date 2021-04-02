@@ -30,7 +30,7 @@ const rejectStyle: CSSProperties = {
   borderColor: '#ff1744'
 };
 
-function UploadImageComponent({ field, form }: FieldProps) {
+function UploadImageComponent({ form }: FieldProps) {
   const { setFieldValue } = form; // access formiks values
 
   // set initial value using formiks values for form.values and field.name
@@ -38,6 +38,7 @@ function UploadImageComponent({ field, form }: FieldProps) {
   const [files, setFiles] = useState<any>([]);
 
   const { getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject } = useDropzone({
+    noDragEventsBubbling: true, // try to stop automatic page refresh
     accept: 'image/*',
     multiple: false,
     onDrop: (acceptedFiles) => {

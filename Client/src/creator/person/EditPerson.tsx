@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Formik, FormikHelpers, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { niftyService, alertService } from '../../_services';
@@ -6,10 +6,8 @@ import CustomSelect from '../../_common/select/CustomSelect';
 import FocusError from '../../_common/FocusError';
 import * as Scroll from 'react-scroll';
 import { Link } from 'react-router-dom';
-import { makeWallet } from '../wallet/GenerateWallet';
-import { encrypt, decrypt } from '../wallet/webcrypto';
 import { FormValues } from './NewPerson';
-import { Status, WalletType, statusOptions } from '../../_common/enums';
+import { statusOptions } from '../../_common/enums';
 
 const scroll = Scroll.animateScroll;
 
@@ -106,7 +104,7 @@ export const EditPersonForm = ({ history, match }: { history: any; match: any })
       ) : (
         <div className="container-fluid">
           <Formik initialValues={initialValues} onSubmit={onSubmit} validationSchema={validationSchema}>
-            {({ values, errors, touched, isSubmitting }) => (
+            {({ errors, touched, isSubmitting }) => (
               <Form noValidate>
                 <div className="form-row">
                   <div className="col">
@@ -157,7 +155,6 @@ export const EditPersonForm = ({ history, match }: { history: any; match: any })
                       />
                       <ErrorMessage name="status" component="div" className="invalid-feedback  show-block" />
                     </div>
-
                     {/* <div className="form-group">
                       <label htmlFor="type">Type</label>
                       <Field
@@ -170,22 +167,6 @@ export const EditPersonForm = ({ history, match }: { history: any; match: any })
                         isMulti={false}
                       />
                       <ErrorMessage name="type" component="div" className="invalid-feedback  show-block" />
-                    </div> */}
-
-                    {/* <div className="form-group">
-                      <label htmlFor="theme">Sales Commission Share (out of 100)</label>
-                      <Field
-                        id="salesCommissionShare"
-                        name="salesCommissionShare"
-                        type="number"
-                        className={`form-control${
-                          errors.salesCommissionShare && touched.salesCommissionShare ? ' is-invalid' : ''
-                        }`}
-                      />
-                      <small id="salesCommissionShare" className="form-text text-muted">
-                        This is the share in percentage of creator. If Sole Creator, this is 100.
-                      </small>
-                      <ErrorMessage name="salesCommissionShare" component="div" className="invalid-feedback" />
                     </div> */}
                   </div>
                 </div>

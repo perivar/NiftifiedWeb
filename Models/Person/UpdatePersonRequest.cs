@@ -29,8 +29,6 @@ namespace Niftified.Models.Persons
 		}
 		public bool IsConfirmed { get; set; } // is this person confirmed, used when being a confirmed Creator 
 
-		public List<int> WalletIds { get; set; }
-
 		private string replaceEmptyWithNull(string value)
 		{
 			// replace empty string with null to make field optional

@@ -21,7 +21,7 @@ export const useCreatorContext = () => {
   return creatorContext;
 };
 
-// impoement the values as a facade pattern
+// implement the values as a facade pattern
 // see https://wanago.io/2020/09/28/react-context-api-hooks-typescript/
 const useCreatorContextValue = (): CreatorContextData => {
   // global state variables

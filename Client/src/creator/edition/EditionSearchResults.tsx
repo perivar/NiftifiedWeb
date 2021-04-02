@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { niftyService } from '../../_services';
 
+// read from .env files
+const config = { storedFilesPath: process.env.REACT_APP_STORED_FILES_PATH };
+
 export const EditionSearchResults = ({ match }: { match: any }) => {
   const { path } = match;
   const { query } = match.params;
@@ -54,7 +57,7 @@ export const EditionSearchResults = ({ match }: { match: any }) => {
                           alt={edition.name}
                           height="150"
                           width="150"
-                          src={`/stored-images/${edition.dataSourceFileName}`}></img>
+                          src={`${config.storedFilesPath}/${edition.dataSourceFileName}`}></img>
                       </td>
                       <td>{edition.id}</td>
                       <td>{edition.name}</td>

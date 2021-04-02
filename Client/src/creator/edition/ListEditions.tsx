@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import { niftyService } from '../../_services';
 import ConfirmModal from '../../_common/ConfirmModal';
 
+// read from .env files
+const config = { storedFilesPath: process.env.REACT_APP_STORED_FILES_PATH };
+
 export const ListEditions = ({ match }: { match: any }) => {
   const { path } = match;
 
@@ -103,7 +106,7 @@ export const ListEditions = ({ match }: { match: any }) => {
                           alt={edition.name}
                           height="80"
                           width="80"
-                          src={`/stored-images/${edition.dataSourceFileName}`}></img>
+                          src={`${config.storedFilesPath}/${edition.dataSourceFileName}`}></img>
                       </td>
                       <td>{edition.id}</td>
                       <td>{edition.name}</td>
@@ -125,7 +128,10 @@ export const ListEditions = ({ match }: { match: any }) => {
                         {!isLoading ? (
                           // editionsEditable && editionsEditable[edition.id] ? (
                           // edition && edition.volumes && edition.volumes.every((v: any) => v.status === 0) ? (
-                          <button onClick={() => confirmDelete(edition.id)} className="btn btn-sm btn-danger">
+                          <button
+                            type="button"
+                            onClick={() => confirmDelete(edition.id)}
+                            className="btn btn-sm btn-danger">
                             Delete
                           </button>
                         ) : (

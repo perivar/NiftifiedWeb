@@ -56,7 +56,9 @@ export const Item = (props: ItemProps) => {
               tabIndex={0}
             />
             <div>
-              <button className="btn btn-primary btn-sm mt-1">Place a bid</button>
+              <button type="button" className="btn btn-primary btn-sm mt-1">
+                Place a bid
+              </button>
             </div>
           </div>
         </div>

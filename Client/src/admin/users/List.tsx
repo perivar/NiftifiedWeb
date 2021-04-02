@@ -56,8 +56,9 @@ function List({ match }: { match: any }) {
                     Edit
                   </Link>
                   <button
-                    onClick={() => deleteUser(user.id)}
+                    type="button"
                     className="btn btn-sm btn-danger"
+                    onClick={() => deleteUser(user.id)}
                     style={{ width: '60px' }}
                     disabled={user.isDeleting}>
                     {user.isDeleting ? <span className="spinner-border spinner-border-sm"></span> : <span>Delete</span>}

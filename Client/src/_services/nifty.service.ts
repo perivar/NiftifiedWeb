@@ -101,17 +101,19 @@ function createEdition(params: any) {
     accountId,
     languageCode: user && user.languageCode ? user.languageCode : 'no-NO',
     currencyUniqueId: params.currencyUniqueId ? params.currencyUniqueId : 'NFY',
-    tagIds: params.tags.map((a: any) => a.value),
+    tagIds: params.tags ? params.tags.map((a: any) => a.value) : [],
     collectionId: params.collection ? params.collection.value : '',
-    creatorPersonIds: params.creators.map((a: any) => a.personId),
-    creatorCommissionShares: params.creators.map((a: any) => a.salesCommissionShare),
-    creatorPersonAliases: params.creators.map((a: any) => a.alias),
-    creatorPersonTypes: params.creators.map((a: any) => a.type)
+    ownerPersonId: params.owner ? params.owner.id : 0,
+    creatorPersonIds: params.creators ? params.creators.map((a: any) => a.personId) : [],
+    creatorCommissionShares: params.creators ? params.creators.map((a: any) => a.salesCommissionShare) : [],
+    creatorPersonAliases: params.creators ? params.creators.map((a: any) => a.alias) : [],
+    creatorPersonTypes: params.creators ? params.creators.map((a: any) => a.type) : []
   };
 
   // delete params that should not be included in the post
   delete params['tags'];
   delete params['collection'];
+  delete params['owner'];
   delete params['creators'];
 
   // merge params
@@ -127,17 +129,19 @@ function updateEdition(id: string, params: any) {
     accountId,
     languageCode: user && user.languageCode ? user.languageCode : 'no-NO',
     currencyUniqueId: params.currencyUniqueId ? params.currencyUniqueId : 'NFY',
-    tagIds: params.tags.map((a: any) => a.value),
+    tagIds: params.tags ? params.tags.map((a: any) => a.value) : [],
     collectionId: params.collection ? params.collection.value : '',
-    creatorPersonIds: params.creators.map((a: any) => a.personId),
-    creatorCommissionShares: params.creators.map((a: any) => a.salesCommissionShare),
-    creatorPersonAliases: params.creators.map((a: any) => a.alias),
-    creatorPersonTypes: params.creators.map((a: any) => a.type)
+    ownerPersonId: params.owner ? params.owner.id : 0,
+    creatorPersonIds: params.creators ? params.creators.map((a: any) => a.personId) : [],
+    creatorCommissionShares: params.creators ? params.creators.map((a: any) => a.salesCommissionShare) : [],
+    creatorPersonAliases: params.creators ? params.creators.map((a: any) => a.alias) : [],
+    creatorPersonTypes: params.creators ? params.creators.map((a: any) => a.type) : []
   };
 
   // delete params that should not be included in the post
   delete params['tags'];
   delete params['collection'];
+  delete params['owner'];
   delete params['creators'];
 
   // merge params

@@ -59,7 +59,7 @@ const ImgPrev = () => {
         </label>
         <img src={src} alt={alt} className="form-img__img-preview" />
       </div>
-      <button className="btn btn-outline-primary" onClick={onFileUpload}>
+      <button type="button" className="btn btn-outline-primary" onClick={onFileUpload}>
         Upload
       </button>
     </form>

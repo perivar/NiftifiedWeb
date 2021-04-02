@@ -97,8 +97,8 @@ function Table({ columns, data, currentpage, setPage, perPage, setPerPage, total
         <ul className="pagination">
           <li className={`page-item ${currentpage === 1 && 'disabled'}`}>
             <button
-              className="page-link"
               type="button"
+              className="page-link"
               onClick={() => {
                 setPage(1);
               }}>
@@ -112,7 +112,7 @@ function Table({ columns, data, currentpage, setPage, perPage, setPerPage, total
             if (visiblePiece.type === 'ellipsis') {
               return (
                 <li key={key} className="page-item disabled">
-                  <button className="page-link" type="button">
+                  <button type="button" className="page-link">
                     &hellip;
                   </button>
                 </li>
@@ -127,8 +127,8 @@ function Table({ columns, data, currentpage, setPage, perPage, setPerPage, total
               return (
                 <li key={key} className={`page-item ${className}`}>
                   <button
-                    className="page-link"
                     type="button"
+                    className="page-link"
                     aria-label={`Goto page ${pageNumber}`}
                     onClick={() => {
                       setPage(pageNumber);
@@ -143,8 +143,8 @@ function Table({ columns, data, currentpage, setPage, perPage, setPerPage, total
               return (
                 <li key={key} className={`page-item ${currentpage === 1 && 'disabled'}`}>
                   <button
-                    className="page-link"
                     type="button"
+                    className="page-link"
                     onClick={() => {
                       setPage(pageNumber);
                     }}>
@@ -157,8 +157,8 @@ function Table({ columns, data, currentpage, setPage, perPage, setPerPage, total
               return (
                 <li key={key} className={`page-item ${currentpage === totalPage && 'disabled'}`}>
                   <button
-                    className="page-link"
                     type="button"
+                    className="page-link"
                     onClick={() => {
                       setPage(pageNumber);
                     }}>
@@ -172,8 +172,8 @@ function Table({ columns, data, currentpage, setPage, perPage, setPerPage, total
           })}
           <li className={`page-item ${currentpage === totalPage && 'disabled'}`}>
             <button
-              className="page-link"
               type="button"
+              className="page-link"
               onClick={() => {
                 setPage(totalPage);
               }}>

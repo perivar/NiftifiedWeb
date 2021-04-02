@@ -130,7 +130,7 @@ namespace Niftified.Controllers
 			// check raw parameters
 			// var form = Request.Form;
 
-			// Check if the request contains multipart/form-data.
+			// Check if the request contains multipart / form - data.
 			if (model.File == null)
 			{
 				return new UnsupportedMediaTypeResult();

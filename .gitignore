@@ -5,3 +5,4 @@
 /Client/src/debug.log
 NiftifiedDatabase.db
 /.env
+/Client/public/stored-images

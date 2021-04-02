@@ -4,6 +4,9 @@ import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { chargeService, accountService, alertService } from '../../_services';
 import { ProductList, Product } from './types';
 
+// read from .env files
+const config = { storedFilesPath: process.env.REACT_APP_STORED_FILES_PATH };
+
 // import './stripe_styles.scss';
 
 const CARD_OPTIONS: StripeCardElementOptions = {
@@ -245,7 +248,7 @@ export const StripeCheckoutForm = ({ productList }: { productList: ProductList |
                                 <img
                                   alt={p.name}
                                   className="img-fluid"
-                                  src={`/stored-images/${p.dataSourceFileName}`}></img>
+                                  src={`${config.storedFilesPath}/${p.dataSourceFileName}`}></img>
                               </div>
                               <div className="col-8">
                                 <div className="row">

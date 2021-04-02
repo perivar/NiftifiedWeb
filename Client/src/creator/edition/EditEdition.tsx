@@ -8,6 +8,9 @@ import * as Scroll from 'react-scroll';
 import { Creator, AddCreatorsField } from '../person/AddCreatorsField';
 import { Link } from 'react-router-dom';
 
+// read from .env files
+const config = { storedFilesPath: process.env.REACT_APP_STORED_FILES_PATH };
+
 const scroll = Scroll.animateScroll;
 
 export interface EditFormValues {
@@ -28,7 +31,7 @@ export interface EditFormValues {
 }
 
 export const EditEditionForm = ({ history, match }: { history: any; match: any }) => {
-  const { path } = match;
+  // const { path } = match;
   const { id } = match.params;
 
   const [isLoading, setLoading] = useState<boolean>(false);
@@ -145,7 +148,7 @@ export const EditEditionForm = ({ history, match }: { history: any; match: any }
                       <img
                         className="img-thumbnail"
                         alt={edition.name}
-                        src={`/stored-images/${edition.dataSourceFileName}`}></img>
+                        src={`${config.storedFilesPath}/${edition.dataSourceFileName}`}></img>
                     </div>
                   </div>
                   <div className="col-lg">

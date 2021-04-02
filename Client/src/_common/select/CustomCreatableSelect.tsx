@@ -53,7 +53,7 @@ export const CustomCreatableSelect = ({
     setValue(newValue);
 
     // and set formik field value
-    console.log(`setting ${field.name} to ${newValue}`);
+    console.log(`setting ${field.name} to ${JSON.stringify(newValue, null, 2)}`);
     form.setFieldValue(field.name, newValue);
     console.groupEnd();
   };

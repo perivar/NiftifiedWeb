@@ -6,7 +6,6 @@ import CustomCreatableSelect from '../../_common/select/CustomCreatableSelect';
 import FocusError from '../../_common/FocusError';
 import UploadImageComponent from '../../_common/UploadComponent';
 import * as Scroll from 'react-scroll';
-// import { Link } from 'react-router-dom';
 import { AddCreatorsField } from '../person/AddCreatorsField';
 import { AddOwnerField } from '../person/AddOwnerField';
 import { Link } from 'react-router-dom';

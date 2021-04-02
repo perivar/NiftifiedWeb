@@ -139,8 +139,12 @@ function ItemDetail({ match }: { match: any }) {
             <div className="h3">{bids} NFYs</div>
           </div>
           <div className="mb-2">
-            <button className="btn btn-primary btn-lg mb-3 mr-3">Buy now</button>
-            <button className="btn btn-info btn-lg mb-3">Place a bid</button>
+            <button type="button" className="btn btn-primary btn-lg mb-3 mr-3">
+              Buy now
+            </button>
+            <button type="button" className="btn btn-info btn-lg mb-3">
+              Place a bid
+            </button>
           </div>
           <div className="h6 mb-2">
             {tagLine} by {curOwner}

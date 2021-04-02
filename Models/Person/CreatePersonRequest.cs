@@ -16,8 +16,6 @@ namespace Niftified.Models.Persons
 		[EnumDataType(typeof(Status))]
 		public string Status { get; set; }
 		public bool IsConfirmed { get; set; } // is this person confirmed, used when being a confirmed Creator 
-		public List<int> WalletIds { get; set; }
-
 
 		// section for information used for the blockchain 
 		// private and protected key
