@@ -31,6 +31,7 @@ services:
 
     volumes:
       - niftyapi-db:/app/db
+      - niftyapi-files:/app/wwwroot/files
 
   niftyclient:
     container_name: niftified.client
@@ -48,6 +49,8 @@ services:
 
 volumes:
   niftyapi-db:
+    driver: local
+  niftyapi-files:
     driver: local
 
 # Remember to start the network before running this file:
