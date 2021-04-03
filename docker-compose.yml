@@ -25,8 +25,12 @@ services:
 
     expose:
       - "5050"
+
     ports:
       - "5050:5050"
+
+    volumes:
+		- niftyapi-db:/app/db
 
   niftyclient:
     container_name: niftified.client
@@ -38,8 +42,13 @@ services:
 
     expose:
       - "5151"
+	  
     ports:
       - "5151:5151"
+
+volumes:
+	niftyapi-db:
+   		driver: local
 
 # Remember to start the network before running this file:
 # $ docker network create mydockernet
