@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Stripe;
 using System.Linq;
+using Niftified.Hubs;
 
 namespace WebApi
 {
@@ -58,38 +59,40 @@ namespace WebApi
 			services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 			services.AddSwaggerGen(c =>
+			{
+				// add support for account model (otherwise it crashes with stripe account model)
+				c.CustomSchemaIds(type => type.ToString());
+
+				c.SwaggerDoc("v1", new OpenApiInfo { Title = "Niftified-Service", Version = "v1" });
+
+				c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
 				{
-					// add support for account model (otherwise it crashes with stripe account model)
-					c.CustomSchemaIds(type => type.ToString());
-
-					c.SwaggerDoc("v1", new OpenApiInfo { Title = "Niftified-Service", Version = "v1" });
-
-					c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-					{
-						Name = "Authorization",
-						Type = SecuritySchemeType.ApiKey,
-						Scheme = "Bearer",
-						BearerFormat = "JWT",
-						In = ParameterLocation.Header,
-						Description = "JWT Authorization header using the Bearer scheme."
-					});
-
-					c.AddSecurityRequirement(new OpenApiSecurityRequirement
-					{
-			 {
-				   new OpenApiSecurityScheme
-					 {
-						 Reference = new OpenApiReference
-						 {
-							 Type = ReferenceType.SecurityScheme,
-							 Id = "Bearer"
-						 }
-					 },
-					 new string[] {}
-
-			 }
-					});
+					Name = "Authorization",
+					Type = SecuritySchemeType.ApiKey,
+					Scheme = "Bearer",
+					BearerFormat = "JWT",
+					In = ParameterLocation.Header,
+					Description = "JWT Authorization header using the Bearer scheme."
 				});
+
+				c.AddSecurityRequirement(new OpenApiSecurityRequirement
+				{
+					{
+						new OpenApiSecurityScheme
+						{
+							Reference = new OpenApiReference
+							{
+								Type = ReferenceType.SecurityScheme,
+								Id = "Bearer"
+							}
+						},
+						new string[] {}
+					}
+				});
+			});
+
+			// Enable SignalR
+			services.AddSignalR();
 
 			// configure strongly typed settings object
 			services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
@@ -119,10 +122,19 @@ namespace WebApi
 				app.UseDeveloperExceptionPage();
 				app.UseDatabaseErrorPage();
 			}
+			else
+			{
+				// app.UseExceptionHandler("/Home/Error");
+				app.UseHsts();
+			}
 
 			// generated swagger json and swagger ui middleware
 			app.UseSwagger();
 			app.UseSwaggerUI(x => x.SwaggerEndpoint("/swagger/v1/swagger.json", "Niftified API"));
+
+			// app.UseHttpsRedirection();
+			// Static files are accessible via a path relative to the web root (wwwroot)
+			app.UseStaticFiles();
 
 			app.UseRouting();
 
@@ -139,7 +151,11 @@ namespace WebApi
 			// custom jwt auth middleware
 			app.UseMiddleware<JwtMiddleware>();
 
-			app.UseEndpoints(x => x.MapControllers());
+			app.UseEndpoints(endpoints =>
+			{
+				endpoints.MapHub<NiftySignalRHub>("/niftyhub");
+				endpoints.MapControllers();
+			});
 		}
 	}
 }

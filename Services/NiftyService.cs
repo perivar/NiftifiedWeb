@@ -207,10 +207,10 @@ namespace Niftified.Services
 				var filePath = Path.Combine(_appSettings.StoredFilesPath, fileName);
 
 				// create the StoredFilesPath directory, if it doesn't already exist
-				string storedFilesPath = Path.GetDirectoryName(_appSettings.StoredFilesPath);
-				if (!Directory.Exists(storedFilesPath))
+				string storedFilesDir = Path.GetDirectoryName(filePath);
+				if (!Directory.Exists(storedFilesDir))
 				{
-					Directory.CreateDirectory(storedFilesPath);
+					Directory.CreateDirectory(storedFilesDir);
 				}
 
 				using (var stream = System.IO.File.Create(filePath))
