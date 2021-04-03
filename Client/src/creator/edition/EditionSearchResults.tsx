@@ -30,7 +30,7 @@ export const EditionSearchResults = ({ match }: { match: any }) => {
 
   return (
     <>
-      <Link className="btn btn-primary" to={`${path}/edition/new`}>
+      <Link className="btn btn-primary" to={`/creator/edition/new`}>
         Create New Edition
       </Link>
       <div className="container mt-4">
