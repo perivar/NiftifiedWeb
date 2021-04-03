@@ -64,16 +64,18 @@ export const NewPersonForm = ({ history }: { history: any }) => {
       values.publicKey = wallet.publicKey;
       values.publicKeyHash = wallet.publicKeyHash;
       values.publicAddress = wallet.publicAddress;
-      // values.privateKeyEncrypted = wallet.privateKey;
-      // values.privateKeyWIFEncrypted = wallet.privateKeyWIF;
 
-      // TODO remove this
+      // TODO - do not save the private key in production
+      // only while debugging
+      // the same for generate wallet - remove the debug lines
+      values.privateKeyEncrypted = wallet.privateKey;
+      values.privateKeyWIFEncrypted = wallet.privateKeyWIF;
       // but keep both the unencoded and the encoded private key WIF to check
-      values.privateKeyEncrypted = wallet.privateKeyWIF;
+      // values.privateKeyEncrypted = wallet.privateKeyWIF;
 
       encrypt(wallet.privateKeyWIF)
         .then((encryptedData) => {
-          values.privateKeyWIFEncrypted = encryptedData;
+          // values.privateKeyWIFEncrypted = encryptedData;
 
           niftyService
             .createPerson(values)
@@ -157,22 +159,6 @@ export const NewPersonForm = ({ history }: { history: any }) => {
                       isMulti={false}
                     />
                     <ErrorMessage name="type" component="div" className="invalid-feedback  show-block" />
-                  </div> */}
-
-                  {/* <div className="form-group">
-                    <label htmlFor="theme">Sales Commission Share (out of 100)</label>
-                    <Field
-                      id="salesCommissionShare"
-                      name="salesCommissionShare"
-                      type="number"
-                      className={`form-control${
-                        errors.salesCommissionShare && touched.salesCommissionShare ? ' is-invalid' : ''
-                      }`}
-                    />
-                    <small id="salesCommissionShare" className="form-text text-muted">
-                      This is the share in percentage of creator. If Sole Creator, this is 100.
-                    </small>
-                    <ErrorMessage name="salesCommissionShare" component="div" className="invalid-feedback" />
                   </div> */}
                 </div>
               </div>

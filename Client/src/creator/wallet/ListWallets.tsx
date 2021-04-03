@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { niftyService } from '../../_services';
+import QRCode from 'qrcode.react';
 
 export enum WalletType {
   Nifty,
@@ -39,7 +40,7 @@ export const ListWallets = ({ match }: { match: any }) => {
         <div className="row">
           <div className="col">
             <h4>Wallets</h4>
-            <div className="card-deck">
+            <div className="card-deck m-5">
               {!isLoading &&
                 wallets &&
                 wallets.map((wallet: any) => (
@@ -52,19 +53,51 @@ export const ListWallets = ({ match }: { match: any }) => {
                             <strong>Type:</strong> {WalletType[wallet.type]}
                           </li>
                           <li className="list-group-item">
-                            <strong>PrivateKeyEncrypted:</strong> {wallet.privateKeyEncrypted}
+                            <div className="mb-2">
+                              <strong>Private Key WIF (Encrypted):</strong>
+                            </div>
+                            <div>
+                              <QRCode
+                                value={wallet.privateKeyWIFEncrypted}
+                                size={1280}
+                                bgColor={'#ffffff'}
+                                fgColor={'#000000'}
+                                level={'H'}
+                                includeMargin={false}
+                                renderAs={'canvas'}
+                                style={{ width: '164px', height: '164px' }}
+                              />
+                            </div>
+                            <code>{wallet.privateKeyWIFEncrypted}</code>
                           </li>
                           <li className="list-group-item">
-                            <strong>PrivateKeyWIFEncrypted:</strong> {wallet.privateKeyWIFEncrypted}
+                            <strong>Private Key Hexadecimal Format (64 characters [0-9A-F]) (Encrypted):</strong>{' '}
+                            <code>{wallet.privateKeyEncrypted}</code>
+                          </li>
+
+                          <li className="list-group-item">
+                            <div className="mb-2">
+                              <strong>Public Address:</strong>
+                            </div>
+                            <div>
+                              <QRCode
+                                value={wallet.publicAddress}
+                                size={1280}
+                                bgColor={'#ffffff'}
+                                fgColor={'#000000'}
+                                level={'H'}
+                                includeMargin={false}
+                                renderAs={'canvas'}
+                                style={{ width: '132px', height: '132px' }}
+                              />
+                            </div>
+                            <code>{wallet.publicAddress}</code>
                           </li>
                           <li className="list-group-item">
-                            <strong>PublicAddress:</strong> {wallet.publicAddress}
+                            <strong>Public Key (130 characters [0-9A-F]):</strong> <code>{wallet.publicKey}</code>
                           </li>
                           <li className="list-group-item">
-                            <strong>PublicKey:</strong> {wallet.publicKey}
-                          </li>
-                          <li className="list-group-item">
-                            <strong>PublicKeyHash:</strong> {wallet.publicKeyHash}
+                            <strong>PublicKey Hash:</strong> <code>{wallet.publicKeyHash}</code>
                           </li>
                         </ul>
                       </div>

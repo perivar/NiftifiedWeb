@@ -1,4 +1,5 @@
 // for generating wallet
+// check https://gist.github.com/tgoldenberg/f5f50386f4a47a6de817610e662bcb2e
 import base58 from 'bs58';
 import { ec } from 'elliptic';
 import ripemd160 from 'ripemd160';
@@ -26,7 +27,7 @@ export const bytesToHex = (bytes: number[]): string => {
 };
 
 // hash with both SHA-256 and RIPEMD-160 algorithms
-export const Hash = (msg: string) => {
+export const HashSHAandRIPE = (msg: string) => {
   const hash = sha256(Buffer.from(msg, 'hex'));
   return new ripemd160().update(Buffer.from(hash, 'hex')).digest();
 };
@@ -34,7 +35,7 @@ export const Hash = (msg: string) => {
 // get a base58 encoded address given a user's public key
 export const getAddress = (publicKey: string) => {
   // generate public key hash
-  const publicKeyHash = Hash(publicKey);
+  const publicKeyHash = HashSHAandRIPE(publicKey);
   console.log('> Public key hash created: ', publicKeyHash.toString('hex'));
 
   // generate public address
@@ -50,8 +51,9 @@ export const getAddress = (publicKey: string) => {
  * @param {String} publicKeyHash
  */
 export const createPrivateKeyWIF = (privateKey: string) => {
-  // step 1 - add prefix "80" in hex
-  const step1 = Buffer.from(`80${privateKey}`, 'hex');
+  // step 1 - add prefix "35" in hex (0x35 for niftycoin, 0x80 for bitcoin, 0xB0 for litecoin)
+  // base58Prefixes[SECRET_KEY]
+  const step1 = Buffer.from(`35${privateKey}`, 'hex');
   // step 2 - create SHA256 hash of step 1
   const step2 = sha256(step1);
   // step 3 - create SHA256 hash of step 2
@@ -71,8 +73,9 @@ export const createPrivateKeyWIF = (privateKey: string) => {
  * @param {String} publicKeyHash
  */
 export const createPublicAddress = (publicKeyHash: string) => {
-  // step 1 - add prefix "00" in hex
-  const step1 = Buffer.from(`00${publicKeyHash}`, 'hex');
+  // step 1 - add prefix "35" in hex (0x35 for niftycoin, 0x00 for bitcoin, 0x30 for litecoin)
+  // base58Prefixes[PUBKEY_ADDRESS]
+  const step1 = Buffer.from(`35${publicKeyHash}`, 'hex');
   // step 2 - create SHA256 hash of step 1
   const step2 = sha256(step1);
   // step 3 - create SHA256 hash of step 2
@@ -112,11 +115,11 @@ export const makeWallet = () => {
 
   // generate public key from private
   const keys = ecdsa.keyFromPrivate(privateKey);
-  const publicKey = keys.getPublic('hex');
+  const publicKey = keys.getPublic('hex').toUpperCase();
   console.log('> Public key created: ', publicKey);
 
   // generate public key hash
-  const publicKeyHash = Hash(publicKey);
+  const publicKeyHash = HashSHAandRIPE(publicKey);
   console.log('> Public key hash created: ', publicKeyHash.toString('hex'));
 
   // generate public address
@@ -128,9 +131,9 @@ export const makeWallet = () => {
   console.log('> Private key WIF (wallet import format) created : ', privateKeyWIF);
 
   const wallet = {
-    privateKey: privateKey.toString('hex'),
+    privateKey: privateKey.toString('hex').toUpperCase(),
     publicKey,
-    publicKeyHash: publicKeyHash.toString('hex'),
+    publicKeyHash: publicKeyHash.toString('hex').toUpperCase(),
     privateKeyWIF,
     publicAddress
   };

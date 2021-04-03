@@ -150,16 +150,18 @@ const enhanceWithFormik = withFormik<OtherProps, FormValues>({
       values.publicKey = wallet.publicKey;
       values.publicKeyHash = wallet.publicKeyHash;
       values.publicAddress = wallet.publicAddress;
-      // values.privateKeyEncrypted = wallet.privateKey;
-      // values.privateKeyWIFEncrypted = wallet.privateKeyWIF;
 
-      // TODO remove this
+      // TODO - do not save the private key in production
+      // only while debugging
+      // the same for generate wallet - remove the debug lines
+      values.privateKeyEncrypted = wallet.privateKey;
+      values.privateKeyWIFEncrypted = wallet.privateKeyWIF;
       // but keep both the unencoded and the encoded private key WIF to check
-      values.privateKeyEncrypted = wallet.privateKeyWIF;
+      // values.privateKeyEncrypted = wallet.privateKeyWIF;
 
       encrypt(wallet.privateKeyWIF)
         .then((encryptedData) => {
-          values.privateKeyWIFEncrypted = encryptedData;
+          // values.privateKeyWIFEncrypted = encryptedData;
 
           niftyService
             .createPerson(values)
