@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, CSSProperties } from 'react';
+import React, { useState } from 'react';
 import { FieldProps } from 'formik';
 
 function MyUploadComponent({ field, form }: FieldProps) {
@@ -10,8 +10,7 @@ function MyUploadComponent({ field, form }: FieldProps) {
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event && event.target && event.target.files) {
-      event.preventDefault(); // make sure the form isn't submitted as well
-
+      // TODO support more than one file
       const fileInfo = event.target.files[0];
       setFileInfo(fileInfo);
 
@@ -27,6 +26,18 @@ function MyUploadComponent({ field, form }: FieldProps) {
     }
   };
 
+  const Thumbs = () => {
+    // TODO: support more than one file?
+    if (fileInfo && fileInfo.type.startsWith('image/')) {
+      return (
+        <div>
+          <img className="img-thumbnail" src={fileData} alt={fileInfo.name} />
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <section className="container-fluid">
       <input
@@ -34,18 +45,14 @@ function MyUploadComponent({ field, form }: FieldProps) {
         name="fileUpload"
         className="form-control-file"
         type="file"
-        accept="image/*"
+        accept="image/*, audio/*"
         multiple={false}
         onChange={handleFileUpload}
       />
       {fileInfo && (
         <>
           <aside className="mt-2">
-            <div key={fileInfo.name}>
-              <div>
-                <img className="img-thumbnail" src={fileData} alt={fileInfo.name} />
-              </div>
-            </div>
+            <Thumbs />
           </aside>
           <small>
             <ul className="list-unstyled mt-2">

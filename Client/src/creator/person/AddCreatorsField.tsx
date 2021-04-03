@@ -18,6 +18,8 @@ export interface Creator {
 }
 
 const ENTER_KEY = 13;
+const COMMA_KEY = 44;
+const DOT_KEY = 46;
 
 export const AddCreatorsField = ({ field, form }: FieldProps) => {
   // const user = accountService.userValue;
@@ -125,6 +127,11 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
     }
   };
 
+  const handleNumberKeypress = (event: any) => {
+    const isComma = event.which === COMMA_KEY || event.keyCode === COMMA_KEY;
+    const isDot = event.which === DOT_KEY || event.keyCode === DOT_KEY;
+  };
+
   const onAdd = (id: any) => {
     // add from option list to selected person list
     const person = personOptions.find((p: any) => p.id === id);
@@ -138,25 +145,25 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
       };
 
       // check if creators is non empty, and not changed
-      let tmpCreators = creators;
-      if (creators.length > 0) {
-        // check if the previous commissions are split evenly?
-        const commissionShare = 100 / creators.length;
-        const isSplitEvenly = creators.every((creator) => {
-          return creator.salesCommissionShare === commissionShare;
-        });
-        if (isSplitEvenly) {
-          // split the commission across the creators
-          const newCommissionShare = 100 / (creators.length + 1);
-          tmpCreators = creators.map((creator) => {
-            creator.salesCommissionShare = newCommissionShare;
-            return creator;
-          });
+      const tmpCreators = creators;
+      // if (creators.length > 0) {
+      //   // check if the previous commissions are split evenly?
+      //   const commissionShare = 100 / creators.length;
+      //   const isSplitEvenly = creators.every((creator) => {
+      //     return creator.salesCommissionShare === commissionShare;
+      //   });
+      //   if (isSplitEvenly) {
+      //     // split the commission across the creators
+      //     const newCommissionShare = Math.floor(100 / (creators.length + 1));
+      //     tmpCreators = creators.map((creator) => {
+      //       creator.salesCommissionShare = newCommissionShare;
+      //       return creator;
+      //     });
 
-          // and update the newly added
-          creator.salesCommissionShare = newCommissionShare;
-        }
-      }
+      //     // and update the newly added
+      //     creator.salesCommissionShare = newCommissionShare;
+      //   }
+      // }
 
       const newCreators = [...tmpCreators, creator];
 
@@ -217,7 +224,6 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
         <small id="addPersonHelpBlock1" className="form-text text-muted">
           Search here for persons you have already added (use * to show all)
         </small>
-        {/* <form className="form-inline my-2 my-lg-0" noValidate id="addCreatorsFieldFilter"> */}
         <div className="form-inline my-2 my-lg-0">
           <input
             className="form-control mr-sm-2"
@@ -269,14 +275,12 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
             </table>
           )}
         </div>
-        {/* </form> */}
         <AddPersonModal
           show={showAddPersonModal}
           setShow={setShowAddPersonModal}
           onSuccess={onCreatePersonSuccess}
           onFailure={onCreatePersonFailure}
         />
-        {/* <form noValidate className="mt-2" id="addCreatorsField"> */}
         <div className="mt-2">
           <div>
             <table className="table table-sm table-bordered">
@@ -322,7 +326,9 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
                         <input
                           className="form-control"
                           name="salesCommissionShare"
-                          value={creator.salesCommissionShare}
+                          defaultValue={creator.salesCommissionShare}
+                          type="number"
+                          // onKeyPress={handleNumberKeypress}
                           onChange={(event) =>
                             updateCreator(creator.personId, { salesCommissionShare: Number(event.target.value) })
                           }
@@ -364,7 +370,6 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
               Add New Person
             </button>
           </div>
-          {/* </form> */}
         </div>
       </div>
     </>

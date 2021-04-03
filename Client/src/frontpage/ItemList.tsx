@@ -142,9 +142,9 @@ function ItemList({ match }: { match: any }) {
         <div className="pp-gallery">
           <div className="card-columns">
             {items &&
-              items.map((item: ItemProps, index: number) => (
+              items.map((item: ItemProps) => (
                 <Item
-                  key={index}
+                  key={item.id}
                   path={path}
                   id={item.id}
                   creator={item.creator}

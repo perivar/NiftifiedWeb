@@ -79,7 +79,7 @@ const Content = ({ tab }: { tab: string | null }) => {
 };
 
 function ItemDetail({ match }: { match: any }) {
-  const { params } = match;
+  // const { params } = match;
   // const { id } = params;
 
   const creator = 'Anette Moi';

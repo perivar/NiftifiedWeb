@@ -146,7 +146,6 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
         <small id="addPersonHelpBlock1" className="form-text text-muted">
           Search here for persons you have already added (use * to show all)
         </small>
-        {/* <form className="form-inline my-2 my-lg-0" noValidate id="addOwnerFieldFilter"> */}
         <div className="form-inline my-2 my-lg-0">
           <input
             className="form-control mr-sm-2"
@@ -197,7 +196,6 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
               </tbody>
             </table>
           )}
-          {/* </form> */}
         </div>
         <AddPersonModal
           show={showAddPersonModal}
@@ -205,7 +203,6 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
           onSuccess={onCreatePersonSuccess}
           onFailure={onCreatePersonFailure}
         />
-        {/* <form noValidate className="mt-2" id="addOwnerField"> */}
         <div className="mt-2">
           <div>
             <table className="table table-sm table-bordered">
@@ -246,7 +243,6 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
             </button>
           </div>
         </div>
-        {/* </form> */}
       </div>
     </>
   );
