@@ -12,9 +12,18 @@ interface FormikSelectProps extends FieldProps {
   isMulti?: boolean;
   className?: string;
   placeholder?: string;
+  isSearchable?: boolean;
 }
 
-export const FormikSelect = ({ className, placeholder, field, form, options, isMulti = false }: FormikSelectProps) => {
+export const FormikSelect = ({
+  className,
+  placeholder,
+  field,
+  form,
+  options,
+  isMulti = false,
+  isSearchable = true
+}: FormikSelectProps) => {
   const onChange = (option: ValueType<Option | Option[], boolean>) => {
     form.setFieldValue(
       field.name,
@@ -44,7 +53,7 @@ export const FormikSelect = ({ className, placeholder, field, form, options, isM
       placeholder={placeholder}
       options={options}
       isMulti={isMulti}
-      isSearchable={false}
+      isSearchable={isSearchable}
     />
   );
 };

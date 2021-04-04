@@ -56,7 +56,7 @@ function Update({ history }: { history: any }) {
     <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
       {({ errors, touched, isSubmitting }) => (
         <Form>
-          <h1>Update Profile</h1>
+          <h4>Update Profile</h4>
           <div className="form-row">
             <div className="form-group col">
               <label htmlFor="firstNameField">First Name</label>
@@ -89,7 +89,7 @@ function Update({ history }: { history: any }) {
             />
             <ErrorMessage name="email" component="div" className="invalid-feedback" />
           </div>
-          <h3 className="pt-3">Change Password</h3>
+          <h4 className="pt-3">Change Password</h4>
           <p>Leave blank to keep the same password</p>
           <div className="form-row">
             <div className="form-group col">

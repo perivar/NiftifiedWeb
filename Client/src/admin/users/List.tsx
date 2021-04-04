@@ -28,53 +28,59 @@ function List({ match }: { match: any }) {
 
   return (
     <div>
-      <h1>Users</h1>
+      <h4>Users</h4>
       <p>All users (admin only):</p>
       <Link to={`${path}/add`} className="btn btn-sm btn-success mb-2">
         Add User
       </Link>
-      <table className="table table-striped">
-        <thead>
-          <tr>
-            <th style={{ width: '30%' }}>Name</th>
-            <th style={{ width: '30%' }}>Email</th>
-            <th style={{ width: '30%' }}>Role</th>
-            <th style={{ width: '10%' }}></th>
-          </tr>
-        </thead>
-        <tbody>
-          {users &&
-            users.map((user: any) => (
-              <tr key={user.id}>
-                <td>
-                  {user.firstName} {user.lastName}
-                </td>
-                <td>{user.email}</td>
-                <td>{user.role}</td>
-                <td style={{ whiteSpace: 'nowrap' }}>
-                  <Link to={`${path}/edit/${user.id}`} className="btn btn-sm btn-primary mr-1">
-                    Edit
-                  </Link>
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-danger"
-                    onClick={() => deleteUser(user.id)}
-                    style={{ width: '60px' }}
-                    disabled={user.isDeleting}>
-                    {user.isDeleting ? <span className="spinner-border spinner-border-sm"></span> : <span>Delete</span>}
-                  </button>
+      <div className="table-responsive">
+        <table className="table table-striped">
+          <thead>
+            <tr>
+              <th style={{ width: '30%' }}>Name</th>
+              <th style={{ width: '30%' }}>Email</th>
+              <th style={{ width: '30%' }}>Role</th>
+              <th style={{ width: '10%' }}></th>
+            </tr>
+          </thead>
+          <tbody>
+            {users &&
+              users.map((user: any) => (
+                <tr key={user.id}>
+                  <td>
+                    {user.firstName} {user.lastName}
+                  </td>
+                  <td>{user.email}</td>
+                  <td>{user.role}</td>
+                  <td style={{ whiteSpace: 'nowrap' }}>
+                    <Link to={`${path}/edit/${user.id}`} className="btn btn-sm btn-primary mr-1">
+                      Edit
+                    </Link>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-danger"
+                      onClick={() => deleteUser(user.id)}
+                      style={{ width: '60px' }}
+                      disabled={user.isDeleting}>
+                      {user.isDeleting ? (
+                        <span className="spinner-border spinner-border-sm"></span>
+                      ) : (
+                        <span>Delete</span>
+                      )}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            {!users && (
+              <tr>
+                <td colSpan={4} className="text-center">
+                  <span className="spinner-border spinner-border-lg align-center"></span>
                 </td>
               </tr>
-            ))}
-          {!users && (
-            <tr>
-              <td colSpan={4} className="text-center">
-                <span className="spinner-border spinner-border-lg align-center"></span>
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

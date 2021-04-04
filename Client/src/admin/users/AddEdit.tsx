@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Formik, Field, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
@@ -78,19 +78,20 @@ function AddEdit({ history, match }: { history: any; match: any }) {
   return (
     <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
       {({ errors, touched, isSubmitting, setFieldValue }) => {
-        // useEffect(() => {
-        if (!isAddMode) {
-          // get user and set form fields
-          accountService.getById(id).then((user) => {
-            const fields = ['languageCode', 'firstName', 'lastName', 'email', 'role'];
-            fields.forEach((field) => setFieldValue(field, user[field], false));
-          });
-        }
-        // }, []);
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        useEffect(() => {
+          if (!isAddMode) {
+            // get user and set form fields
+            accountService.getById(id).then((user) => {
+              const fields = ['languageCode', 'firstName', 'lastName', 'email', 'role'];
+              fields.forEach((field) => setFieldValue(field, user[field], false));
+            });
+          }
+        }, []);
 
         return (
           <Form>
-            <h1>{isAddMode ? 'Add User' : 'Edit User'}</h1>
+            <h4>{isAddMode ? 'Add User' : 'Edit User'}</h4>
             <div className="form-row">
               <div className="form-group col">
                 <label htmlFor="languageCode">Language</label>
@@ -109,9 +110,9 @@ function AddEdit({ history, match }: { history: any; match: any }) {
             </div>
             <div className="form-row">
               <div className="form-group col">
-                <label htmlFor="firstNameField">First Name</label>
+                <label htmlFor="firstName">First Name</label>
                 <Field
-                  id="firstNameField"
+                  id="firstName"
                   name="firstName"
                   type="text"
                   className={`form-control${errors.firstName && touched.firstName ? ' is-invalid' : ''}`}
@@ -119,9 +120,9 @@ function AddEdit({ history, match }: { history: any; match: any }) {
                 <ErrorMessage name="firstName" component="div" className="invalid-feedback" />
               </div>
               <div className="form-group col">
-                <label htmlFor="lastNameField">Last Name</label>
+                <label htmlFor="lastName">Last Name</label>
                 <Field
-                  id="lastNameField"
+                  id="lastName"
                   name="lastName"
                   type="text"
                   className={`form-control${errors.lastName && touched.lastName ? ' is-invalid' : ''}`}
@@ -131,9 +132,9 @@ function AddEdit({ history, match }: { history: any; match: any }) {
             </div>
             <div className="form-row">
               <div className="form-group col-7">
-                <label htmlFor="emailField">Email</label>
+                <label htmlFor="email">Email</label>
                 <Field
-                  id="emailField"
+                  id="email"
                   name="email"
                   type="text"
                   className={`form-control${errors.email && touched.email ? ' is-invalid' : ''}`}
@@ -141,12 +142,12 @@ function AddEdit({ history, match }: { history: any; match: any }) {
                 <ErrorMessage name="email" component="div" className="invalid-feedback" />
               </div>
               <div className="form-group col">
-                <label htmlFor="roleField">Role</label>
+                <label htmlFor="role">Role</label>
                 <Field
-                  id="roleField"
+                  id="role"
                   name="role"
                   as="select"
-                  className={`form-control${errors.role && touched.role ? ' is-invalid' : ''}`}>
+                  className={`form-control form-select${errors.role && touched.role ? ' is-invalid' : ''}`}>
                   <option value=""></option>
                   <option value="User">User</option>
                   <option value="Admin">Admin</option>
@@ -156,15 +157,15 @@ function AddEdit({ history, match }: { history: any; match: any }) {
             </div>
             {!isAddMode && (
               <div>
-                <h3 className="pt-3">Change Password</h3>
+                <h4 className="pt-3">Change Password</h4>
                 <p>Leave blank to keep the same password</p>
               </div>
             )}
             <div className="form-row">
               <div className="form-group col">
-                <label htmlFor="passwordField">Password</label>
+                <label htmlFor="password">Password</label>
                 <Field
-                  id="passwordField"
+                  id="password"
                   name="password"
                   type="password"
                   className={`form-control${errors.password && touched.password ? ' is-invalid' : ''}`}
@@ -172,9 +173,9 @@ function AddEdit({ history, match }: { history: any; match: any }) {
                 <ErrorMessage name="password" component="div" className="invalid-feedback" />
               </div>
               <div className="form-group col">
-                <label htmlFor="confirmPasswordField">Confirm Password</label>
+                <label htmlFor="confirmPassword">Confirm Password</label>
                 <Field
-                  id="confirmPasswordField"
+                  id="confirmPassword"
                   name="confirmPassword"
                   type="password"
                   className={`form-control${errors.confirmPassword && touched.confirmPassword ? ' is-invalid' : ''}`}

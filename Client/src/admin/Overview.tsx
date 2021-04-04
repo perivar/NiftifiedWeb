@@ -6,7 +6,7 @@ function Overview({ match }: { match: any }) {
 
   return (
     <div>
-      <h1>Admin</h1>
+      <h3>Admin</h3>
       <p>This section can only be accessed by administrators.</p>
       <p>
         <Link to={`${path}/users`}>Manage Users</Link>

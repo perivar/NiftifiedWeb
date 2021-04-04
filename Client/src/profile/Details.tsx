@@ -9,7 +9,9 @@ function Details({ match }: { match: any }) {
 
   return (
     <div>
-      <h1>My Profile</h1>
+      <h4>
+        <i className="fa fa-user"></i> My Profile
+      </h4>
       <p>
         <strong>Name: </strong> {user.firstName} {user.lastName}
         <br />
