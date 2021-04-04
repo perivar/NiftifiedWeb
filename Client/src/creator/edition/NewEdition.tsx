@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import { Form, Field, ErrorMessage, FormikProps, withFormik } from 'formik';
 import * as Yup from 'yup';
 import { niftyService, alertService } from '../../_services';
-import CustomCreatableSelect from '../../_common/select/CustomCreatableSelect';
+import FormikCreatableSelect from '../../_common/select/FormikCreatableSelect';
 import FocusError from '../../_common/FocusError';
 // import UploadImageComponent from '../../_common/UploadComponent';
 import MyUploadComponent from '../../_common/MyUploadComponent';
@@ -122,7 +122,7 @@ const InnerForm = (props: any & FormikProps<FormValues>) => {
             <label htmlFor="tags">Tags</label>
             <Field
               name="tags"
-              component={CustomCreatableSelect}
+              component={FormikCreatableSelect}
               placeholder="Select Tag..."
               isMulti={true}
               optionsMapper={optionsMapper}
@@ -155,7 +155,7 @@ const InnerForm = (props: any & FormikProps<FormValues>) => {
           <label htmlFor="theme">Collection</label>
           <Field
             name="collection"
-            component={CustomCreatableSelect}
+            component={FormikCreatableSelect}
             placeholder="Select Collection ..."
             isMulti={false}
             optionsMapper={optionsMapper}

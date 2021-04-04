@@ -7,6 +7,7 @@ import Select from 'react-select';
 import { useCreatorContext } from '../CreatorContext';
 
 import './AddCreatorsField.scss';
+import CustomSelect from '../../_common/select/CustomSelect';
 
 export interface Creator {
   personId: number;
@@ -127,10 +128,10 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
     }
   };
 
-  const handleNumberKeypress = (event: any) => {
-    const isComma = event.which === COMMA_KEY || event.keyCode === COMMA_KEY;
-    const isDot = event.which === DOT_KEY || event.keyCode === DOT_KEY;
-  };
+  // const handleNumberKeypress = (event: any) => {
+  //   const isComma = event.which === COMMA_KEY || event.keyCode === COMMA_KEY;
+  //   const isDot = event.which === DOT_KEY || event.keyCode === DOT_KEY;
+  // };
 
   const onAdd = (id: any) => {
     // add from option list to selected person list
@@ -289,11 +290,13 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
                   <th scope="col">#</th>
                   <th scope="col">Alias</th>
                   {/* <th scope="col">Status</th> */}
-                  <th scope="col">Type</th>
+                  <th scope="col" className="col-1">
+                    Type
+                  </th>
                   {/* <th scope="col" className="text-center">
                     Anonymous
                   </th> */}
-                  <th scope="col" className="text-center">
+                  <th scope="col" className="text-center col-1">
                     Commission
                   </th>
                   <th scope="col" className="text-center">
@@ -309,14 +312,15 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
                       <td className="align-middle">{creator.personId}</td>
                       <td className="align-middle">{creator.alias}</td>
                       {/* <td>{Status[person.status]}</td> */}
-                      <td className="align-middle col-4">
-                        <Select
+                      <td className="align-middle">
+                        <CustomSelect
                           name="type"
                           options={creatorTypeOptions}
                           defaultValue={{ label: CreatorType[creator.type], value: creator.type }}
                           onChange={(value: any) => {
                             updateCreator(creator.personId, { type: Number(value?.value) });
                           }}
+                          isSearchable={false}
                         />
                       </td>
                       {/* <td className="text-center">

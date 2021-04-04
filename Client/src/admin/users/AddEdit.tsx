@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Formik, Field, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import CustomSelect from '../../_common/select/CustomSelect';
+import FormikSelect from '../../_common/select/FormikSelect';
 import { languageOptions } from '../../_common/languageOptions';
 
 import { accountService, alertService } from '../../_services';
@@ -99,7 +99,7 @@ function AddEdit({ history, match }: { history: any; match: any }) {
                   name="languageCode"
                   type="text"
                   options={languageOptions}
-                  component={CustomSelect}
+                  component={FormikSelect}
                   placeholder="Select language..."
                   isMulti={false}
                 />

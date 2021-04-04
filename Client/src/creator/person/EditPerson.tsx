@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Formik, FormikHelpers, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { niftyService, alertService } from '../../_services';
-import CustomSelect from '../../_common/select/CustomSelect';
+import FormikSelect from '../../_common/select/FormikSelect';
 import FocusError from '../../_common/FocusError';
 import * as Scroll from 'react-scroll';
 import { Link } from 'react-router-dom';
@@ -149,7 +149,7 @@ export const EditPersonForm = ({ history, match }: { history: any; match: any })
                         name="status"
                         type="text"
                         options={statusOptions}
-                        component={CustomSelect}
+                        component={FormikSelect}
                         placeholder="Select Status..."
                         isMulti={false}
                       />

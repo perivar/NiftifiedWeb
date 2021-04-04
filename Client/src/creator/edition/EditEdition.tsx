@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Formik, FormikHelpers, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { niftyService, alertService } from '../../_services';
-import CustomCreatableSelect from '../../_common/select/CustomCreatableSelect';
+import FormikCreatableSelect from '../../_common/select/FormikCreatableSelect';
 import FocusError from '../../_common/FocusError';
 import * as Scroll from 'react-scroll';
 import { Creator, AddCreatorsField } from '../person/AddCreatorsField';
@@ -207,7 +207,7 @@ export const EditEditionForm = ({ history, match }: { history: any; match: any }
                       <label htmlFor="tags">Tags</label>
                       <Field
                         name="tags"
-                        component={CustomCreatableSelect}
+                        component={FormikCreatableSelect}
                         placeholder="Select Tag..."
                         isMulti={true}
                         optionsMapper={optionsMapper}
@@ -240,7 +240,7 @@ export const EditEditionForm = ({ history, match }: { history: any; match: any }
                     <label htmlFor="theme">Collection</label>
                     <Field
                       name="collection"
-                      component={CustomCreatableSelect}
+                      component={FormikCreatableSelect}
                       placeholder="Select Collection ..."
                       isMulti={false}
                       optionsMapper={optionsMapper}

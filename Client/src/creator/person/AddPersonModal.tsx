@@ -1,7 +1,8 @@
+/* eslint-disable jsx-a11y/no-autofocus */
 import React, { memo } from 'react';
 import { Modal } from 'react-bootstrap';
 import { niftyService } from '../../_services';
-import { Form, Field, ErrorMessage, withFormik, FormikProps } from 'formik';
+import { Field, ErrorMessage, withFormik, FormikProps } from 'formik';
 import * as Yup from 'yup';
 import FocusError from '../../_common/FocusError';
 // import CustomSelect from '../../_common/select/CustomSelect';
@@ -51,8 +52,7 @@ const InnerForm = (props: OtherProps & FormikProps<FormValues>) => {
   };
 
   return (
-    // <Form>
-    <Modal show={show} onHide={handleClose}>
+    <Modal show={show} onHide={handleClose} autoFocus={false}>
       <Modal.Header closeButton>
         <Modal.Title>Add New Person</Modal.Title>
       </Modal.Header>
@@ -65,6 +65,7 @@ const InnerForm = (props: OtherProps & FormikProps<FormValues>) => {
                 id="alias"
                 name="alias"
                 type="text"
+                autoFocus={true}
                 className={`form-control${errors.alias && touched.alias ? ' is-invalid' : ''}`}
               />
               <small id="nameHelpBlock" className="form-text text-muted">
@@ -135,7 +136,6 @@ const InnerForm = (props: OtherProps & FormikProps<FormValues>) => {
         </button>
       </Modal.Footer>
     </Modal>
-    // </Form>
   );
 };
 

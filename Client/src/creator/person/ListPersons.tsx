@@ -135,7 +135,7 @@ export const ListPersons = ({ history }: { history: any; match: any }) => {
                           )}
                         </td>
 
-                        <td>
+                        <td className="btn-group">
                           <Link to={`/creator/person/edit/${person.id}`} className="btn btn-sm btn-secondary mr-1">
                             Edit
                           </Link>

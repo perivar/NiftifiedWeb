@@ -9,7 +9,7 @@ interface Option {
   value: string;
 }
 
-interface CustomCreatableSelectProps extends FieldProps {
+interface FormikCreatableSelectProps extends FieldProps {
   isMulti?: boolean;
   className?: string;
   placeholder?: string;
@@ -18,7 +18,7 @@ interface CustomCreatableSelectProps extends FieldProps {
   readOptions?: () => Promise<any>;
 }
 
-export const CustomCreatableSelect = ({
+export const FormikCreatableSelect = ({
   className,
   placeholder,
   field,
@@ -27,7 +27,7 @@ export const CustomCreatableSelect = ({
   optionsMapper: extOptionsMapper,
   createOption: extCreateOption,
   readOptions: extReadOptions
-}: CustomCreatableSelectProps) => {
+}: FormikCreatableSelectProps) => {
   // set initial value using formiks values for form.values and field.name
   const [value, setValue] = useState<any>(form.values[field.name]);
   const [options, setOptions] = useState<any>([]);
@@ -132,4 +132,4 @@ export const CustomCreatableSelect = ({
   );
 };
 
-export default CustomCreatableSelect;
+export default FormikCreatableSelect;

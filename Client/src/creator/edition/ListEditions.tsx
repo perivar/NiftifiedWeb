@@ -118,7 +118,7 @@ export const ListEditions = ({ match }: { match: any }) => {
                           View the {edition.volumeCount} volumes
                         </Link>
                       </td>
-                      <td className="text-center">
+                      <td className="text-center btn-group">
                         <Link to={`${path}/edition/publish/${edition.id}`} className="btn btn-sm btn-primary mr-1">
                           Publish
                         </Link>

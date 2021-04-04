@@ -40,7 +40,7 @@ export const ListWallets = ({ match }: { match: any }) => {
         <div className="row">
           <div className="col">
             <h4>Wallets</h4>
-            <div className="card-deck m-5">
+            <div className="card-deck">
               {!isLoading &&
                 wallets &&
                 wallets.map((wallet: any) => (
@@ -71,9 +71,10 @@ export const ListWallets = ({ match }: { match: any }) => {
                             <code>{wallet.privateKeyWIFEncrypted}</code>
                           </li>
                           <li className="list-group-item">
-                            <strong className="text-nowrap">
-                              Private Key hexadecimal format: <small>(64 characters [0-9A-F])</small>
-                            </strong>
+                            <strong>Private Key:</strong>
+                            <div className="mb-2">
+                              <small className="text-muted">Hexadecimal format: (64 characters [0-9A-F])</small>
+                            </div>
                             <div>
                               <code>{wallet.privateKeyEncrypted}</code>
                             </div>
@@ -98,10 +99,11 @@ export const ListWallets = ({ match }: { match: any }) => {
                             <code>{wallet.publicAddress}</code>
                           </li>
                           <li className="list-group-item">
-                            <div className="mb-2 text-nowrap">
-                              <strong>
-                                Public Key Hash: <small>(RIPEMD160(SHA256(publickey)))</small>
-                              </strong>
+                            <strong>Public Key Hash:</strong>
+                            <div className="mb-2">
+                              <small className="text-muted">
+                                RIPEMD160 ( SHA256(publickey) ) in hexadecimal format: (40 characters [0-9A-F])
+                              </small>
                             </div>
                             <div>
                               <QRCode
@@ -118,9 +120,10 @@ export const ListWallets = ({ match }: { match: any }) => {
                             <code>{wallet.publicKeyHash}</code>
                           </li>
                           <li className="list-group-item">
-                            <strong className="text-nowrap">
-                              Public Key: <small>(130 characters [0-9A-F])</small>
-                            </strong>
+                            <strong>Public Key:</strong>
+                            <div className="mb-2">
+                              <small className="text-muted">Hexadecimal format: (130 characters [0-9A-F])</small>
+                            </div>
                             <div>
                               <code>{wallet.publicKey}</code>
                             </div>
