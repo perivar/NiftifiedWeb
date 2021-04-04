@@ -54,7 +54,7 @@ export const ListWallets = ({ match }: { match: any }) => {
                           </li>
                           <li className="list-group-item">
                             <div className="mb-2">
-                              <strong>Private Key WIF (Encrypted):</strong>
+                              <strong>Private Key WIF:</strong>
                             </div>
                             <div>
                               <QRCode
@@ -71,8 +71,12 @@ export const ListWallets = ({ match }: { match: any }) => {
                             <code>{wallet.privateKeyWIFEncrypted}</code>
                           </li>
                           <li className="list-group-item">
-                            <strong>Private Key Hexadecimal Format (64 characters [0-9A-F]) (Encrypted):</strong>{' '}
-                            <code>{wallet.privateKeyEncrypted}</code>
+                            <strong className="text-nowrap">
+                              Private Key hexadecimal format: <small>(64 characters [0-9A-F])</small>
+                            </strong>
+                            <div>
+                              <code>{wallet.privateKeyEncrypted}</code>
+                            </div>
                           </li>
 
                           <li className="list-group-item">
@@ -88,21 +92,43 @@ export const ListWallets = ({ match }: { match: any }) => {
                                 level={'H'}
                                 includeMargin={false}
                                 renderAs={'canvas'}
-                                style={{ width: '132px', height: '132px' }}
+                                style={{ width: '164px', height: '164px' }}
                               />
                             </div>
                             <code>{wallet.publicAddress}</code>
                           </li>
                           <li className="list-group-item">
-                            <strong>Public Key (130 characters [0-9A-F]):</strong> <code>{wallet.publicKey}</code>
+                            <div className="mb-2 text-nowrap">
+                              <strong>
+                                Public Key Hash: <small>(RIPEMD160(SHA256(publickey)))</small>
+                              </strong>
+                            </div>
+                            <div>
+                              <QRCode
+                                value={wallet.publicKeyHash}
+                                size={1280}
+                                bgColor={'#ffffff'}
+                                fgColor={'#000000'}
+                                level={'H'}
+                                includeMargin={false}
+                                renderAs={'canvas'}
+                                style={{ width: '164px', height: '164px' }}
+                              />
+                            </div>
+                            <code>{wallet.publicKeyHash}</code>
                           </li>
                           <li className="list-group-item">
-                            <strong>PublicKey Hash:</strong> <code>{wallet.publicKeyHash}</code>
+                            <strong className="text-nowrap">
+                              Public Key: <small>(130 characters [0-9A-F])</small>
+                            </strong>
+                            <div>
+                              <code>{wallet.publicKey}</code>
+                            </div>
                           </li>
                         </ul>
                       </div>
                       <p className="card-text">
-                        <small className="text-muted">Created {wallet.created}</small>
+                        <small className="text-muted">Created {new Date(wallet.created).toLocaleString()}</small>
                       </p>
                     </div>
                   </div>

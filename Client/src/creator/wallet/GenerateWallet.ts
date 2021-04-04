@@ -27,7 +27,7 @@ export const bytesToHex = (bytes: number[]): string => {
 };
 
 // hash with both SHA-256 and RIPEMD-160 algorithms
-export const HashSHAandRIPE = (msg: string) => {
+export const HASH160 = (msg: string) => {
   const hash = sha256(Buffer.from(msg, 'hex'));
   return new ripemd160().update(Buffer.from(hash, 'hex')).digest();
 };
@@ -35,7 +35,7 @@ export const HashSHAandRIPE = (msg: string) => {
 // get a base58 encoded address given a user's public key
 export const getAddress = (publicKey: string) => {
   // generate public key hash
-  const publicKeyHash = HashSHAandRIPE(publicKey);
+  const publicKeyHash = HASH160(publicKey);
   console.log('> Public key hash created: ', publicKeyHash.toString('hex'));
 
   // generate public address
@@ -119,7 +119,7 @@ export const makeWallet = () => {
   console.log('> Public key created: ', publicKey);
 
   // generate public key hash
-  const publicKeyHash = HashSHAandRIPE(publicKey);
+  const publicKeyHash = HASH160(publicKey);
   console.log('> Public key hash created: ', publicKeyHash.toString('hex'));
 
   // generate public address
