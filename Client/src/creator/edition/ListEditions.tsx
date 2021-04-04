@@ -80,70 +80,72 @@ export const ListEditions = ({ match }: { match: any }) => {
         <div className="row">
           <div className="col">
             <h4>Your editions</h4>
-            <table className="table">
-              <thead>
-                <tr>
-                  <th scope="col"></th>
-                  <th scope="col">#</th>
-                  <th scope="col">Name</th>
-                  <th scope="col">Description</th>
-                  <th scope="col">Version</th>
-                  <th scope="col" className="text-center">
-                    Show Volumes
-                  </th>
-                  <th scope="col" className="text-center">
-                    Publish / Edit / Delete
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {!isLoading &&
-                  editions &&
-                  editions.map((edition: any) => (
-                    <tr key={edition.id}>
-                      <td>
-                        <img
-                          alt={edition.name}
-                          height="80"
-                          width="80"
-                          src={`${config.storedFilesPath}/${edition.dataSourceFileName}`}></img>
-                      </td>
-                      <td>{edition.id}</td>
-                      <td>{edition.name}</td>
-                      <td>{edition.description}</td>
-                      <td>{edition.version}</td>
-                      {/* <td>{edition.volumes.length}</td> */}
-                      <td>
-                        <Link to={`${path}/volumes/${edition.id}`} className="btn btn-sm btn-light btn-block">
-                          View the {edition.volumeCount} volumes
-                        </Link>
-                      </td>
-                      <td className="text-center btn-group">
-                        <Link to={`${path}/edition/publish/${edition.id}`} className="btn btn-sm btn-primary mr-1">
-                          Publish
-                        </Link>
-                        <Link to={`${path}/edition/edit/${edition.id}`} className="btn btn-sm btn-secondary mr-1">
-                          Edit
-                        </Link>
-                        {!isLoading ? (
-                          // editionsEditable && editionsEditable[edition.id] ? (
-                          // edition && edition.volumes && edition.volumes.every((v: any) => v.status === 0) ? (
-                          <button
-                            type="button"
-                            onClick={() => confirmDelete(edition.id)}
-                            className="btn btn-sm btn-danger">
-                            Delete
-                          </button>
-                        ) : (
-                          <button type="button" className="btn btn-secondary btn-sm" disabled>
-                            Delete
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
+            <div className="table-responsive">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th scope="col"></th>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Version</th>
+                    <th scope="col" className="text-center">
+                      Show Volumes
+                    </th>
+                    <th scope="col" className="text-center">
+                      Publish / Edit / Delete
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {!isLoading &&
+                    editions &&
+                    editions.map((edition: any) => (
+                      <tr key={edition.id}>
+                        <td>
+                          <img
+                            alt={edition.name}
+                            height="80"
+                            width="80"
+                            src={`${config.storedFilesPath}/${edition.dataSourceFileName}`}></img>
+                        </td>
+                        <td>{edition.id}</td>
+                        <td>{edition.name}</td>
+                        <td>{edition.description}</td>
+                        <td>{edition.version}</td>
+                        {/* <td>{edition.volumes.length}</td> */}
+                        <td>
+                          <Link to={`${path}/volumes/${edition.id}`} className="btn btn-sm btn-light btn-block">
+                            View the {edition.volumeCount} volumes
+                          </Link>
+                        </td>
+                        <td className="text-center btn-group">
+                          <Link to={`${path}/edition/publish/${edition.id}`} className="btn btn-sm btn-primary mr-1">
+                            Publish
+                          </Link>
+                          <Link to={`${path}/edition/edit/${edition.id}`} className="btn btn-sm btn-secondary mr-1">
+                            Edit
+                          </Link>
+                          {!isLoading ? (
+                            // editionsEditable && editionsEditable[edition.id] ? (
+                            // edition && edition.volumes && edition.volumes.every((v: any) => v.status === 0) ? (
+                            <button
+                              type="button"
+                              onClick={() => confirmDelete(edition.id)}
+                              className="btn btn-sm btn-danger">
+                              Delete
+                            </button>
+                          ) : (
+                            <button type="button" className="btn btn-secondary btn-sm" disabled>
+                              Delete
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

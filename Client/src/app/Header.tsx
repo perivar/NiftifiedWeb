@@ -8,6 +8,7 @@ export const Header = () => {
 
   const history = useHistory();
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [expanded, setExpanded] = useState<boolean>(false);
 
   const handleSubmit = (e: any) => {
     if (searchQuery.length > 0) history.push(`/creator/editions/${searchQuery}`);
@@ -17,31 +18,67 @@ export const Header = () => {
   return (
     <>
       <header>
-        <Navbar className="navbar-light" bg="light" expand="lg">
+        <Navbar className="navbar-light" bg="light" expand="lg" expanded={expanded}>
           <NavLink exact to="/" className="nav-item nav-link">
             <img src="/niftified-logo.svg" alt="Logo" width="200" className="d-inline-block align-top" />
           </NavLink>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={() => setExpanded(!expanded)} />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ml-auto">
-              <NavLink exact to="/" className="nav-item nav-link">
+              <NavLink
+                exact
+                to="/"
+                className="nav-item nav-link"
+                onClick={() =>
+                  setTimeout(() => {
+                    setExpanded(false);
+                  }, 150)
+                }>
                 Home
               </NavLink>
               {user ? (
-                <NavLink to="/creator/profile" className="nav-item nav-link mr-2">
+                <NavLink
+                  to="/creator/profile"
+                  className="nav-item nav-link mr-2"
+                  onClick={() =>
+                    setTimeout(() => {
+                      setExpanded(false);
+                    }, 150)
+                  }>
                   <i className="fa fa-user"></i>
                 </NavLink>
               ) : (
                 <>
-                  <NavLink to="/account/register" className="nav-item btn btn-secondary mr-2">
+                  <NavLink
+                    to="/account/register"
+                    className="nav-item btn btn-secondary mr-2"
+                    onClick={() =>
+                      setTimeout(() => {
+                        setExpanded(false);
+                      }, 150)
+                    }>
                     Sign up
                   </NavLink>
-                  <NavLink to="/account/login" className="nav-item btn btn-warning mr-2">
+                  <NavLink
+                    to="/account/login"
+                    className="nav-item btn btn-warning mr-2"
+                    onClick={() =>
+                      setTimeout(() => {
+                        setExpanded(false);
+                      }, 150)
+                    }>
                     Sign in
                   </NavLink>
                 </>
               )}
-              <NavLink to="/creator" className="btn btn-primary">
+              <NavLink
+                to="/creator"
+                className="btn btn-primary"
+                onClick={() =>
+                  setTimeout(() => {
+                    setExpanded(false);
+                  }, 150)
+                }>
                 Sell your creations
               </NavLink>
               <Form inline className="ml-2 my-2 my-lg-0" onSubmit={handleSubmit}>

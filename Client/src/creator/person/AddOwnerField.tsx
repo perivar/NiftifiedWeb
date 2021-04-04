@@ -142,7 +142,7 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
 
   return (
     <>
-      <div className="container">
+      <div className="container-fluid p-0">
         <small id="addPersonHelpBlock1" className="form-text text-muted">
           Search here for persons you have already added (use * to show all)
         </small>
