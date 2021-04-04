@@ -290,14 +290,14 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
                   <th scope="col">#</th>
                   <th scope="col">Alias</th>
                   {/* <th scope="col">Status</th> */}
-                  <th scope="col" className="col-1">
+                  <th scope="col" className="w-50">
                     Type
                   </th>
                   {/* <th scope="col" className="text-center">
                     Anonymous
                   </th> */}
-                  <th scope="col" className="text-center col-1">
-                    Commission
+                  <th scope="col" className="text-center w-25">
+                    Share
                   </th>
                   <th scope="col" className="text-center">
                     Remove
@@ -320,7 +320,6 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
                           onChange={(value: any) => {
                             updateCreator(creator.personId, { type: Number(value?.value) });
                           }}
-                          isSearchable={false}
                         />
                       </td>
                       {/* <td className="text-center">
