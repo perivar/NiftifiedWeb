@@ -7,7 +7,7 @@ import FocusError from '../../_common/FocusError';
 import * as Scroll from 'react-scroll';
 // import { Link } from 'react-router-dom';
 import { makeWallet } from '../wallet/GenerateWallet';
-import { encrypt, decrypt } from '../wallet/webcrypto';
+import { encrypt } from '../wallet/webcrypto';
 import { Status, statusOptions, WalletType } from '../../_common/enums';
 
 const scroll = Scroll.animateScroll;
@@ -94,7 +94,7 @@ export const NewPersonForm = ({ history }: { history: any }) => {
         })
         .catch((err) => {
           // got error
-          return 'FAILED';
+          throw err;
         });
     } catch (e) {
       console.log(e);

@@ -128,7 +128,7 @@ export const ListPersons = ({ history }: { history: any; match: any }) => {
                         <td className="text-center">
                           {person.wallets && person.wallets.length ? (
                             <Link to={`/creator/wallets/${person.id}`} className="btn btn-sm btn-light btn-block">
-                              {person.wallets.length}
+                              Show {person.wallets.length} {person.wallets.length > 1 ? 'wallets' : 'wallet'}
                             </Link>
                           ) : (
                             'None'

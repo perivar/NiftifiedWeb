@@ -22,3 +22,4 @@ export enum WalletType {
 
 export const statusOptions = ToOptionArray(Status);
 export const creatorTypeOptions = ToOptionArray(CreatorType);
+export const walletTypeOptions = ToOptionArray(WalletType);

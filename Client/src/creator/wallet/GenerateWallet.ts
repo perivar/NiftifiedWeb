@@ -26,31 +26,39 @@ export const bytesToHex = (bytes: number[]): string => {
   return hex.join('');
 };
 
-// hash with both SHA-256 and RIPEMD-160 algorithms
+/**
+ * hash with both SHA-256 and RIPEMD-160 algorithms
+ *
+ * @param {String} msg
+ */
 export const HASH160 = (msg: string) => {
   const hash = sha256(Buffer.from(msg, 'hex'));
   return new ripemd160().update(Buffer.from(hash, 'hex')).digest();
 };
 
-// get a base58 encoded address given a user's public key
+/**
+ * get a base58 encoded address given a user's public key
+ *
+ * @param {String} publicKey
+ */
 export const getAddress = (publicKey: string) => {
   // generate public key hash
   const publicKeyHash = HASH160(publicKey);
   console.log('> Public key hash created: ', publicKeyHash.toString('hex'));
 
   // generate public address
-  const publicAddress = createPublicAddress(publicKeyHash.toString('hex'));
+  const publicAddress = getPublicAddress(publicKeyHash.toString('hex'));
   console.log('> Public address created: ', publicAddress);
 
   return publicAddress;
 };
 
 /**
- * Create a public address based on the hash
+ * get a private WIF key based on the private key in hex
  *
- * @param {String} publicKeyHash
+ * @param {String} privateKey
  */
-export const createPrivateKeyWIF = (privateKey: string) => {
+export const getPrivateKeyWIF = (privateKey: string) => {
   // step 1 - add prefix "35" in hex (0x35 for niftycoin, 0x80 for bitcoin, 0xB0 for litecoin)
   // base58Prefixes[SECRET_KEY]
   const step1 = Buffer.from(`35${privateKey}`, 'hex');
@@ -68,11 +76,30 @@ export const createPrivateKeyWIF = (privateKey: string) => {
 };
 
 /**
+ * Create a private key in hex based on the private WIF key
+ *
+ * @param {String} privateKeyWIF
+ */
+export const getPrivateKey = (privateKeyWIF: string) => {
+  const step1 = base58.decode(privateKeyWIF);
+  const step2 = step1.toString('hex').toUpperCase();
+  // TODO how to check that the checksum is OK?
+  // for now remove the network byte and the checksum
+  // console.log(`base58 nocheck: ${step2}`);
+  const networkByte = step2.substring(0, 2);
+  const checksum = step2.substring(66, 74);
+  const privateKey = step2.substring(2, 66);
+  // console.log(`networkByte: ${networkByte}`);
+  // console.log(`checksum: ${checksum}`);
+  return privateKey;
+};
+
+/**
  * Create a public address based on the hash
  *
  * @param {String} publicKeyHash
  */
-export const createPublicAddress = (publicKeyHash: string) => {
+export const getPublicAddress = (publicKeyHash: string) => {
   // step 1 - add prefix "35" in hex (0x35 for niftycoin, 0x00 for bitcoin, 0x30 for litecoin)
   // base58Prefixes[PUBKEY_ADDRESS]
   const step1 = Buffer.from(`35${publicKeyHash}`, 'hex');
@@ -89,7 +116,11 @@ export const createPublicAddress = (publicKeyHash: string) => {
   return address;
 };
 
-export const createPrivateKey = (): Buffer => {
+/**
+ * Generate a private key in hex
+ *
+ */
+export const generatePrivateKey = (): Buffer => {
   // https://en.bitcoin.it/wiki/Secp256k1
   // the key needs to be in the range 1 - curve order
   // the curve order for secp256k1 curve is
@@ -110,12 +141,27 @@ export const createPrivateKey = (): Buffer => {
   return privateKey;
 };
 
-export const makeWallet = () => {
-  const privateKey = createPrivateKey();
-
+/**
+ * get a public key based on the private key buffer
+ *
+ * @param {Buffer | string} privateKey
+ */
+export const getPublicKey = (privateKey: Buffer | string) => {
   // generate public key from private
   const keys = ecdsa.keyFromPrivate(privateKey);
   const publicKey = keys.getPublic('hex').toUpperCase();
+  return publicKey;
+};
+
+/**
+ * Generate a full wallet
+ *
+ */
+export const makeWallet = () => {
+  const privateKey = generatePrivateKey();
+
+  // generate public key from private
+  const publicKey = getPublicKey(privateKey);
   console.log('> Public key created: ', publicKey);
 
   // generate public key hash
@@ -123,11 +169,11 @@ export const makeWallet = () => {
   console.log('> Public key hash created: ', publicKeyHash.toString('hex'));
 
   // generate public address
-  const publicAddress = createPublicAddress(publicKeyHash.toString('hex'));
+  const publicAddress = getPublicAddress(publicKeyHash.toString('hex'));
   console.log('> Public address created: ', publicAddress);
 
   // generate private key WIF (wallet import format)
-  const privateKeyWIF = createPrivateKeyWIF(privateKey.toString('hex'));
+  const privateKeyWIF = getPrivateKeyWIF(privateKey.toString('hex'));
   console.log('> Private key WIF (wallet import format) created : ', privateKeyWIF);
 
   const wallet = {

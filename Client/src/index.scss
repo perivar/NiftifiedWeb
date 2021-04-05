@@ -1,3 +1,19 @@
+// Import a Google Font
+@import url('https://fonts.googleapis.com/css2?family=Lato&family=Poppins&display=swap');
+
+.fa-long-arrow-alt-down,
+.fa-long-arrow-alt-up {
+    padding: 4px 8px;
+    background-color: #444;
+    position: relative;
+    border-radius: 50%;
+    color: #28df99;
+}
+
+.fa-long-arrow-alt-up {
+    color: #ffa500;
+}
+
 // global styles
 a {
     cursor: pointer;
@@ -68,7 +84,8 @@ body {
     min-height: 900px;
     position: relative;
     background-size: cover;
-    font-family: 'Arimo', sans-serif;
+    // font-family: 'Arimo', sans-serif;
+    font-family: 'Poppins', sans-serif;
 }
 
 .page {

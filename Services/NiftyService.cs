@@ -733,7 +733,7 @@ namespace Niftified.Services
 		{
 			// validate
 			if (_context.Wallets.Any(x => x.Name == model.Name))
-				throw new AppException($"Wallet '{model.Name}:{model.Name}' is already registered");
+				throw new AppException($"Wallet '{model.Name}' is already registered");
 
 			// map model to new object
 			var wallet = _mapper.Map<Wallet>(model);
@@ -752,8 +752,8 @@ namespace Niftified.Services
 			if (wallet == null) throw new KeyNotFoundException("Wallet not found");
 
 			// validate
-			if (_context.Wallets.Any(x => x.Name == model.Name))
-				throw new AppException($"Wallet '{model.Name}:{model.Name}' is already registered");
+			// if (_context.Wallets.Any(x => x.Name == model.Name))
+			// 	throw new AppException($"Wallet '{model.Name}' is already registered");
 
 			// copy model to edition and save
 			_mapper.Map(model, wallet);

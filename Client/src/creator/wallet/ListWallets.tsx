@@ -2,11 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { niftyService } from '../../_services';
 import QRCode from 'qrcode.react';
-
-export enum WalletType {
-  Nifty,
-  Other
-}
+import { WalletType } from '../../_common/enums';
 
 export const ListWallets = ({ match }: { match: any }) => {
   const { path } = match;
@@ -36,6 +32,9 @@ export const ListWallets = ({ match }: { match: any }) => {
       <Link className="btn btn-primary" to={`/creator/profile`}>
         My Profile
       </Link>
+      <Link className="btn btn-secondary ml-2" to={`/creator/wallet/new/${id}`}>
+        Add Wallet
+      </Link>
       <div className="container mt-4">
         <div className="row">
           <div className="col">
@@ -49,6 +48,9 @@ export const ListWallets = ({ match }: { match: any }) => {
                       <h5 className="card-title"># {wallet.id}</h5>
                       <div className="card-text">
                         <ul className="list-group list-group-flush">
+                          <li className="list-group-item">
+                            <strong>Name:</strong> {wallet.name}
+                          </li>
                           <li className="list-group-item">
                             <strong>Type:</strong> {WalletType[wallet.type]}
                           </li>

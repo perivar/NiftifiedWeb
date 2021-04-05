@@ -10,6 +10,8 @@ import { EditionSearchResults } from './edition/EditionSearchResults';
 import { EditPersonForm } from './person/EditPerson';
 import { MyProfile } from './profile/MyProfile';
 import { ListWallets } from './wallet/ListWallets';
+import { WalletTransactions } from './wallet/WalletTransactions';
+import { NewWalletForm } from './wallet/NewWallet';
 
 // shared context provider
 import CreatorContextProvider from './CreatorContext';
@@ -30,6 +32,8 @@ function Creator({ match }: { match: any }) {
         <Route path={`${path}/person/edit/:id`} component={EditPersonForm} />
         <Route path={`${path}/profile`} component={MyProfile} />
         <Route path={`${path}/wallets/:id`} component={ListWallets} />
+        <Route path={`${path}/wallet/new/:id`} component={NewWalletForm} />
+        <Route path={`${path}/transactions`} component={WalletTransactions} />
       </Switch>
     </CreatorContextProvider>
   );

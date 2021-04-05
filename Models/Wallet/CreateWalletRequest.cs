@@ -9,6 +9,7 @@ namespace Niftified.Models.Wallets
 		[Required]
 		public int PersonId { get; set; } // must be owned by a person
 
+		[Required]
 		public string Name { get; set; }
 
 
