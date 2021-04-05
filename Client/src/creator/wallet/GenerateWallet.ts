@@ -75,6 +75,17 @@ export const getPrivateKeyWIF = (privateKey: string) => {
   return privateKeyWIF;
 };
 
+const calculateChecksum = (data: string) => {
+  const step1 = Buffer.from(`${data}`, 'hex');
+  // step 2 - create SHA256 hash of step 1
+  const step2 = sha256(step1);
+  // step 3 - create SHA256 hash of step 2
+  const step3 = sha256(Buffer.from(step2, 'hex'));
+  // step 4 - find the 1st byte of step 3 - save as "checksum"
+  const checksum = step3.substring(0, 8).toUpperCase();
+  return checksum;
+};
+
 /**
  * Create a private key in hex based on the private WIF key
  *
@@ -91,6 +102,14 @@ export const getPrivateKey = (privateKeyWIF: string) => {
   const privateKey = step2.substring(2, 66);
   // console.log(`networkByte: ${networkByte}`);
   // console.log(`checksum: ${checksum}`);
+
+  // data is everything apart from the last 8 characters
+  const data = step2.substring(0, 66);
+  const testChecksum = calculateChecksum(data);
+  if (checksum !== testChecksum) {
+    throw new Error('privateKeyWIF checksum failed!');
+  }
+
   return privateKey;
 };
 

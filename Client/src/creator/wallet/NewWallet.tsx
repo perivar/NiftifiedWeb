@@ -52,44 +52,48 @@ const InnerForm = (props: any & FormikProps<FormValues>) => {
   const { id } = match.params;
 
   const handleOnBlur = () => {
-    let privateKey = '';
-    let privateKeyWIF = '';
-    if (values.privateKeyWIFEncrypted !== '') {
-      privateKeyWIF = values.privateKeyWIFEncrypted;
-      privateKey = getPrivateKey(privateKeyWIF);
-    } else if (values.privateKeyEncrypted !== '') {
-      privateKey = values.privateKeyEncrypted;
-      privateKeyWIF = getPrivateKeyWIF(privateKey);
-    }
+    try {
+      let privateKey = '';
+      let privateKeyWIF = '';
+      if (values.privateKeyWIFEncrypted !== '') {
+        privateKeyWIF = values.privateKeyWIFEncrypted;
+        privateKey = getPrivateKey(privateKeyWIF);
+      } else if (values.privateKeyEncrypted !== '') {
+        privateKey = values.privateKeyEncrypted;
+        privateKeyWIF = getPrivateKeyWIF(privateKey);
+      }
 
-    if (privateKey !== '' && privateKeyWIF !== '') {
-      // set WIF
-      setFieldValue('privateKeyWIFEncrypted', privateKeyWIF);
-      setFieldTouched('privateKeyWIFEncrypted', true);
-      setFieldError('privateKeyWIFEncrypted', undefined);
+      if (privateKey !== '' && privateKeyWIF !== '') {
+        // set WIF
+        setFieldValue('privateKeyWIFEncrypted', privateKeyWIF);
+        setFieldTouched('privateKeyWIFEncrypted', true);
+        setFieldError('privateKeyWIFEncrypted', undefined);
 
-      // set hex
-      setFieldValue('privateKeyEncrypted', privateKey);
-      setFieldTouched('privateKeyEncrypted', true);
-      setFieldError('privateKeyEncrypted', undefined);
+        // set hex
+        setFieldValue('privateKeyEncrypted', privateKey);
+        setFieldTouched('privateKeyEncrypted', true);
+        setFieldError('privateKeyEncrypted', undefined);
 
-      // generate public key from private
-      const publicKey = getPublicKey(privateKey);
-      setFieldValue('publicKey', publicKey);
-      setFieldTouched('publicKey', true);
-      setFieldError('publicKey', undefined);
+        // generate public key from private
+        const publicKey = getPublicKey(privateKey);
+        setFieldValue('publicKey', publicKey);
+        setFieldTouched('publicKey', true);
+        setFieldError('publicKey', undefined);
 
-      // generate public key hash
-      const publicKeyHash = HASH160(publicKey);
-      setFieldValue('publicKeyHash', publicKeyHash.toString('hex'));
-      setFieldTouched('publicKeyHash', true);
-      setFieldError('publicKeyHash', undefined);
+        // generate public key hash
+        const publicKeyHash = HASH160(publicKey);
+        setFieldValue('publicKeyHash', publicKeyHash.toString('hex'));
+        setFieldTouched('publicKeyHash', true);
+        setFieldError('publicKeyHash', undefined);
 
-      // generate public address
-      const publicAddress = getPublicAddress(publicKeyHash.toString('hex'));
-      setFieldValue('publicAddress', publicAddress);
-      setFieldTouched('publicAddress', true);
-      setFieldError('publicAddress', undefined);
+        // generate public address
+        const publicAddress = getPublicAddress(publicKeyHash.toString('hex'));
+        setFieldValue('publicAddress', publicAddress);
+        setFieldTouched('publicAddress', true);
+        setFieldError('publicAddress', undefined);
+      }
+    } catch (error) {
+      console.log(`failed: ${error}`);
     }
   };
 
