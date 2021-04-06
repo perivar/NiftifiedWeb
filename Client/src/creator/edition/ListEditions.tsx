@@ -15,6 +15,7 @@ export const ListEditions = ({ match }: { match: any }) => {
 
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<number>(0);
+  const [confirmDeleteTitle, setConfirmDeleteTitle] = useState<string | undefined>();
 
   // load editions async
   React.useEffect(() => {
@@ -52,10 +53,13 @@ export const ListEditions = ({ match }: { match: any }) => {
   const onCancelDeleteEdition = () => {
     // make sure to set confirm delete id to zero
     setConfirmDeleteId(0);
+    setConfirmDeleteTitle(undefined);
   };
 
-  const confirmDelete = (id: number) => {
+  const confirmDelete = (edition: any) => {
+    const { id } = edition;
     setConfirmDeleteId(id);
+    setConfirmDeleteTitle(edition.name ? edition.name : edition.id);
     setShowConfirmModal(true);
   };
 
@@ -131,7 +135,7 @@ export const ListEditions = ({ match }: { match: any }) => {
                             // edition && edition.volumes && edition.volumes.every((v: any) => v.status === 0) ? (
                             <button
                               type="button"
-                              onClick={() => confirmDelete(edition.id)}
+                              onClick={() => confirmDelete(edition)}
                               className="btn btn-sm btn-danger">
                               Delete
                             </button>
@@ -154,6 +158,7 @@ export const ListEditions = ({ match }: { match: any }) => {
         setShow={setShowConfirmModal}
         onConfirm={onConfirmedDeleteEdition}
         onCancel={onCancelDeleteEdition}
+        title={confirmDeleteTitle}
       />
     </>
   );

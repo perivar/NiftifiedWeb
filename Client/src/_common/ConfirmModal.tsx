@@ -5,12 +5,14 @@ function ConfirmModal({
   show,
   setShow,
   onConfirm,
-  onCancel
+  onCancel,
+  title
 }: {
   show: boolean;
   setShow: Function;
   onConfirm: Function;
   onCancel: Function;
+  title?: string;
 }) {
   const handleClose = () => {
     setShow(false);
@@ -28,7 +30,7 @@ function ConfirmModal({
         <Modal.Header closeButton>
           <Modal.Title>Confirm Delete</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Are you sure you want to delete this. This cannot be undone!</Modal.Body>
+        <Modal.Body>Are you sure you want to delete {title ? `"${title}"` : 'this'}. This cannot be undone!</Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>
             Cancel

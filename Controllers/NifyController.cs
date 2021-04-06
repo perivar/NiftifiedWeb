@@ -153,11 +153,11 @@ namespace Niftified.Controllers
 		}
 
 		[Authorize]
-		[HttpDelete("/api/edition/delete/{id:int}")]
+		[HttpDelete("/api/edition/{id:int}")]
 		public ActionResult<EditionResponse> DeleteEdition(int id)
 		{
 			// get the current logged in user 
-			// and verify that the edition is owner by this user
+			// and verify that the edition is owned by this user
 			var accountId = Account.Id;
 			var edition = _niftyService.GetEditionById(id);
 			if (edition.AccountId != accountId)
@@ -230,11 +230,11 @@ namespace Niftified.Controllers
 		}
 
 		[Authorize]
-		[HttpDelete("/api/person/delete/{id:int}")]
+		[HttpDelete("/api/person/{id:int}")]
 		public ActionResult<PersonResponse> DeletePerson(int id)
 		{
 			// get the current logged in user 
-			// and verify that the edition is owner by this user
+			// and verify that the edition is owned by this user
 			var accountId = Account.Id;
 			var person = _niftyService.GetPersonById(id);
 			if (person.Account.Id != accountId)
@@ -320,6 +320,28 @@ namespace Niftified.Controllers
 			var wallet = _niftyService.UpdateWallet(id, model);
 			return Ok(wallet);
 		}
+
+		[Authorize]
+		[HttpDelete("/api/wallet/{id:int}")]
+		public ActionResult<WalletResponse> DeleteWallet(int id)
+		{
+			// get the current logged in user 
+			// and verify that the wallet is owned by this user
+			var accountId = Account.Id;
+			var wallet = _niftyService.GetWalletById(id);
+			var person = _niftyService.GetPersonById(wallet.PersonId);
+			if (person.Account.Id != accountId)
+			{
+				throw new KeyNotFoundException("Cannot delete a wallet you don't own!");
+			}
+			else
+			{
+				_niftyService.DeleteWallet(id);
+			}
+
+			return Ok(true);
+		}
+
 
 	}
 }

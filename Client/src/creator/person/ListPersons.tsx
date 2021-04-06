@@ -16,6 +16,7 @@ export const ListPersons = ({ history }: { history: any; match: any }) => {
 
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<number>(0);
+  const [confirmDeleteTitle, setConfirmDeleteTitle] = useState<string | undefined>();
 
   // add a new person using a modal
   const [showAddPersonModal, setShowAddPersonModal] = useState<boolean>(false);
@@ -62,10 +63,13 @@ export const ListPersons = ({ history }: { history: any; match: any }) => {
   const onCancelDeletePerson = () => {
     // make sure to set confirm delete id to zero
     setConfirmDeleteId(0);
+    setConfirmDeleteTitle(undefined);
   };
 
-  const confirmDelete = (id: number) => {
+  const confirmDelete = (person: any) => {
+    const { id } = person;
     setConfirmDeleteId(id);
+    setConfirmDeleteTitle(person.alias ? person.alias : person.id);
     setShowConfirmModal(true);
   };
 
@@ -142,7 +146,7 @@ export const ListPersons = ({ history }: { history: any; match: any }) => {
                           {!isLoading ? (
                             <button
                               type="button"
-                              onClick={() => confirmDelete(person.id)}
+                              onClick={() => confirmDelete(person)}
                               className="btn btn-sm btn-danger">
                               Delete
                             </button>
@@ -171,6 +175,7 @@ export const ListPersons = ({ history }: { history: any; match: any }) => {
         setShow={setShowConfirmModal}
         onConfirm={onConfirmedDeletePerson}
         onCancel={onCancelDeletePerson}
+        title={confirmDeleteTitle}
       />
     </>
   );

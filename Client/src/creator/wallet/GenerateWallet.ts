@@ -8,6 +8,14 @@ import { sha256 } from 'js-sha256';
 
 const ecdsa = new ec('secp256k1');
 
+export interface IWallet {
+  privateKey: string;
+  publicKey: string;
+  publicKeyHash: string;
+  privateKeyWIF: string;
+  publicAddress: string;
+}
+
 // Convert a hex string to a byte array
 export const hexToBytes = (hex: string): number[] => {
   const bytes = [];
@@ -195,7 +203,7 @@ export const makeWallet = () => {
   const privateKeyWIF = getPrivateKeyWIF(privateKey.toString('hex'));
   console.log('> Private key WIF (wallet import format) created : ', privateKeyWIF);
 
-  const wallet = {
+  const wallet: IWallet = {
     privateKey: privateKey.toString('hex').toUpperCase(),
     publicKey,
     publicKeyHash: publicKeyHash.toString('hex').toUpperCase(),

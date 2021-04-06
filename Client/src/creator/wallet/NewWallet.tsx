@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { memo } from 'react';
 import { Form, Field, ErrorMessage, FormikProps, withFormik } from 'formik';
 import * as Yup from 'yup';
 import { niftyService, alertService } from '../../_services';
@@ -7,13 +7,21 @@ import FocusError from '../../_common/FocusError';
 import * as Scroll from 'react-scroll';
 import { Link } from 'react-router-dom';
 import { WalletType, walletTypeOptions } from '../../_common/enums';
-import { getPublicKey, HASH160, getPublicAddress, getPrivateKeyWIF, getPrivateKey } from './GenerateWallet';
+import {
+  IWallet,
+  makeWallet,
+  getPublicKey,
+  HASH160,
+  getPublicAddress,
+  getPrivateKeyWIF,
+  getPrivateKey
+} from './GenerateWallet';
 
 const scroll = Scroll.animateScroll;
 
 interface FormValues {
   name: string;
-  walletType: WalletType | null;
+  type: WalletType | null;
   publicKey: string;
   publicKeyHash: string;
   publicAddress: string;
@@ -25,7 +33,7 @@ interface FormValues {
 const validationSchema = Yup.object().shape(
   {
     name: Yup.string().required('A unique name is required'),
-    walletType: Yup.mixed().required('Wallet Type is required'),
+    type: Yup.mixed().required('Wallet Type is required'),
     publicKey: Yup.string().required('A public key is required'),
     publicKeyHash: Yup.string().required('A public key hash is required'),
     publicAddress: Yup.string().required('A public address is required'),
@@ -51,6 +59,39 @@ const InnerForm = (props: any & FormikProps<FormValues>) => {
   const { match } = props;
   const { id } = match.params;
 
+  const updateFormikWalletFields = (wallet: IWallet) => {
+    const { privateKey } = wallet;
+    const { publicKey } = wallet;
+    const { publicKeyHash } = wallet;
+    const { privateKeyWIF } = wallet;
+    const { publicAddress } = wallet;
+
+    // set private key WIF
+    setFieldValue('privateKeyWIFEncrypted', privateKeyWIF);
+    setFieldTouched('privateKeyWIFEncrypted', true);
+    setFieldError('privateKeyWIFEncrypted', undefined);
+
+    // set private key hex
+    setFieldValue('privateKeyEncrypted', privateKey);
+    setFieldTouched('privateKeyEncrypted', true);
+    setFieldError('privateKeyEncrypted', undefined);
+
+    // set public key
+    setFieldValue('publicKey', publicKey);
+    setFieldTouched('publicKey', true);
+    setFieldError('publicKey', undefined);
+
+    // set public key hash
+    setFieldValue('publicKeyHash', publicKeyHash);
+    setFieldTouched('publicKeyHash', true);
+    setFieldError('publicKeyHash', undefined);
+
+    // set public address
+    setFieldValue('publicAddress', publicAddress);
+    setFieldTouched('publicAddress', true);
+    setFieldError('publicAddress', undefined);
+  };
+
   const handleOnBlur = () => {
     try {
       let privateKey = '';
@@ -64,37 +105,34 @@ const InnerForm = (props: any & FormikProps<FormValues>) => {
       }
 
       if (privateKey !== '' && privateKeyWIF !== '') {
-        // set WIF
-        setFieldValue('privateKeyWIFEncrypted', privateKeyWIF);
-        setFieldTouched('privateKeyWIFEncrypted', true);
-        setFieldError('privateKeyWIFEncrypted', undefined);
-
-        // set hex
-        setFieldValue('privateKeyEncrypted', privateKey);
-        setFieldTouched('privateKeyEncrypted', true);
-        setFieldError('privateKeyEncrypted', undefined);
+        const wallet: IWallet = {} as IWallet;
+        wallet.privateKey = privateKey;
+        wallet.privateKeyWIF = privateKeyWIF;
 
         // generate public key from private
         const publicKey = getPublicKey(privateKey);
-        setFieldValue('publicKey', publicKey);
-        setFieldTouched('publicKey', true);
-        setFieldError('publicKey', undefined);
 
         // generate public key hash
-        const publicKeyHash = HASH160(publicKey);
-        setFieldValue('publicKeyHash', publicKeyHash.toString('hex'));
-        setFieldTouched('publicKeyHash', true);
-        setFieldError('publicKeyHash', undefined);
+        const publicKeyHashBuffer = HASH160(publicKey);
+        const publicKeyHash = publicKeyHashBuffer.toString('hex');
 
         // generate public address
-        const publicAddress = getPublicAddress(publicKeyHash.toString('hex'));
-        setFieldValue('publicAddress', publicAddress);
-        setFieldTouched('publicAddress', true);
-        setFieldError('publicAddress', undefined);
+        const publicAddress = getPublicAddress(publicKeyHash);
+
+        wallet.publicKey = publicKey;
+        wallet.publicKeyHash = publicKeyHash;
+        wallet.publicAddress = publicAddress;
+
+        updateFormikWalletFields(wallet);
       }
     } catch (error) {
       console.log(`failed: ${error}`);
     }
+  };
+
+  const handleOnClickGenerateWallet = () => {
+    const wallet = makeWallet();
+    updateFormikWalletFields(wallet);
   };
 
   return (
@@ -102,6 +140,9 @@ const InnerForm = (props: any & FormikProps<FormValues>) => {
       <Link to={`/creator/wallets/${id}`} className="btn btn-primary">
         Wallets
       </Link>
+      <button className="btn btn-secondary ml-2" onClick={handleOnClickGenerateWallet}>
+        Generate Wallet
+      </button>
       <div className="container mt-4">
         <Form>
           <div className="form-row">
@@ -125,17 +166,17 @@ const InnerForm = (props: any & FormikProps<FormValues>) => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="walletType">Wallet Type</label>
+                <label htmlFor="type">Wallet Type</label>
                 <Field
-                  id="walletType"
-                  name="walletType"
+                  id="type"
+                  name="type"
                   type="text"
                   options={walletTypeOptions}
                   component={FormikSelect}
                   placeholder="Select Type..."
                   isMulti={false}
                 />
-                <ErrorMessage name="walletType" component="div" className="invalid-feedback show-block" />
+                <ErrorMessage name="type" component="div" className="invalid-feedback show-block" />
               </div>
 
               <div className="form-group">
@@ -237,7 +278,7 @@ const InnerForm = (props: any & FormikProps<FormValues>) => {
 
 const initialValues: FormValues = {
   name: '',
-  walletType: null,
+  type: null,
   publicKey: '',
   publicKeyHash: '',
   publicAddress: '',

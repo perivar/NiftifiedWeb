@@ -3,13 +3,18 @@ import { Link } from 'react-router-dom';
 import { niftyService } from '../../_services';
 import QRCode from 'qrcode.react';
 import { WalletType } from '../../_common/enums';
+import ConfirmModal from '../../_common/ConfirmModal';
 
 export const ListWallets = ({ match }: { match: any }) => {
-  const { path } = match;
+  // const { path } = match;
   const { id } = match.params;
 
   const [isLoading, setLoading] = useState<boolean>(false);
   const [wallets, setWallets] = useState<any>([]);
+
+  const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number>(0);
+  const [confirmDeleteTitle, setConfirmDeleteTitle] = useState<string | undefined>();
 
   // load volumes async
   React.useEffect(() => {
@@ -26,6 +31,31 @@ export const ListWallets = ({ match }: { match: any }) => {
         setLoading(false);
       });
   }, [id]);
+
+  const onCancelDeleteWallet = () => {
+    // make sure to set confirm delete id to zero
+    setConfirmDeleteId(0);
+    setConfirmDeleteTitle(undefined);
+  };
+
+  const confirmDelete = (wallet: any) => {
+    const { id } = wallet;
+    setConfirmDeleteId(id);
+    setConfirmDeleteTitle(wallet.name ? wallet.name : wallet.id);
+    setShowConfirmModal(true);
+  };
+
+  const onConfirmedDeleteWallet = () => {
+    if (confirmDeleteId !== 0) {
+      // we have a confirmed id
+      // alert(confirmDeleteId);
+
+      niftyService.deleteWallet(confirmDeleteId).then(() => {
+        // remove from list and re-render
+        setWallets(wallets.filter((wallet: any) => wallet.id !== confirmDeleteId));
+      });
+    }
+  };
 
   return (
     <>
@@ -44,13 +74,22 @@ export const ListWallets = ({ match }: { match: any }) => {
                 wallets &&
                 wallets.map((wallet: any) => (
                   <div className="card" key={wallet.id}>
+                    <div className="card-header">
+                      <div className="row">
+                        <div className="col-md-10">
+                          <div className="w-75">{wallet.name ? wallet.name : '(No Name)'}</div>
+                        </div>
+                        <div className="col-md-2 float-right">
+                          <button type="button" onClick={() => confirmDelete(wallet)} className="btn btn-sm btn-danger">
+                            Del
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                     <div className="card-body">
                       <h5 className="card-title"># {wallet.id}</h5>
                       <div className="card-text">
                         <ul className="list-group list-group-flush">
-                          <li className="list-group-item">
-                            <strong>Name:</strong> {wallet.name}
-                          </li>
                           <li className="list-group-item">
                             <strong>Type:</strong> {WalletType[wallet.type]}
                           </li>
@@ -142,6 +181,13 @@ export const ListWallets = ({ match }: { match: any }) => {
           </div>
         </div>
       </div>
+      <ConfirmModal
+        show={showConfirmModal}
+        setShow={setShowConfirmModal}
+        onConfirm={onConfirmedDeleteWallet}
+        onCancel={onCancelDeleteWallet}
+        title={confirmDeleteTitle}
+      />
     </>
   );
 };

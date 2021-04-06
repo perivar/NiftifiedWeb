@@ -29,7 +29,8 @@ export const niftyService = {
   deletePerson,
   getWalletsByPersonId,
   getWalletById,
-  createWallet
+  createWallet,
+  deleteWallet
 };
 
 function getTags() {
@@ -155,7 +156,7 @@ function updateEdition(id: string, params: any) {
 function deleteEdition(id: number) {
   const user = accountService.userValue;
   if (user && user.id) {
-    return fetchWrapper.delete(`${baseUrl}/edition/delete/${id}`);
+    return fetchWrapper.delete(`${baseUrl}/edition/${id}`);
   }
   return Promise.reject('not logged in');
 }
@@ -213,7 +214,7 @@ function updatePerson(id: string, params: any) {
 function deletePerson(id: number) {
   const user = accountService.userValue;
   if (user && user.id) {
-    return fetchWrapper.delete(`${baseUrl}/person/delete/${id}`);
+    return fetchWrapper.delete(`${baseUrl}/person/${id}`);
   }
   return Promise.reject('not logged in');
 }
@@ -235,4 +236,12 @@ function createWallet(params: any) {
   // merge params
   const allParams = { ...params, ...body };
   return fetchWrapper.post(`${baseUrl}/wallet`, allParams);
+}
+
+function deleteWallet(id: number) {
+  const user = accountService.userValue;
+  if (user && user.id) {
+    return fetchWrapper.delete(`${baseUrl}/wallet/${id}`);
+  }
+  return Promise.reject('not logged in');
 }
