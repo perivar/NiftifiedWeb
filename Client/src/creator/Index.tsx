@@ -12,6 +12,7 @@ import { MyProfile } from './profile/MyProfile';
 import { ListWallets } from './wallet/ListWallets';
 import { WalletTransactions } from './wallet/WalletTransactions';
 import { NewWalletForm } from './wallet/NewWallet';
+import { Wallet } from './wallet/Wallet';
 
 // shared context provider
 import CreatorContextProvider from './CreatorContext';
@@ -34,6 +35,7 @@ function Creator({ match }: { match: any }) {
         <Route path={`${path}/wallets/:id`} component={ListWallets} />
         <Route path={`${path}/wallet/new/:id`} component={NewWalletForm} />
         <Route path={`${path}/transactions`} component={WalletTransactions} />
+        <Route path={`${path}/wallet`} component={Wallet} />
       </Switch>
     </CreatorContextProvider>
   );

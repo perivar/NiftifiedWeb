@@ -129,14 +129,16 @@ export const ListVolumes = ({ match }: { match: any }) => {
           <div className="col">
             {!isLoadingEdition && <h5>Showing volumes for {`${edition.name} - ${edition.description}`}</h5>}
             {!isLoading && (
-              <Table
-                columns={columns}
-                data={volumes}
-                currentpage={page}
-                setPage={setPage}
-                perPage={perPage}
-                setPerPage={setPerPage}
-                totalPage={numberOfPages}></Table>
+              <div className="table-responsive">
+                <Table
+                  columns={columns}
+                  data={volumes}
+                  currentpage={page}
+                  setPage={setPage}
+                  perPage={perPage}
+                  setPerPage={setPerPage}
+                  totalPage={numberOfPages}></Table>
+              </div>
             )}
           </div>
         </div>

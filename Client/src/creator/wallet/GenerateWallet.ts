@@ -67,7 +67,7 @@ export const getAddress = (publicKey: string) => {
  * @param {String} privateKey
  */
 export const getPrivateKeyWIF = (privateKey: string) => {
-  // step 1 - add prefix "35" in hex (0x35 for niftycoin, 0x80 for bitcoin, 0xB0 for litecoin)
+  // step 1 - add prefix "35" in hex (0x35 for niftycoin, 0x80 for bitcoin, 0xb0 for litecoin)
   // base58Prefixes[SECRET_KEY]
   const step1 = Buffer.from(`35${privateKey}`, 'hex');
   // step 2 - create SHA256 hash of step 1

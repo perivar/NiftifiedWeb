@@ -49,7 +49,7 @@ export const Header = () => {
                     <i className="fa fa-user"></i>
                   </NavLink>
                   <NavLink
-                    to="/creator/transactions"
+                    to="/creator/wallet"
                     className="nav-item nav-link mr-2"
                     onClick={() =>
                       setTimeout(() => {
