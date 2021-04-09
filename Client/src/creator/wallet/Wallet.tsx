@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { niftyService } from '../../_services';
-import { sendTransactions } from './nifty/generate';
+import { sendTransactions, sendNiftyCoin, generateWallet } from './nifty/generate';
 
 export const Wallet = ({ match }: { match: any }) => {
   // const { path } = match;
   // const { id } = match.params;
 
   const handleSend = () => {
-    const res = sendTransactions('sss')
+    // generateWallet();
+
+    // sendTransactions('2nafhgiCX3txpTtokW6XVU5jd1RZijtEfjNbn3euPftpUrht6aJ')
+    sendNiftyCoin('2nafhgiCX3txpTtokW6XVU5jd1RZijtEfjNbn3euPftpUrht6aJ')
       .then((res: any) => {
         console.log(res);
       })
