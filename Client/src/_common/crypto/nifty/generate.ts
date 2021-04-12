@@ -18,11 +18,11 @@ const RECV_ADDR = 'NUcBvW67GEqi8CXYPcL4Y5qzw7Vf9rp7wg';
 const NIFTOSHIS_TO_SEND = 1000;
 
 export const sendTransactions = async (privateKeyWIF: string) => {
-  const balanceResult = await axios.get(`http://116.203.83.168:3001/ext/getbalance/${SEND_ADDR}`);
+  const balanceResult = await axios.get(`https://explorer.niftycoin.org/ext/getbalance/${SEND_ADDR}`);
   const balance = balanceResult.data;
   console.log('Source address balance:', balance);
 
-  const transactionResult = await axios.get(`http://116.203.83.168:3001/ext/getaddress/${SEND_ADDR}`);
+  const transactionResult = await axios.get(`https://explorer.niftycoin.org/ext/getaddress/${SEND_ADDR}`);
   const transactions = transactionResult.data;
   console.log('Last txs :', transactions.last_txs.length);
 
@@ -71,7 +71,7 @@ export const sendNiftyCoin = async (privateKeyWIF: string) => {
 
     // Get UTXOs held by the address.
     // https://developer.bitcoin.com/mastering-bitcoin-cash/4-transactions/
-    const transactionResult = await axios.get(`http://116.203.83.168:3001/ext/getaddresstxs/${SEND_ADDR}/0/1`);
+    const transactionResult = await axios.get(`https://explorer.niftycoin.org/ext/getaddresstxs/${SEND_ADDR}/0/1`);
     const transactions = transactionResult.data;
 
     if (transactions.length === 0) throw new Error('No transactions found.');
@@ -120,7 +120,7 @@ export const sendNiftyCoin = async (privateKeyWIF: string) => {
     console.log(`TX hex: ${hex}`);
 
     // Broadcast transation to the network
-    // const txidStr = await bchjs.RawTransactions.sendRawTransaction([hex]);
+    // const txidStr = await bitcoin.RawTransactions.sendRawTransaction([hex]);
     // // import from util.js file
     // const util = require('../util.js');
     // console.log(`Transaction ID: ${txidStr}`);
@@ -134,7 +134,7 @@ export const sendNiftyCoin = async (privateKeyWIF: string) => {
 // Get the balance in NFY of a NFY address.
 async function getNFYBalance(addr: string, verbose: boolean) {
   try {
-    const result = await axios.get(`http://116.203.83.168:3001/ext/getbalance/${addr}`);
+    const result = await axios.get(`https://explorer.niftycoin.org/ext/getbalance/${addr}`);
 
     if (verbose) console.log(result);
 
@@ -155,7 +155,7 @@ async function findUtxo(transactions: any) {
     const tx = transactions[i].txid;
 
     // Validate the data with the API
-    const txout = await axios.get(`http://116.203.83.168:3001/api/getrawtransaction?txid=${tx}&decrypt=1`);
+    const txout = await axios.get(`https://explorer.niftycoin.org/api/getrawtransaction?txid=${tx}&decrypt=1`);
 
     if (txout === null) {
       // If the UTXO has already been spent, the full node will respond with null.
@@ -183,7 +183,7 @@ async function findBiggestUtxo(utxos: any) {
     // console.log(`thisUTXO: ${JSON.stringify(thisUtxo, null, 2)}`);
 
     // Validate the data with the API
-    const txout = await axios.get(`http://116.203.83.168:3001/api/getrawtransaction?txid=${thisUtxo}&decrypt=1`);
+    const txout = await axios.get(`https://explorer.niftycoin.org/api/getrawtransaction?txid=${thisUtxo}&decrypt=1`);
 
     if (txout === null) {
       // If the UTXO has already been spent, the full node will respond with null.

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { niftyService } from '../../_services';
-import { sendTransactions, sendNiftyCoin, generateWallet } from './nifty/generate';
+import { sendTransactions, sendNiftyCoin, generateWallet } from '../../_common/crypto/nifty/generate';
 
 export const Wallet = ({ match }: { match: any }) => {
   // const { path } = match;
