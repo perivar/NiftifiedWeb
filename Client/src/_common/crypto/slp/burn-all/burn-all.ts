@@ -4,11 +4,19 @@
 */
 
 import * as bitcoin from 'bitcoinjs-lib';
-import NiftyCoinExplorer from '../../NiftyCoinExplorer';
-import * as util from '../../util.js';
+import * as bip39 from 'bip39';
+import * as bip32 from 'bip32';
+import CryptoUtil from '../../util';
+import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
+import { Network, Transaction } from 'bitcoinjs-lib';
+import { toBitcoinJS } from '../../nifty/nfy';
 
 // Set NETWORK to either testnet or mainnet
 const NETWORK = 'mainnet';
+
+// import networks
+const mainNet = toBitcoinJS(false);
+const testNet = toBitcoinJS(true);
 
 // Edit this variable to direct where the NFY should be sent. By default, it
 // will be sent to the address in the wallet.
@@ -19,17 +27,16 @@ const NFY_MAINNET = 'https://explorer.niftycoin.org/';
 const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 
 // Instantiate explorer based on the network.
-let explorer;
+let explorer: any;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
 // Open the wallet generated with create-wallet.
-let walletInfo;
+let walletInfo: any;
 try {
-  walletInfo = import('../create-wallet/wallet.json');
+  walletInfo = JSON.parse(window.localStorage.getItem('wallet.json') || '{}');
 } catch (err) {
   console.log('Could not open wallet.json. Generate a wallet with create-wallet first.');
-  process.exit(0);
 }
 
 const SEND_ADDR = walletInfo.cashAddress;
@@ -39,13 +46,15 @@ const SEND_MNEMONIC = walletInfo.mnemonic;
 // somewhere else.
 if (RECV_ADDR === '') RECV_ADDR = walletInfo.cashAddress;
 
-async function sendAll() {
+export async function sendAll() {
   try {
+    // set network
+    let network: Network;
+    if (NETWORK === 'mainnet') network = mainNet;
+    else network = testNet;
+
     // instance of transaction builder
-    let transactionBuilder;
-    if (NETWORK === 'mainnet') {
-      transactionBuilder = new bitcoin.TransactionBuilder();
-    } else transactionBuilder = new bitcoin.TransactionBuilder('testnet');
+    const transactionBuilder = new bitcoin.TransactionBuilder(network);
 
     let sendAmount = 0;
     const inputs = [];
@@ -66,7 +75,7 @@ async function sendAll() {
     }
 
     // get byte count to calculate fee. paying 1 sat/byte
-    const byteCount = bitcoin.BitcoinCash.getByteCount({ P2PKH: inputs.length }, { P2PKH: 1 });
+    const byteCount = CryptoUtil.getByteCount({ P2PKH: inputs.length }, { P2PKH: 1 });
     console.log(`byteCount: ${byteCount}`);
 
     const satoshisPerByte = 1.1;
@@ -86,12 +95,12 @@ async function sendAll() {
     const change = await changeAddrFromMnemonic(SEND_MNEMONIC);
 
     // Generate a keypair from the change address.
-    const keyPair = bitcoin.HDNode.toKeyPair(change);
+    const keyPair = change.derivePath('0/0'); // not sure if this is the correct to get keypair
 
     // sign w/ HDNode
-    let redeemScript;
+    const redeemScript = undefined;
     inputs.forEach((input, index) => {
-      transactionBuilder.sign(index, keyPair, redeemScript, transactionBuilder.hashTypes.SIGHASH_ALL, input.value);
+      transactionBuilder.sign(index, keyPair, redeemScript, Transaction.SIGHASH_ALL, input.value);
     });
 
     // build tx
@@ -102,33 +111,35 @@ async function sendAll() {
     console.log(' ');
 
     // Broadcast transation to the network
-    const txid = await bitcoin.RawTransactions.sendRawTransaction([hex]);
+    const txid = await explorer.broadcast([hex]);
     console.log(`Transaction ID: ${txid}`);
 
     console.log('Check the status of your transaction on this block explorer:');
-    util.transactionStatus(txid, NETWORK);
+    CryptoUtil.transactionStatus(txid, NETWORK);
   } catch (err) {
     console.log('error: ', err);
   }
 }
-sendAll();
 
 // Generate a change address from a Mnemonic of a private key.
-async function changeAddrFromMnemonic(mnemonic) {
+async function changeAddrFromMnemonic(mnemonic: string) {
   try {
     // root seed buffer
-    const rootSeed = await bitcoin.Mnemonic.toSeed(mnemonic);
+    const rootSeed = await bip39.mnemonicToSeed(mnemonic); // creates seed buffer
+
+    // set network
+    let network: Network;
+    if (NETWORK === 'mainnet') network = mainNet;
+    else network = testNet;
 
     // master HDNode
-    let masterHDNode;
-    if (NETWORK === 'mainnet') masterHDNode = bitcoin.HDNode.fromSeed(rootSeed);
-    else masterHDNode = bitcoin.HDNode.fromSeed(rootSeed, 'testnet');
+    const masterHDNode = bip32.fromSeed(rootSeed, network);
 
     // HDNode of BIP44 account
-    const account = bitcoin.HDNode.derivePath(masterHDNode, "m/44'/245'/0'");
+    const account = masterHDNode.derivePath("m/44'/245'/0'");
 
     // derive the first external change address HDNode which is going to spend utxo
-    const change = bitcoin.HDNode.derivePath(account, '0/0');
+    const change = account.derivePath('0/0');
 
     return change;
   } catch (err) {

@@ -4,11 +4,19 @@
 */
 
 import * as bitcoin from 'bitcoinjs-lib';
-import NiftyCoinExplorer from '../../NiftyCoinExplorer';
-import * as util from '../../util.js';
+import * as bip39 from 'bip39';
+import * as bip32 from 'bip32';
+import CryptoUtil from '../../util';
+import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
+import { toBitcoinJS } from '../../nifty/nfy';
+import { Network, Transaction } from 'bitcoinjs-lib';
 
 // Set NETWORK to either testnet or mainnet
 const NETWORK = 'mainnet';
+
+// import networks
+const mainNet = toBitcoinJS(false);
+const testNet = toBitcoinJS(true);
 
 // Set the number of dust outputs to send.
 const NUM_OUTPUTS = 5;
@@ -21,23 +29,22 @@ const NFY_MAINNET = 'https://explorer.niftycoin.org/';
 const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 
 // Instantiate explorer based on the network.
-let explorer;
+let explorer: any;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
 // Open the wallet generated with create-wallet.
-let walletInfo;
+let walletInfo: any;
 try {
-  walletInfo = import('../create-wallet/wallet.json');
+  walletInfo = JSON.parse(window.localStorage.getItem('wallet.json') || '{}');
 } catch (err) {
   console.log('Could not open wallet.json. Generate a wallet with create-wallet first.');
-  process.exit(0);
 }
 
 const SEND_ADDR = walletInfo.cashAddress;
 const SEND_MNEMONIC = walletInfo.mnemonic;
 
-async function sendDust() {
+export async function sendDust() {
   try {
     // Get the balance of the sending address.
     const balance = await getNFYBalance(SEND_ADDR, false);
@@ -45,15 +52,14 @@ async function sendDust() {
     // Exit if the balance is zero.
     if (balance <= 0.0) {
       console.log('Balance of sending address is zero. Exiting.');
-      process.exit(0);
     }
 
     // Send the NFY back to the same wallet address.
     if (RECV_ADDR === '') RECV_ADDR = SEND_ADDR;
 
     // Convert to a legacy address (needed to build transactions).
-    // const SEND_ADDR_LEGACY = bitcoin.Address.toLegacyAddress(SEND_ADDR)
-    // const RECV_ADDR_LEGACY = bitcoin.Address.toLegacyAddress(RECV_ADDR)
+    // const SEND_ADDR_LEGACY = CryptoUtil.toLegacyAddress(SEND_ADDR)
+    // const RECV_ADDR_LEGACY = CryptoUtil.toLegacyAddress(RECV_ADDR)
 
     // Get UTXOs held by the address.
     // https://developer.bitcoin.com/mastering-bitcoin-cash/4-transactions/
@@ -73,11 +79,13 @@ async function sendDust() {
       throw new Error('Not enough satoshis to send desired number of dust outputs.');
     }
 
+    // set network
+    let network: Network;
+    if (NETWORK === 'mainnet') network = mainNet;
+    else network = testNet;
+
     // instance of transaction builder
-    let transactionBuilder;
-    if (NETWORK === 'mainnet') {
-      transactionBuilder = new bitcoin.TransactionBuilder();
-    } else transactionBuilder = new bitcoin.TransactionBuilder('testnet');
+    const transactionBuilder = new bitcoin.TransactionBuilder(network);
 
     // Essential variables of a transaction.
     const originalAmount = utxo.value;
@@ -88,7 +96,7 @@ async function sendDust() {
     transactionBuilder.addInput(txid, vout);
 
     // get byte count to calculate fee. paying 1.2 sat/byte
-    const byteCount = bitcoin.BitcoinCash.getByteCount({ P2PKH: 1 }, { P2PKH: NUM_OUTPUTS + 1 });
+    const byteCount = CryptoUtil.getByteCount({ P2PKH: 1 }, { P2PKH: NUM_OUTPUTS + 1 });
     console.log(`Transaction byte count: ${byteCount}`);
     const satoshisPerByte = 1.2;
     const txFee = Math.floor(satoshisPerByte * byteCount);
@@ -113,11 +121,11 @@ async function sendDust() {
     const change = await changeAddrFromMnemonic(SEND_MNEMONIC);
 
     // Generate a keypair from the change address.
-    const keyPair = bitcoin.HDNode.toKeyPair(change);
+    const keyPair = change.derivePath('0/0'); // not sure if this is the correct to get keypair
 
     // Sign the transaction with the HD node.
-    let redeemScript;
-    transactionBuilder.sign(0, keyPair, redeemScript, transactionBuilder.hashTypes.SIGHASH_ALL, originalAmount);
+    const redeemScript = undefined;
+    transactionBuilder.sign(0, keyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
 
     // build tx
     const tx = transactionBuilder.build();
@@ -127,49 +135,46 @@ async function sendDust() {
     console.log(' ');
 
     // Broadcast transation to the network
-    const txidStr = await bitcoin.RawTransactions.sendRawTransaction([hex]);
+    const txidStr = await explorer.broadcast([hex]);
 
     console.log(`Transaction ID: ${txidStr}`);
     console.log('Check the status of your transaction on this block explorer:');
-    util.transactionStatus(txidStr, NETWORK);
+    CryptoUtil.transactionStatus(txidStr, NETWORK);
   } catch (err) {
     console.log('error: ', err);
   }
 }
-sendDust();
 
 // Generate a change address from a Mnemonic of a private key.
-async function changeAddrFromMnemonic(mnemonic) {
+async function changeAddrFromMnemonic(mnemonic: string) {
   // root seed buffer
-  const rootSeed = await bitcoin.Mnemonic.toSeed(mnemonic);
+  const rootSeed = await bip39.mnemonicToSeed(mnemonic); // creates seed buffer
+
+  // set network
+  let network: Network;
+  if (NETWORK === 'mainnet') network = mainNet;
+  else network = testNet;
 
   // master HDNode
-  let masterHDNode;
-  if (NETWORK === 'mainnet') masterHDNode = bitcoin.HDNode.fromSeed(rootSeed);
-  else masterHDNode = bitcoin.HDNode.fromSeed(rootSeed, 'testnet');
+  const masterHDNode = bip32.fromSeed(rootSeed, network);
 
   // HDNode of BIP44 account
-  const account = bitcoin.HDNode.derivePath(masterHDNode, "m/44'/145'/0'");
+  const account = masterHDNode.derivePath("m/44'/145'/0'");
 
   // derive the first external change address HDNode which is going to spend utxo
-  const change = bitcoin.HDNode.derivePath(account, '0/0');
+  const change = account.derivePath('0/0');
 
   return change;
 }
 
 // Get the balance in NFY of a NFY address.
-async function getNFYBalance(addr, verbose) {
+async function getNFYBalance(addr: string, verbose: boolean) {
   try {
     const result = await explorer.balance(addr);
 
     if (verbose) console.log(result);
 
-    // The total balance is the sum of the confirmed and unconfirmed balances.
-    const satBalance = Number(result.balance.confirmed) + Number(result.balance.unconfirmed);
-
-    // Convert the satoshi balance to a NFY balance
-    const nfyBalance = bitcoin.BitcoinCash.toBitcoinCash(satBalance);
-
+    const nfyBalance = Number(result.data);
     return nfyBalance;
   } catch (err) {
     console.error('Error in getNFYBalance: ', err);
@@ -179,7 +184,7 @@ async function getNFYBalance(addr, verbose) {
 }
 
 // Returns the utxo with the biggest balance from an array of utxos.
-async function findBiggestUtxo(utxos) {
+async function findBiggestUtxo(utxos: any) {
   let largestAmount = 0;
   let largestIndex = 0;
 
@@ -188,7 +193,7 @@ async function findBiggestUtxo(utxos) {
     // console.log(`thisUTXO: ${JSON.stringify(thisUtxo, null, 2)}`);
 
     // Validate the UTXO data with the full node.
-    const txout = await bitcoin.Blockchain.getTxOut(thisUtxo.tx_hash, thisUtxo.tx_pos);
+    const txout = await explorer.getTxOut(thisUtxo.tx_hash, thisUtxo.tx_pos);
     if (txout === null) {
       // If the UTXO has already been spent, the full node will respond with null.
       console.log('Stale UTXO found. You may need to wait for the indexer to catch up.');

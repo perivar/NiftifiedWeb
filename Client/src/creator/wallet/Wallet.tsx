@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { niftyService } from '../../_services';
 import { sendTransactions, sendNiftyCoin, generateWallet } from '../../_common/crypto/nifty/generate';
+import { createWallet } from '../../_common/crypto/wallet/create-wallet/create-wallet';
+import { getBalance } from '../../_common/crypto/wallet/check-balance/check-balance';
 
 export const Wallet = ({ match }: { match: any }) => {
   // const { path } = match;
@@ -11,13 +13,16 @@ export const Wallet = ({ match }: { match: any }) => {
     // generateWallet();
 
     // sendTransactions('2nafhgiCX3txpTtokW6XVU5jd1RZijtEfjNbn3euPftpUrht6aJ')
-    sendNiftyCoin('2nafhgiCX3txpTtokW6XVU5jd1RZijtEfjNbn3euPftpUrht6aJ')
-      .then((res: any) => {
-        console.log(res);
-      })
-      .catch((err: any) => {
-        console.log(err);
-      });
+    // sendNiftyCoin('2nafhgiCX3txpTtokW6XVU5jd1RZijtEfjNbn3euPftpUrht6aJ')
+    // createWallet()
+    //   .then((res: any) => {
+    //     console.log(res);
+    //   })
+    //   .catch((err: any) => {
+    //     console.log(err);
+    //   });
+
+    getBalance().then(() => {});
   };
 
   return (

@@ -60,7 +60,6 @@ export const sendNiftyCoin = async (privateKeyWIF: string) => {
     // Exit if the balance is zero.
     if (balance <= 0.0) {
       console.log('Balance of sending address is zero. Exiting.');
-      process.exit(0);
     }
 
     // Convert to a legacy address (needed to build transactions).
@@ -120,12 +119,12 @@ export const sendNiftyCoin = async (privateKeyWIF: string) => {
     console.log(`TX hex: ${hex}`);
 
     // Broadcast transation to the network
-    // const txidStr = await bitcoin.RawTransactions.sendRawTransaction([hex]);
+    // const txidStr = await explorer.broadcast([hex]);
     // // import from util.js file
     // const util = require('../util.js');
     // console.log(`Transaction ID: ${txidStr}`);
     // console.log('Check the status of your transaction on this block explorer:');
-    // util.transactionStatus(txidStr, NETWORK);
+    // CryptoUtil.transactionStatus(txidStr, NETWORK);
   } catch (err) {
     console.log('error: ', err);
   }
@@ -171,32 +170,4 @@ async function findUtxo(transactions: any) {
   }
 
   return transactions[largestIndex];
-}
-
-// Returns the utxo with the biggest balance from an array of utxos.
-async function findBiggestUtxo(utxos: any) {
-  let largestAmount = 0;
-  let largestIndex = 0;
-
-  for (let i = 0; i < utxos.length; i++) {
-    const thisUtxo = utxos[i].addresses;
-    // console.log(`thisUTXO: ${JSON.stringify(thisUtxo, null, 2)}`);
-
-    // Validate the data with the API
-    const txout = await axios.get(`https://explorer.niftycoin.org/api/getrawtransaction?txid=${thisUtxo}&decrypt=1`);
-
-    if (txout === null) {
-      // If the UTXO has already been spent, the full node will respond with null.
-      console.log('Stale UTXO found. You may need to wait for the indexer to catch up.');
-      continue;
-    }
-
-    const val = txout.data.vout[0].value;
-    if (val > largestAmount) {
-      largestAmount = val;
-      largestIndex = i;
-    }
-  }
-
-  return utxos[largestIndex].addresses;
 }

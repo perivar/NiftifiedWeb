@@ -3,8 +3,13 @@
 */
 
 import * as bitcoin from 'bitcoinjs-lib';
-import NiftyCoinExplorer from '../../../NiftyCoinExplorer';
-import * as util from '../../../util.js';
+import * as bip39 from 'bip39';
+import * as bip32 from 'bip32';
+import CryptoUtil from '../../../util';
+import CryptoLib from '../../../lib';
+import { NiftyCoinExplorer } from '../../../NiftyCoinExplorer';
+import { Network, Transaction } from 'bitcoinjs-lib';
+import { toBitcoinJS } from '../../../nifty/nfy';
 
 // EDIT THESE VALUES FOR YOUR USE.
 const TOKENID = 'ba6c400e66190baf7f101c6ea54c0ab81c7fcfa45e9a239088f2ac0a570ec0e5';
@@ -14,43 +19,50 @@ const TOKENQTY = 10; // The quantity of new tokens to mint.
 // Set NETWORK to either testnet or mainnet
 const NETWORK = 'mainnet';
 
+// import networks
+const mainNet = toBitcoinJS(false);
+const testNet = toBitcoinJS(true);
+
 // REST API servers.
 const NFY_MAINNET = 'https://explorer.niftycoin.org/';
 const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 
 // Instantiate explorer based on the network.
-let explorer;
+let explorer: any;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
 // Open the wallet generated with create-wallet.
-let walletInfo;
+let walletInfo: any;
 try {
-  walletInfo = import('../create-wallet/wallet.json');
+  walletInfo = JSON.parse(window.localStorage.getItem('wallet.json') || '{}');
 } catch (err) {
   console.log('Could not open wallet.json. Generate a wallet with create-wallet first.');
-  process.exit(0);
 }
 
-async function mintNFTGroup() {
+export async function mintNFTGroup() {
   try {
     const { mnemonic } = walletInfo;
 
     // root seed buffer
-    const rootSeed = await bitcoin.Mnemonic.toSeed(mnemonic);
+    const rootSeed = await bip39.mnemonicToSeed(mnemonic); // creates seed buffer
+
+    // set network
+    let network: Network;
+    if (NETWORK === 'mainnet') network = mainNet;
+    else network = testNet;
+
     // master HDNode
-    let masterHDNode;
-    if (NETWORK === 'mainnet') masterHDNode = bitcoin.HDNode.fromSeed(rootSeed);
-    else masterHDNode = bitcoin.HDNode.fromSeed(rootSeed, 'testnet'); // Testnet
+    const masterHDNode = bip32.fromSeed(rootSeed, network);
 
     // HDNode of BIP44 account
-    const account = bitcoin.HDNode.derivePath(masterHDNode, "m/44'/245'/0'");
+    const account = masterHDNode.derivePath("m/44'/245'/0'");
 
-    const change = bitcoin.HDNode.derivePath(account, '0/0');
+    const change = account.derivePath('0/0');
 
     // get the cash address
-    const cashAddress = bitcoin.HDNode.toCashAddress(change);
-    // const slpAddress = bitcoin.SLP.Address.toSLPAddress(cashAddress)
+    const cashAddress = CryptoUtil.toCashAddress(change, network);
+    // const slpAddress = CryptoUtil.toSLPAddress(cashAddress)
 
     // Get a UTXO to pay for the transaction.
     const data = await explorer.utxo(cashAddress);
@@ -62,11 +74,11 @@ async function mintNFTGroup() {
     }
 
     // Identify the SLP token UTXOs.
-    let tokenUtxos = await bitcoin.SLP.Utils.tokenUtxoDetails(utxos);
+    let tokenUtxos = await CryptoLib.Utils.tokenUtxoDetails(utxos);
     // console.log(`tokenUtxos: ${JSON.stringify(tokenUtxos, null, 2)}`)
 
     // Filter out the non-SLP token UTXOs.
-    const nfyUtxos = utxos.filter((utxo, index) => {
+    const nfyUtxos = utxos.filter((utxo: any, index: number) => {
       const tokenUtxo = tokenUtxos[index];
       if (!tokenUtxo.isValid) return true;
     });
@@ -78,7 +90,7 @@ async function mintNFTGroup() {
 
     // Filter out the token UTXOs that match the user-provided token ID
     // and contain the minting baton.
-    tokenUtxos = tokenUtxos.filter((utxo, index) => {
+    tokenUtxos = tokenUtxos.filter((utxo: any, index: number) => {
       if (
         utxo && // UTXO is associated with a token.
         utxo.tokenId === TOKENID && // UTXO matches the token ID.
@@ -99,10 +111,7 @@ async function mintNFTGroup() {
     // console.log(`nfyUtxo: ${JSON.stringify(nfyUtxo, null, 2)}`);
 
     // instance of transaction builder
-    let transactionBuilder;
-    if (NETWORK === 'mainnet') {
-      transactionBuilder = new bitcoin.TransactionBuilder();
-    } else transactionBuilder = new bitcoin.TransactionBuilder('testnet');
+    const transactionBuilder = new bitcoin.TransactionBuilder(network);
 
     const originalAmount = utxo.value;
     const vout = utxo.tx_pos;
@@ -122,29 +131,29 @@ async function mintNFTGroup() {
     const remainder = originalAmount - 546 - txFee;
 
     // Generate the SLP OP_RETURN.
-    const script = bitcoin.SLP.NFT1.mintNFTGroupOpReturn(tokenUtxos, TOKENQTY);
+    const script = CryptoLib.NFT1.mintNFTGroupOpReturn(tokenUtxos, TOKENQTY);
 
     // OP_RETURN needs to be the first output in the transaction.
     transactionBuilder.addOutput(script, 0);
 
     // Send dust transaction representing the new tokens.
-    transactionBuilder.addOutput(bitcoin.Address.toLegacyAddress(cashAddress), 546);
+    transactionBuilder.addOutput(CryptoUtil.toLegacyAddressFromString(cashAddress), 546);
 
     // Send dust transaction representing minting baton.
-    transactionBuilder.addOutput(bitcoin.Address.toLegacyAddress(cashAddress), 546);
+    transactionBuilder.addOutput(CryptoUtil.toLegacyAddressFromString(cashAddress), 546);
 
     // add output to send NFY remainder of UTXO.
     transactionBuilder.addOutput(cashAddress, remainder);
 
     // Generate a keypair from the change address.
-    const keyPair = bitcoin.HDNode.toKeyPair(change);
+    const keyPair = change.derivePath('0/0'); // not sure if this is the correct to get keypair
 
     // Sign the transaction for the UTXO input that pays for the transaction..
-    let redeemScript;
-    transactionBuilder.sign(0, keyPair, redeemScript, transactionBuilder.hashTypes.SIGHASH_ALL, originalAmount);
+    const redeemScript = undefined;
+    transactionBuilder.sign(0, keyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
 
     // Sign the Token UTXO minting baton input
-    transactionBuilder.sign(1, keyPair, redeemScript, transactionBuilder.hashTypes.SIGHASH_ALL, 546);
+    transactionBuilder.sign(1, keyPair, redeemScript, Transaction.SIGHASH_ALL, 546);
 
     // build tx
     const tx = transactionBuilder.build();
@@ -154,17 +163,16 @@ async function mintNFTGroup() {
     // console.log(` `)
 
     // Broadcast transation to the network
-    const txidStr = await bitcoin.RawTransactions.sendRawTransaction([hex]);
+    const txidStr = await explorer.broadcast([hex]);
     console.log('Check the status of your transaction on this block explorer:');
-    util.transactionStatus(txidStr, NETWORK);
+    CryptoUtil.transactionStatus(txidStr, NETWORK);
   } catch (err) {
     console.error('Error in mintNFTGroup: ', err);
   }
 }
-mintNFTGroup();
 
 // Returns the utxo with the biggest balance from an array of utxos.
-function findBiggestUtxo(utxos) {
+function findBiggestUtxo(utxos: any) {
   let largestAmount = 0;
   let largestIndex = 0;
 

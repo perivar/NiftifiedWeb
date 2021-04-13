@@ -1,43 +1,54 @@
 /*
-  Consolidate all UTXOs in an address into a single UTXO
+  Consolidate all UTXOs of size 546 sats or smaller into
+  a single UTXO.
 */
 
 import * as bitcoin from 'bitcoinjs-lib';
-import NiftyCoinExplorer from '../../NiftyCoinExplorer';
-import * as util from '../../util.js';
+import * as bip39 from 'bip39';
+import * as bip32 from 'bip32';
+import CryptoUtil from '../../util';
+import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
+import { toBitcoinJS } from '../../nifty/nfy';
+import { Network, Transaction } from 'bitcoinjs-lib';
 
 // Set NETWORK to either testnet or mainnet
 const NETWORK = 'mainnet';
+
+// import networks
+const mainNet = toBitcoinJS(false);
+const testNet = toBitcoinJS(true);
 
 // REST API servers.
 const NFY_MAINNET = 'https://explorer.niftycoin.org/';
 const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 
 // Instantiate explorer based on the network.
-let explorer;
+let explorer: any;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
 // Open the wallet generated with create-wallet.
-let walletInfo;
+let walletInfo: any;
 try {
-  walletInfo = import('../create-wallet/wallet.json');
+  walletInfo = JSON.parse(window.localStorage.getItem('wallet.json') || '{}');
 } catch (err) {
   console.log('Could not open wallet.json. Generate a wallet with create-wallet first.');
-  process.exit(0);
 }
 
 const SEND_ADDR = walletInfo.cashAddress;
 const SEND_MNEMONIC = walletInfo.mnemonic;
 
-async function consolidateUtxos() {
+export async function consolidateDust() {
   try {
-    // instance of transaction builder
-    let transactionBuilder;
-    if (NETWORK === 'mainnet') {
-      transactionBuilder = new bitcoin.TransactionBuilder();
-    } else transactionBuilder = new bitcoin.TransactionBuilder('testnet');
+    // set network
+    let network: Network;
+    if (NETWORK === 'mainnet') network = mainNet;
+    else network = testNet;
 
+    // instance of transaction builder
+    const transactionBuilder = new bitcoin.TransactionBuilder(network);
+
+    const dust = 546;
     let sendAmount = 0;
     const inputs = [];
 
@@ -48,16 +59,24 @@ async function consolidateUtxos() {
     for (let i = 0; i < utxos.length; i++) {
       const thisUtxo = utxos[i];
 
-      inputs.push(thisUtxo);
+      // If the UTXO is dust...
+      if (thisUtxo.value <= dust) {
+        inputs.push(thisUtxo);
 
-      sendAmount += thisUtxo.value;
+        sendAmount += thisUtxo.value;
 
-      // ..Add the utxo as an input to the transaction.
-      transactionBuilder.addInput(thisUtxo.tx_hash, thisUtxo.tx_pos);
+        // ..Add the utxo as an input to the transaction.
+        transactionBuilder.addInput(thisUtxo.tx_hash, thisUtxo.tx_pos);
+      }
+    }
+
+    if (inputs.length === 0) {
+      console.log('No dust found in the wallet address.');
+      return;
     }
 
     // get byte count to calculate fee. paying 1.2 sat/byte
-    const byteCount = bitcoin.BitcoinCash.getByteCount({ P2PKH: inputs.length }, { P2PKH: 1 });
+    const byteCount = CryptoUtil.getByteCount({ P2PKH: inputs.length }, { P2PKH: 1 });
     console.log(`byteCount: ${byteCount}`);
 
     const satoshisPerByte = 1.0;
@@ -66,7 +85,7 @@ async function consolidateUtxos() {
 
     // Exit if the transaction costs too much to send.
     if (sendAmount - txFee < 0) {
-      console.log("Transaction fee costs more combined UTXOs. Can't send transaction.");
+      console.log("Transaction fee costs more combined dust. Can't send transaction.");
       return;
     }
 
@@ -77,12 +96,12 @@ async function consolidateUtxos() {
     const change = await changeAddrFromMnemonic(SEND_MNEMONIC);
 
     // Generate a keypair from the change address.
-    const keyPair = bitcoin.HDNode.toKeyPair(change);
+    const keyPair = change.derivePath('0/0'); // not sure if this is the correct to get keypair
 
     // sign w/ HDNode
-    let redeemScript;
+    const redeemScript = undefined;
     inputs.forEach((input, index) => {
-      transactionBuilder.sign(index, keyPair, redeemScript, transactionBuilder.hashTypes.SIGHASH_ALL, input.value);
+      transactionBuilder.sign(index, keyPair, redeemScript, Transaction.SIGHASH_ALL, input.value);
     });
 
     // build tx
@@ -93,31 +112,33 @@ async function consolidateUtxos() {
     console.log(' ');
 
     // Broadcast transation to the network
-    const txid = await bitcoin.RawTransactions.sendRawTransaction([hex]);
-    console.log(`Transaction ID: ${txid}`);
+    const broadcast = await explorer.broadcast([hex]);
+    console.log(`Transaction ID: ${broadcast}`);
     console.log('Check the status of your transaction on this block explorer:');
-    util.transactionStatus(txid, NETWORK);
+    CryptoUtil.transactionStatus(broadcast, NETWORK);
   } catch (err) {
     console.log('error: ', err);
   }
 }
-consolidateUtxos();
 
 // Generate a change address from a Mnemonic of a private key.
-async function changeAddrFromMnemonic(mnemonic) {
+async function changeAddrFromMnemonic(mnemonic: string) {
   // root seed buffer
-  const rootSeed = await bitcoin.Mnemonic.toSeed(mnemonic);
+  const rootSeed = await bip39.mnemonicToSeed(mnemonic); // creates seed buffer
+
+  // set network
+  let network: Network;
+  if (NETWORK === 'mainnet') network = mainNet;
+  else network = testNet;
 
   // master HDNode
-  let masterHDNode;
-  if (NETWORK === 'mainnet') masterHDNode = bitcoin.HDNode.fromSeed(rootSeed);
-  else masterHDNode = bitcoin.HDNode.fromSeed(rootSeed, 'testnet');
+  const masterHDNode = bip32.fromSeed(rootSeed, network);
 
   // HDNode of BIP44 account
-  const account = bitcoin.HDNode.derivePath(masterHDNode, "m/44'/145'/0'");
+  const account = masterHDNode.derivePath("m/44'/145'/0'");
 
   // derive the first external change address HDNode which is going to spend utxo
-  const change = bitcoin.HDNode.derivePath(account, '0/0');
+  const change = account.derivePath('0/0');
 
   return change;
 }

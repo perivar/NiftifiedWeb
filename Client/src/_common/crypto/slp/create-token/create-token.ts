@@ -4,49 +4,60 @@
 */
 
 import * as bitcoin from 'bitcoinjs-lib';
-import NiftyCoinExplorer from '../../../NiftyCoinExplorer';
-import * as util from '../../../util.js';
+import * as bip39 from 'bip39';
+import * as bip32 from 'bip32';
+import CryptoUtil from '../../util';
+import CryptoLib from '../../lib';
+import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
+import { Network, Transaction } from 'bitcoinjs-lib';
+import { toBitcoinJS } from '../../nifty/nfy';
 
 // Set NETWORK to either testnet or mainnet
 const NETWORK = 'mainnet';
+
+// import networks
+const mainNet = toBitcoinJS(false);
+const testNet = toBitcoinJS(true);
 
 // REST API servers.
 const NFY_MAINNET = 'https://explorer.niftycoin.org/';
 const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 
 // Instantiate explorer based on the network.
-let explorer;
+let explorer: any;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
 // Open the wallet generated with create-wallet.
-let walletInfo;
+let walletInfo: any;
 try {
-  walletInfo = import('../create-wallet/wallet.json');
+  walletInfo = JSON.parse(window.localStorage.getItem('wallet.json') || '{}');
 } catch (err) {
   console.log('Could not open wallet.json. Generate a wallet with create-wallet first.');
-  process.exit(0);
 }
 
-async function createNFT() {
+export async function createToken() {
   try {
     const { mnemonic } = walletInfo;
 
     // root seed buffer
-    const rootSeed = await bitcoin.Mnemonic.toSeed(mnemonic);
+    const rootSeed = await bip39.mnemonicToSeed(mnemonic); // creates seed buffer
+
+    // set network
+    let network: Network;
+    if (NETWORK === 'mainnet') network = mainNet;
+    else network = testNet;
+
     // master HDNode
-    let masterHDNode;
-    if (NETWORK === 'mainnet') masterHDNode = bitcoin.HDNode.fromSeed(rootSeed);
-    else masterHDNode = bitcoin.HDNode.fromSeed(rootSeed, 'testnet'); // Testnet
+    const masterHDNode = bip32.fromSeed(rootSeed, network);
 
     // HDNode of BIP44 account
-    const account = bitcoin.HDNode.derivePath(masterHDNode, "m/44'/245'/0'");
+    const account = masterHDNode.derivePath("m/44'/245'/0'");
 
-    const change = bitcoin.HDNode.derivePath(account, '0/0');
+    const change = account.derivePath('0/0');
 
     // get the cash address
-    const cashAddress = bitcoin.HDNode.toCashAddress(change);
-    // const slpAddress = bitcoin.SLP.Address.toSLPAddress(cashAddress)
+    const cashAddress = CryptoUtil.toCashAddress(change, network);
 
     // Get a UTXO to pay for the transaction.
     const data = await explorer.utxo(cashAddress);
@@ -58,14 +69,11 @@ async function createNFT() {
     }
 
     // Get the biggest UTXO to pay for the transaction.
-    const utxo = findBiggestUtxo(utxos);
-    // console.log(`utxo: ${JSON.stringify(utxo, null, 2)}`)
+    const utxo = await findBiggestUtxo(utxos);
+    console.log(`utxo: ${JSON.stringify(utxo, null, 2)}`);
 
     // instance of transaction builder
-    let transactionBuilder;
-    if (NETWORK === 'mainnet') {
-      transactionBuilder = new bitcoin.TransactionBuilder();
-    } else transactionBuilder = new bitcoin.TransactionBuilder('testnet');
+    const transactionBuilder = new bitcoin.TransactionBuilder(network);
 
     const originalAmount = utxo.value;
     const vout = utxo.tx_pos;
@@ -83,15 +91,17 @@ async function createNFT() {
 
     // Generate SLP config object
     const configObj = {
-      name: 'NFT Test Token',
-      ticker: 'NFTTT',
+      name: 'SLP Test Token',
+      ticker: 'SLPTEST',
       documentUrl: 'https://FullStack.cash',
-      mintBatonVout: 2,
-      initialQty: 1
+      decimals: 8,
+      initialQty: 100,
+      documentHash: '',
+      mintBatonVout: 2
     };
 
     // Generate the OP_RETURN entry for an SLP GENESIS transaction.
-    const script = bitcoin.SLP.NFT1.newNFTGroupOpReturn(configObj);
+    const script = CryptoLib.TokenType1.generateGenesisOpReturn(configObj);
     // const data = bitcoin.Script.encode(script)
     // const data = compile(script)
 
@@ -99,20 +109,20 @@ async function createNFT() {
     transactionBuilder.addOutput(script, 0);
 
     // Send dust transaction representing the tokens.
-    transactionBuilder.addOutput(bitcoin.Address.toLegacyAddress(cashAddress), 546);
+    transactionBuilder.addOutput(CryptoUtil.toLegacyAddressFromString(cashAddress), 546);
 
     // Send dust transaction representing minting baton.
-    transactionBuilder.addOutput(bitcoin.Address.toLegacyAddress(cashAddress), 546);
+    transactionBuilder.addOutput(CryptoUtil.toLegacyAddressFromString(cashAddress), 546);
 
     // add output to send NFY remainder of UTXO.
     transactionBuilder.addOutput(cashAddress, remainder);
 
     // Generate a keypair from the change address.
-    const keyPair = bitcoin.HDNode.toKeyPair(change);
+    const keyPair = change.derivePath('0/0'); // not sure if this is the correct to get keypair
 
     // Sign the transaction with the HD node.
-    let redeemScript;
-    transactionBuilder.sign(0, keyPair, redeemScript, transactionBuilder.hashTypes.SIGHASH_ALL, originalAmount);
+    const redeemScript = undefined;
+    transactionBuilder.sign(0, keyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
 
     // build tx
     const tx = transactionBuilder.build();
@@ -122,22 +132,30 @@ async function createNFT() {
     // console.log(` `)
 
     // Broadcast transation to the network
-    const txidStr = await bitcoin.RawTransactions.sendRawTransaction([hex]);
+    const txidStr = await explorer.broadcast([hex]);
     console.log('Check the status of your transaction on this block explorer:');
-    util.transactionStatus(txidStr, NETWORK);
+    CryptoUtil.transactionStatus(txidStr, NETWORK);
   } catch (err) {
     console.error('Error in createToken: ', err);
   }
 }
-createNFT();
 
 // Returns the utxo with the biggest balance from an array of utxos.
-function findBiggestUtxo(utxos) {
+async function findBiggestUtxo(utxos: any) {
   let largestAmount = 0;
   let largestIndex = 0;
 
   for (let i = 0; i < utxos.length; i++) {
     const thisUtxo = utxos[i];
+    // console.log(`thisUTXO: ${JSON.stringify(thisUtxo, null, 2)}`);
+
+    // Validate the UTXO data with the full node.
+    const txout = await explorer.getTxOut(thisUtxo.tx_hash, thisUtxo.tx_pos);
+    if (txout === null) {
+      // If the UTXO has already been spent, the full node will respond with null.
+      console.log('Stale UTXO found. You may need to wait for the indexer to catch up.');
+      continue;
+    }
 
     if (thisUtxo.value > largestAmount) {
       largestAmount = thisUtxo.value;

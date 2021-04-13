@@ -2,7 +2,7 @@
   List the UTXOs associated with the NFY address in the wallet.
 */
 
-import NiftyCoinExplorer from '../../NiftyCoinExplorer';
+import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
 
 // Set NETWORK to either testnet or mainnet
 const NETWORK = 'mainnet';
@@ -12,21 +12,20 @@ const NFY_MAINNET = 'https://explorer.niftycoin.org/';
 const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 
 // Instantiate explorer based on the network.
-let explorer;
+let explorer: any;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
 // Open the wallet generated with create-wallet.
-let walletInfo;
+let walletInfo: any;
 try {
-  walletInfo = import('../create-wallet/wallet.json');
+  walletInfo = JSON.parse(window.localStorage.getItem('wallet.json') || '{}');
 } catch (err) {
   console.log('Could not open wallet.json. Generate a wallet with create-wallet first.');
-  process.exit(0);
 }
 
 // Get the balance of the wallet.
-async function listUtxos() {
+export async function listUtxos() {
   try {
     // first get NFY balance
     const balance = await explorer.utxo(walletInfo.cashAddress);
@@ -38,4 +37,3 @@ async function listUtxos() {
     throw err;
   }
 }
-listUtxos();
