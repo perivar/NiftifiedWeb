@@ -53,8 +53,7 @@ export async function createToken(walletInfo: WalletInfo) {
     const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
 
     // Get a UTXO to pay for the transaction.
-    const data = await explorer.utxo(legacyAddress);
-    const { utxos } = data;
+    const utxos = await explorer.utxo(legacyAddress);
     // console.log(`utxos: ${JSON.stringify(utxos, null, 2)}`)
 
     if (utxos.length === 0) {
@@ -125,7 +124,7 @@ export async function createToken(walletInfo: WalletInfo) {
     // console.log(` `)
 
     // Broadcast transation to the network
-    const txidStr = await explorer.broadcast([hex]);
+    const txidStr = await explorer.sendRawTransaction(hex);
     console.log('Check the status of your transaction on this block explorer:');
     CryptoUtil.transactionStatus(txidStr, NETWORK);
   } catch (err) {

@@ -715,7 +715,7 @@ export class Utils {
    *  circulatingSupply: 20995990,
    *  totalBurned: 4010,
    *  totalMinted: 21000000,
-   *  satoshisLockedUp: 135408
+   *  niftoshisLockedUp: 135408
    * }
    */
   async tokenStats(tokenId: string) {
@@ -1075,7 +1075,7 @@ export class Utils {
    *  "txid": "fde117b1f176b231e2fa9a6cb022e0f7c31c288221df6bcb05f8b7d040ca87cb",
    *  "vout": 1,
    *  "amount": 0.00000546,
-   *  "satoshis": 546,
+   *  "niftoshis": 546,
    *  "height": 596089,
    *  "confirmations": 748,
    *  "utxoType": "token",
@@ -1689,7 +1689,7 @@ export class Utils {
    *         "tx_hash": "516e763932061f9e868652d727045b714db1ecac459e84cd52b5b4cb39572ecc",
    *        "tx_pos": 0,
    *        "value": 6000,
-   *        "satoshis": 6000,
+   *        "niftoshis": 6000,
    *        "txid": "516e763932061f9e868652d727045b714db1ecac459e84cd52b5b4cb39572ecc",
    *        "vout": 0,
    *        "isValid": false
@@ -1704,7 +1704,7 @@ export class Utils {
    *        "tx_hash": "8ec01d851d9df9fb4b4331275e2ff680257c224100d0081cec6fbeedf982f738",
    *        "tx_pos": 1,
    *        "value": 546,
-   *        "satoshis": 546,
+   *        "niftoshis": 546,
    *        "txid": "8ec01d851d9df9fb4b4331275e2ff680257c224100d0081cec6fbeedf982f738",
    *        "vout": 1,
    *        "utxoType": "token",
@@ -1729,7 +1729,7 @@ export class Utils {
    *        "tx_hash": "072a1e2c2d5f1309bf4eef7f88684e4ecd544a903b386b07f3e04b91b13d8af1",
    *        "tx_pos": 0,
    *        "value": 6999,
-   *        "satoshis": 6999,
+   *        "niftoshis": 6999,
    *        "txid": "072a1e2c2d5f1309bf4eef7f88684e4ecd544a903b386b07f3e04b91b13d8af1",
    *        "vout": 0,
    *        "isValid": false
@@ -1739,7 +1739,7 @@ export class Utils {
    *        "tx_hash": "a72db6a0883ecb8e379f317231b2571e41e041b7b1107e3e54c2e0b3386ac6ca",
    *        "tx_pos": 1,
    *        "value": 546,
-   *        "satoshis": 546,
+   *        "niftoshis": 546,
    *        "txid": "a72db6a0883ecb8e379f317231b2571e41e041b7b1107e3e54c2e0b3386ac6ca",
    *        "vout": 1,
    *        "utxoType": "token",
@@ -1771,7 +1771,7 @@ export class Utils {
    *           value: "6816",
    *           height: 606848,
    *           confirmations: 13,
-   *           satoshis: 6816
+   *           niftoshis: 6816
    *         }
    *       ]
    *    }
@@ -1796,7 +1796,7 @@ export class Utils {
    *        "value": "6816",
    *        "height": 606848,
    *        "confirmations": 13,
-   *        "satoshis": 6816,
+   *        "niftoshis": 6816,
    *        "isValid": false
    *      }
    *    ]

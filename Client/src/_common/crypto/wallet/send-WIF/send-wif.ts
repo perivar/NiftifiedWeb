@@ -1,7 +1,7 @@
 /*
   Same as send-nfy example, except this uses a WIF instead of a mnemonic to
   sign the transaction.
-  Send 1000 satoshis to RECV_ADDR_LEGACY.
+  Send 1000 niftoshis to RECV_ADDR_LEGACY.
 */
 
 import * as bitcoin from 'bitcoinjs-lib';
@@ -26,14 +26,14 @@ let explorer: any;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
-export async function sendNFY(walletInfo: WalletInfo) {
+export async function sendWIF(walletInfo: WalletInfo) {
   try {
     const SEND_ADDR_LEGACY = walletInfo.legacyAddress;
     const SEND_WIF = walletInfo.WIF;
     let RECV_ADDR_LEGACY = '';
 
     // set satoshi amount to send
-    const SATOSHIS_TO_SEND = 1000;
+    const NIFTOSHIS_TO_SEND = 1000;
 
     // If the user fails to specify a reciever address, just send the NFY back
     // to the origination address, so the example doesn't fail.
@@ -55,11 +55,12 @@ export async function sendNFY(walletInfo: WalletInfo) {
     const balance2 = await getNFYBalance(RECV_ADDR_LEGACY, false);
     console.log(`Balance of recieving address ${RECV_ADDR_LEGACY} is ${balance2} NFY.`);
 
-    const data = await explorer.utxo(SEND_ADDR_LEGACY);
-    const { utxos } = data;
+    const utxos = await explorer.utxo(SEND_ADDR_LEGACY);
     // console.log('utxos: ', utxos)
 
-    const utxo = await findBiggestUtxo(utxos);
+    if (utxos.length === 0) throw new Error('No UTXOs found.');
+
+    const utxo = await explorer.findBiggestUtxo(utxos);
     // console.log(`utxo: ${JSON.stringify(utxo, null, 2)}`)
 
     // set network
@@ -70,7 +71,7 @@ export async function sendNFY(walletInfo: WalletInfo) {
     // instance of transaction builder
     const transactionBuilder = new bitcoin.TransactionBuilder(network);
 
-    const satoshisToSend = SATOSHIS_TO_SEND;
+    const niftoshisToSend = NIFTOSHIS_TO_SEND;
     const originalAmount = utxo.value;
     const vout = utxo.tx_pos;
     const txid = utxo.tx_hash;
@@ -81,19 +82,19 @@ export async function sendNFY(walletInfo: WalletInfo) {
     // get byte count to calculate fee. paying 1.2 sat/byte
     const byteCount = CryptoUtil.getByteCount({ P2PKH: 1 }, { P2PKH: 2 });
     console.log(`byteCount: ${byteCount}`);
-    const satoshisPerByte = 1.0;
-    const txFee = Math.floor(satoshisPerByte * byteCount);
+    const niftoshisPerByte = 1.0;
+    const txFee = Math.floor(niftoshisPerByte * byteCount);
     // console.log(`txFee: ${txFee}`)
 
     // amount to send back to the sending address.
     // It's the original amount - 1 sat/byte for tx size
-    const remainder = originalAmount - satoshisToSend - txFee;
+    const remainder = originalAmount - niftoshisToSend - txFee;
 
     // add output w/ address and amount to send
-    transactionBuilder.addOutput(RECV_ADDR_LEGACY, satoshisToSend);
+    transactionBuilder.addOutput(RECV_ADDR_LEGACY, niftoshisToSend);
     transactionBuilder.addOutput(SEND_ADDR_LEGACY, remainder);
 
-    const ecPair = bitcoin.ECPair.fromWIF(SEND_WIF);
+    const ecPair = bitcoin.ECPair.fromWIF(SEND_WIF, network);
 
     // Sign the transaction with the HD node.
     const redeemScript = undefined;
@@ -104,10 +105,9 @@ export async function sendNFY(walletInfo: WalletInfo) {
     // output rawhex
     const hex = tx.toHex();
     // console.log(`TX hex: ${hex}`)
-    console.log(' ');
 
     // Broadcast transation to the network
-    const txidStr = await explorer.broadcast([hex]);
+    const txidStr = await explorer.sendRawTransaction(hex);
     console.log(`Transaction ID: ${txidStr}`);
     console.log('Check the status of your transaction on this block explorer:');
     CryptoUtil.transactionStatus(txidStr, NETWORK);
@@ -130,30 +130,4 @@ async function getNFYBalance(addr: string, verbose: boolean) {
     console.log(`addr: ${addr}`);
     throw err;
   }
-}
-
-// Returns the utxo with the biggest balance from an array of utxos.
-async function findBiggestUtxo(utxos: any) {
-  let largestAmount = 0;
-  let largestIndex = 0;
-
-  for (let i = 0; i < utxos.length; i++) {
-    const thisUtxo = utxos[i];
-    // console.log(`thisUTXO: ${JSON.stringify(thisUtxo, null, 2)}`);
-
-    // Validate the UTXO data with the full node.
-    const txout = await explorer.getTxOut(thisUtxo.tx_hash, thisUtxo.tx_pos);
-    if (txout === null) {
-      // If the UTXO has already been spent, the full node will respond with null.
-      console.log('Stale UTXO found. You may need to wait for the indexer to catch up.');
-      continue;
-    }
-
-    if (thisUtxo.value > largestAmount) {
-      largestAmount = thisUtxo.value;
-      largestIndex = i;
-    }
-  }
-
-  return utxos[largestIndex];
 }

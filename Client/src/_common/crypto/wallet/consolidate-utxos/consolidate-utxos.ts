@@ -42,8 +42,9 @@ export async function consolidateUtxos(walletInfo: WalletInfo) {
     let sendAmount = 0;
     const inputs = [];
 
-    const data = await explorer.utxo(SEND_ADDR);
-    const { utxos } = data;
+    const utxos = await explorer.utxo(SEND_ADDR);
+
+    if (utxos.length === 0) throw new Error('No UTXOs found.');
 
     // Loop through each UTXO assigned to this address.
     for (let i = 0; i < utxos.length; i++) {
@@ -61,8 +62,8 @@ export async function consolidateUtxos(walletInfo: WalletInfo) {
     const byteCount = CryptoUtil.getByteCount({ P2PKH: inputs.length }, { P2PKH: 1 });
     console.log(`byteCount: ${byteCount}`);
 
-    const satoshisPerByte = 1.0;
-    const txFee = Math.ceil(satoshisPerByte * byteCount);
+    const niftoshisPerByte = 1.0;
+    const txFee = Math.ceil(niftoshisPerByte * byteCount);
     console.log(`txFee: ${txFee}`);
 
     // Exit if the transaction costs too much to send.
@@ -91,10 +92,9 @@ export async function consolidateUtxos(walletInfo: WalletInfo) {
     // output rawhex
     const hex = tx.toHex();
     // console.log(`TX hex: ${hex}`)
-    console.log(' ');
 
     // Broadcast transation to the network
-    const txid = await explorer.broadcast([hex]);
+    const txid = await explorer.sendRawTransaction(hex);
     console.log(`Transaction ID: ${txid}`);
     console.log('Check the status of your transaction on this block explorer:');
     CryptoUtil.transactionStatus(txid, NETWORK);

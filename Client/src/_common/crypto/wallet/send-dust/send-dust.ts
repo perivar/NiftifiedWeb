@@ -55,20 +55,19 @@ export async function sendDust(walletInfo: WalletInfo) {
 
     // Get UTXOs held by the address.
     // https://developer.bitcoin.com/mastering-bitcoin-cash/4-transactions/
-    const data = await explorer.utxo(SEND_ADDR);
-    const { utxos } = data;
+    const utxos = await explorer.utxo(SEND_ADDR);
     // console.log(`utxos: ${JSON.stringify(utxos, null, 2)}`)
 
     if (utxos.length === 0) throw new Error('No UTXOs found.');
 
     // console.log(`u: ${JSON.stringify(u, null, 2)}`
-    const utxo = await findBiggestUtxo(utxos);
+    const utxo = await explorer.findBiggestUtxo(utxos);
     console.log(`utxo: ${JSON.stringify(utxo, null, 2)}`);
 
     // Ensure there is enough NFY to generate the desired number of dust.
     const outNFY = 546 * NUM_OUTPUTS + 500;
     if (utxo.value < outNFY) {
-      throw new Error('Not enough satoshis to send desired number of dust outputs.');
+      throw new Error('Not enough niftoshis to send desired number of dust outputs.');
     }
 
     // set network
@@ -90,8 +89,8 @@ export async function sendDust(walletInfo: WalletInfo) {
     // get byte count to calculate fee. paying 1.2 sat/byte
     const byteCount = CryptoUtil.getByteCount({ P2PKH: 1 }, { P2PKH: NUM_OUTPUTS + 1 });
     console.log(`Transaction byte count: ${byteCount}`);
-    const satoshisPerByte = 1.2;
-    const txFee = Math.floor(satoshisPerByte * byteCount);
+    const niftoshisPerByte = 1.2;
+    const txFee = Math.floor(niftoshisPerByte * byteCount);
     console.log(`Transaction fee: ${txFee}`);
 
     // Calculate the amount to put into each new UTXO.
@@ -124,10 +123,9 @@ export async function sendDust(walletInfo: WalletInfo) {
     // output rawhex
     const hex = tx.toHex();
     // console.log(`TX hex: ${hex}`)
-    console.log(' ');
 
     // Broadcast transation to the network
-    const txidStr = await explorer.broadcast([hex]);
+    const txidStr = await explorer.sendRawTransaction(hex);
 
     console.log(`Transaction ID: ${txidStr}`);
     console.log('Check the status of your transaction on this block explorer:');
@@ -173,30 +171,4 @@ async function getNFYBalance(addr: string, verbose: boolean) {
     console.log(`addr: ${addr}`);
     throw err;
   }
-}
-
-// Returns the utxo with the biggest balance from an array of utxos.
-async function findBiggestUtxo(utxos: any) {
-  let largestAmount = 0;
-  let largestIndex = 0;
-
-  for (let i = 0; i < utxos.length; i++) {
-    const thisUtxo = utxos[i];
-    // console.log(`thisUTXO: ${JSON.stringify(thisUtxo, null, 2)}`);
-
-    // Validate the UTXO data with the full node.
-    const txout = await explorer.getTxOut(thisUtxo.tx_hash, thisUtxo.tx_pos);
-    if (txout === null) {
-      // If the UTXO has already been spent, the full node will respond with null.
-      console.log('Stale UTXO found. You may need to wait for the indexer to catch up.');
-      continue;
-    }
-
-    if (thisUtxo.value > largestAmount) {
-      largestAmount = thisUtxo.value;
-      largestIndex = i;
-    }
-  }
-
-  return utxos[largestIndex];
 }

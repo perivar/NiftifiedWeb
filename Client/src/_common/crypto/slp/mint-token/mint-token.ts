@@ -60,8 +60,7 @@ export async function mintToken(walletInfo: WalletInfo) {
     const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
 
     // Get UTXOs held by this address.
-    const data = await explorer.utxo(legacyAddress);
-    const { utxos } = data;
+    const utxos = await explorer.utxo(legacyAddress);
     // console.log(`utxos: ${JSON.stringify(utxos, null, 2)}`);
 
     if (utxos.length === 0) throw new Error('No UTXOs to spend! Exiting.');
@@ -99,7 +98,7 @@ export async function mintToken(walletInfo: WalletInfo) {
     }
 
     // Choose a UTXO to pay for the transaction.
-    const nfyUtxo = findBiggestUtxo(nfyUtxos);
+    const nfyUtxo = await explorer.findBiggestUtxo(nfyUtxos);
     // console.log(`nfyUtxo: ${JSON.stringify(nfyUtxo, null, 2)}`);
 
     // Generate the SLP OP_RETURN.
@@ -126,15 +125,15 @@ export async function mintToken(walletInfo: WalletInfo) {
     //   { P2PKH: 5 }
     // )
     // //console.log(`byteCount: ${byteCount}`)
-    // const satoshisPerByte = 1.1
-    // const txFee = Math.floor(satoshisPerByte * byteCount)
-    // console.log(`txFee: ${txFee} satoshis\n`)
+    // const niftoshisPerByte = 1.1
+    // const txFee = Math.floor(niftoshisPerByte * byteCount)
+    // console.log(`txFee: ${txFee} niftoshis\n`)
     const txFee = 250;
 
     // amount to send back to the sending address. It's the original amount - 1 sat/byte for tx size
     const remainder = originalAmount - txFee - 546 * 2;
     if (remainder < 1) {
-      throw new Error('Selected UTXO does not have enough satoshis');
+      throw new Error('Selected UTXO does not have enough niftoshis');
     }
     // console.log(`remainder: ${remainder}`)
 
@@ -174,7 +173,7 @@ export async function mintToken(walletInfo: WalletInfo) {
     // END transaction construction.
 
     // Broadcast transation to the network
-    const txidStr = await explorer.broadcast([hex]);
+    const txidStr = await explorer.sendRawTransaction(hex);
     console.log(`Transaction ID: ${txidStr}`);
     console.log('Check the status of your transaction on this block explorer:');
     CryptoUtil.transactionStatus(txidStr, NETWORK);
@@ -183,21 +182,4 @@ export async function mintToken(walletInfo: WalletInfo) {
     console.log(`Error message: ${err.message}`);
     throw err;
   }
-}
-
-// Returns the utxo with the biggest balance from an array of utxos.
-function findBiggestUtxo(utxos: any) {
-  let largestAmount = 0;
-  let largestIndex = 0;
-
-  for (let i = 0; i < utxos.length; i++) {
-    const thisUtxo = utxos[i];
-
-    if (thisUtxo.value > largestAmount) {
-      largestAmount = thisUtxo.value;
-      largestIndex = i;
-    }
-  }
-
-  return utxos[largestIndex];
 }

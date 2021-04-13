@@ -84,7 +84,7 @@ export const sendNiftyCoin = async (privateKeyWIF: string) => {
 
     // Essential variables of a transaction.
     // everything is in Niftoshis (100 million = 1 Nifty)
-    const satoshisToSend = NIFTOSHIS_TO_SEND;
+    const niftoshisToSend = NIFTOSHIS_TO_SEND;
     const originalAmount = utxo.balance * 100000000;
     const vout = 1;
     const { txid } = utxo;
@@ -93,19 +93,19 @@ export const sendNiftyCoin = async (privateKeyWIF: string) => {
     transactionBuilder.addInput(txid, vout);
     // txb.addInput(latestTx, 1);
 
-    const txFee = Math.floor(satoshisToSend * 0.01);
+    const txFee = Math.floor(niftoshisToSend * 0.01);
     console.log(`Transaction fee: ${txFee}`);
 
     // amount to send back to the sending address.
     // It's the original amount - 1 sat/byte for tx size
-    const remainder = originalAmount - satoshisToSend - txFee;
+    const remainder = originalAmount - niftoshisToSend - txFee;
 
     if (remainder < 0) {
       throw new Error('Not enough NFY to complete transaction!');
     }
 
     // add output w/ address and amount to send
-    transactionBuilder.addOutput(RECV_ADDR, satoshisToSend);
+    transactionBuilder.addOutput(RECV_ADDR, niftoshisToSend);
     transactionBuilder.addOutput(SEND_ADDR, remainder);
 
     const keyPair = bitcoin.ECPair.fromWIF(privateKeyWIF, network);
@@ -119,7 +119,7 @@ export const sendNiftyCoin = async (privateKeyWIF: string) => {
     console.log(`TX hex: ${hex}`);
 
     // Broadcast transation to the network
-    // const txidStr = await explorer.broadcast([hex]);
+    // const txidStr = await explorer.sendRawTransaction(hex);
     // // import from util.js file
     // const util = require('../util.js');
     // console.log(`Transaction ID: ${txidStr}`);

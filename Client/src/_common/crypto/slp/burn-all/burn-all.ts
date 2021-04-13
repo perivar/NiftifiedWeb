@@ -70,8 +70,8 @@ export async function sendAll(walletInfo: WalletInfo) {
     const byteCount = CryptoUtil.getByteCount({ P2PKH: inputs.length }, { P2PKH: 1 });
     console.log(`byteCount: ${byteCount}`);
 
-    const satoshisPerByte = 1.1;
-    const txFee = Math.ceil(satoshisPerByte * byteCount);
+    const niftoshisPerByte = 1.1;
+    const txFee = Math.ceil(niftoshisPerByte * byteCount);
     console.log(`txFee: ${txFee}`);
 
     // Exit if the transaction costs too much to send.
@@ -100,10 +100,9 @@ export async function sendAll(walletInfo: WalletInfo) {
     // output rawhex
     const hex = tx.toHex();
     // console.log(`TX hex: ${hex}`)
-    console.log(' ');
 
     // Broadcast transation to the network
-    const txid = await explorer.broadcast([hex]);
+    const txid = await explorer.sendRawTransaction(hex);
     console.log(`Transaction ID: ${txid}`);
 
     console.log('Check the status of your transaction on this block explorer:');

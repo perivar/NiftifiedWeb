@@ -99,9 +99,9 @@ const RECV_ADDR = ``
 to
 const RECV_ADDR = 'YourNFYwalletHereInQuotes'
 #NOTE:
-the .js file is defaulted to sending 1000 satoshis. Edit this line:
-const SATOSHIS_TO_SEND = 1000
-to any number you wish, above 546, to change the amount of satoshis that will be
+the .js file is defaulted to sending 1000 niftoshis. Edit this line:
+const NIFTOSHIS_TO_SEND = 1000
+to any number you wish, above 546, to change the amount of niftoshis that will be
 sent to the receiving address you entered above.
 
 
@@ -116,9 +116,9 @@ changed from:
 const RECV_ADDR = ``
 to
 const RECV_ADDR = 'YourNFYwalletHereInQuotes'
-NOTE: the .js file is defaulted to sending 1000 satoshis. Edit this line:
-const SATOSHIS_TO_SEND = 1000
-to any number you wish, above 546 satoshis, to send that amount of satoshis
+NOTE: the .js file is defaulted to sending 1000 niftoshis. Edit this line:
+const NIFTOSHIS_TO_SEND = 1000
+to any number you wish, above 546 niftoshis, to send that amount of niftoshis
 to the receiving address you entered above.
 
 
@@ -135,10 +135,10 @@ dozens of UTXOs into a single UTXO. Ran by running:
 ##applications/wallet/consolidate-dust
 
 Similar to 'wallet/consolidate-utxos', however this .js file concerns itself
-with satoshi amounts smaller than 546 satoshis (the cut-off limit for "dust").
+with satoshi amounts smaller than 546 niftoshis (the cut-off limit for "dust").
 The transaction will happen if ALL of the COMBINED UTXOs have satoshi values
 individually less than 546, but if combined together, are greater than 546
-satoshis. Should the total combined utxos not exceed 546 satoshis in total,
+niftoshis. Should the total combined utxos not exceed 546 niftoshis in total,
 then there will be an error message of "insufficient funds".
 
 ##applications/util.js

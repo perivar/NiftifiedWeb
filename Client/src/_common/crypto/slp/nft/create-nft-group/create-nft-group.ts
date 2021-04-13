@@ -54,8 +54,7 @@ export async function createNFT(walletInfo: WalletInfo) {
     const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
 
     // Get a UTXO to pay for the transaction.
-    const data = await explorer.utxo(legacyAddress);
-    const { utxos } = data;
+    const utxos = await explorer.utxo(legacyAddress);
     // console.log(`utxos: ${JSON.stringify(utxos, null, 2)}`)
 
     if (utxos.length === 0) {
@@ -63,7 +62,7 @@ export async function createNFT(walletInfo: WalletInfo) {
     }
 
     // Get the biggest UTXO to pay for the transaction.
-    const utxo = findBiggestUtxo(utxos);
+    const utxo = await explorer.findBiggestUtxo(utxos);
     // console.log(`utxo: ${JSON.stringify(utxo, null, 2)}`)
 
     // instance of transaction builder
@@ -124,27 +123,10 @@ export async function createNFT(walletInfo: WalletInfo) {
     // console.log(` `)
 
     // Broadcast transation to the network
-    const txidStr = await explorer.broadcast([hex]);
+    const txidStr = await explorer.sendRawTransaction(hex);
     console.log('Check the status of your transaction on this block explorer:');
     CryptoUtil.transactionStatus(txidStr, NETWORK);
   } catch (err) {
     console.error('Error in createToken: ', err);
   }
-}
-
-// Returns the utxo with the biggest balance from an array of utxos.
-function findBiggestUtxo(utxos: any) {
-  let largestAmount = 0;
-  let largestIndex = 0;
-
-  for (let i = 0; i < utxos.length; i++) {
-    const thisUtxo = utxos[i];
-
-    if (thisUtxo.value > largestAmount) {
-      largestAmount = thisUtxo.value;
-      largestIndex = i;
-    }
-  }
-
-  return utxos[largestIndex];
 }

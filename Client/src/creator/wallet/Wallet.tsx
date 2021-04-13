@@ -6,6 +6,8 @@ import { WalletInfo } from '../../_common/crypto/util';
 import { createWallet } from '../../_common/crypto/wallet/create-wallet/create-wallet';
 import { getBalance } from '../../_common/crypto/wallet/check-balance/check-balance';
 import { sendNFY } from '../../_common/crypto/wallet/send-nfy/send-nfy';
+import { sendWIF } from '../../_common/crypto/wallet/send-WIF/send-wif';
+import { listUtxos } from '../../_common/crypto/wallet/list-utxos/list-utxos';
 
 export const Wallet = ({ match }: { match: any }) => {
   // const { path } = match;
@@ -36,24 +38,32 @@ export const Wallet = ({ match }: { match: any }) => {
     const wallet1: WalletInfo = {
       segwitAddress: '',
       legacyAddress: 'NfNPPMJAYqWFHBpVakAaiEJrRB6ohqLi7Y',
-      WIF: '',
+      WIF: '2nafhgiCX3txpTtokW6XVU5jd1RZijtEfjNbn3euPftpUrht6aJ',
       slpAddress: '',
-      mnemonic: ''
+      mnemonic: 'suffer demise spin myself balance before oxygen cushion pumpkin exclude ethics uniform'
     };
 
     const wallet2: WalletInfo = {
       segwitAddress: '',
       legacyAddress: 'NUcBvW67GEqi8CXYPcL4Y5qzw7Vf9rp7wg',
-      WIF: '',
+      WIF: '2nafhgiCX3txpTtokW6XVU5jd1RZijtEfjNbn3euPftpUrht6aJ',
       slpAddress: '',
-      mnemonic: ''
+      mnemonic: 'suffer demise spin myself balance before oxygen cushion pumpkin exclude ethics uniform'
     };
 
     // getBalance(wallet2).then((res: any) => {
     //   console.log(res);
     // });
 
-    sendNFY(wallet1).then((res: any) => {
+    // sendNFY(wallet1).then((res: any) => {
+    //   console.log(res);
+    // });
+
+    sendWIF(wallet1).then((res: any) => {
+      console.log(res);
+    });
+
+    listUtxos(wallet1).then((res: any) => {
       console.log(res);
     });
   };

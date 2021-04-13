@@ -21,10 +21,16 @@ else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 export async function listUtxos(walletInfo: WalletInfo) {
   try {
     // first get NFY balance
-    const balance = await explorer.utxo(walletInfo.segwitAddress);
+    const balance = await explorer.balance(walletInfo.legacyAddress);
+    console.log(`Balance associated with ${walletInfo.legacyAddress}: ${balance}`);
 
-    console.log(`UTXOs associated with ${walletInfo.segwitAddress}:`);
-    console.log(JSON.stringify(balance, null, 2));
+    // get utxos
+    const utxos = await explorer.utxo(walletInfo.legacyAddress);
+
+    // find biggest
+    const utxo = await explorer.findBiggestUtxo(utxos);
+    console.log(`UTXOs associated with ${walletInfo.legacyAddress}:`);
+    console.log(JSON.stringify(utxo, null, 2));
   } catch (err) {
     console.error('Error in listUtxos: ', err);
     throw err;
