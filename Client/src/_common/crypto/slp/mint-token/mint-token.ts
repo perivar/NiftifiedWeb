@@ -5,16 +5,11 @@
 import * as bitcoin from 'bitcoinjs-lib';
 import * as bip39 from 'bip39';
 import * as bip32 from 'bip32';
-import CryptoUtil from '../../util';
+import CryptoUtil, { WalletInfo } from '../../util';
 import CryptoLib from '../../lib';
 import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
 import { Network, Transaction } from 'bitcoinjs-lib';
 import { toBitcoinJS } from '../../nifty/nfy';
-
-// EDIT THESE VALUES FOR YOUR USE.
-const TOKENID = '8de4984472af772f144a74de473d6c21505a6d89686b57445c3e4fc7db3773b6';
-const TOKENQTY = 100; // The quantity of new tokens to mint.
-let TO_SLPADDR = ''; // The address to send the new tokens.
 
 // Set NETWORK to either testnet or mainnet
 const NETWORK = 'mainnet';
@@ -32,16 +27,13 @@ let explorer: any;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
-// Open the wallet generated with create-wallet.
-let walletInfo: any;
-try {
-  walletInfo = JSON.parse(window.localStorage.getItem('wallet.json') || '{}');
-} catch (err) {
-  console.log('Could not open wallet.json. Generate a wallet with create-wallet first.');
-}
-
-export async function mintToken() {
+export async function mintToken(walletInfo: WalletInfo) {
   try {
+    // EDIT THESE VALUES FOR YOUR USE.
+    const TOKENID = '8de4984472af772f144a74de473d6c21505a6d89686b57445c3e4fc7db3773b6';
+    const TOKENQTY = 100; // The quantity of new tokens to mint.
+    let TO_ADDR = ''; // The address to send the new tokens.
+
     const { mnemonic } = walletInfo;
 
     // root seed buffer
@@ -62,12 +54,13 @@ export async function mintToken() {
     // Generate an EC key pair for signing the transaction.
     const keyPair = change.derivePath('0/0'); // not sure if this is the correct to get keypair
 
-    // get the cash address
-    const cashAddress = CryptoUtil.toCashAddress(change, network);
-    // const slpAddress = CryptoUtil.toSLPAddress(cashAddress)
+    // get the segwit address
+    // const segwitAddress = CryptoUtil.toSegWitAddress(change, network);
+    // const slpAddress = CryptoUtil.toSLPAddress(segwitAddress)
+    const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
 
     // Get UTXOs held by this address.
-    const data = await explorer.utxo(cashAddress);
+    const data = await explorer.utxo(legacyAddress);
     const { utxos } = data;
     // console.log(`utxos: ${JSON.stringify(utxos, null, 2)}`);
 
@@ -150,16 +143,16 @@ export async function mintToken() {
 
     // Send the token back to the same wallet if the user hasn't specified a
     // different address.
-    if (TO_SLPADDR === '') TO_SLPADDR = walletInfo.slpAddress;
+    if (TO_ADDR === '') TO_ADDR = walletInfo.legacyAddress;
 
     // Send dust transaction representing tokens being sent.
-    transactionBuilder.addOutput(CryptoUtil.toLegacyAddressFromString(TO_SLPADDR), 546);
+    transactionBuilder.addOutput(TO_ADDR, 546);
 
     // Send dust transaction representing new minting baton.
-    transactionBuilder.addOutput(CryptoUtil.toLegacyAddressFromString(walletInfo.slpAddress), 546);
+    transactionBuilder.addOutput(walletInfo.legacyAddress, 546);
 
     // Last output: send the NFY change back to the wallet.
-    transactionBuilder.addOutput(CryptoUtil.toLegacyAddressFromString(cashAddress), remainder);
+    transactionBuilder.addOutput(legacyAddress, remainder);
 
     // Sign the transaction with the private key for the NFY UTXO paying the fees.
     const redeemScript = undefined;

@@ -6,7 +6,7 @@
 import * as bitcoin from 'bitcoinjs-lib';
 import * as bip39 from 'bip39';
 import * as bip32 from 'bip32';
-import CryptoUtil from '../../util';
+import CryptoUtil, { WalletInfo } from '../../util';
 import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
 import { toBitcoinJS } from '../../nifty/nfy';
 import { Network, Transaction } from 'bitcoinjs-lib';
@@ -27,19 +27,11 @@ let explorer: any;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
-// Open the wallet generated with create-wallet.
-let walletInfo: any;
-try {
-  walletInfo = JSON.parse(window.localStorage.getItem('wallet.json') || '{}');
-} catch (err) {
-  console.log('Could not open wallet.json. Generate a wallet with create-wallet first.');
-}
-
-const SEND_ADDR = walletInfo.cashAddress;
-const SEND_MNEMONIC = walletInfo.mnemonic;
-
-export async function splitUtxo() {
+export async function splitUtxo(walletInfo: WalletInfo) {
   try {
+    const SEND_ADDR = walletInfo.segwitAddress;
+    const SEND_MNEMONIC = walletInfo.mnemonic;
+
     // Get the balance of the sending address.
     const balance = await getNFYBalance(SEND_ADDR, false);
 
@@ -159,7 +151,7 @@ async function getNFYBalance(addr: string, verbose: boolean) {
 
     if (verbose) console.log(result);
 
-    const nfyBalance = Number(result.data);
+    const nfyBalance = Number(result);
     return nfyBalance;
   } catch (err) {
     console.error('Error in getNFYBalance: ', err);

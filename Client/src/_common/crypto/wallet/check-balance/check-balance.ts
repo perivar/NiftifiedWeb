@@ -4,6 +4,7 @@
 */
 
 import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
+import { WalletInfo } from '../../util';
 
 // Set NETWORK to either testnet or mainnet
 const NETWORK = 'mainnet';
@@ -17,23 +18,16 @@ let explorer: any;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
-// Open the wallet generated with create-wallet.
-let walletInfo: any;
-try {
-  walletInfo = JSON.parse(window.localStorage.getItem('wallet.json') || '{}');
-} catch (err) {
-  console.log('Could not open wallet.json. Generate a wallet with create-wallet first.');
-}
-
 // Get the balance of the wallet.
-export const getBalance = async () => {
+export async function getBalance(walletInfo: WalletInfo) {
   try {
     // first get NFY balance
     const balance = await explorer.balance(walletInfo.legacyAddress);
     console.log('NFY Balance information:');
     console.log(JSON.stringify(balance, null, 2));
+    return balance;
   } catch (err) {
     console.error('Error in getBalance: ', err);
     throw err;
   }
-};
+}

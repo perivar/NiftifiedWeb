@@ -5,7 +5,7 @@
 import * as bitcoin from 'bitcoinjs-lib';
 import * as bip39 from 'bip39';
 import * as bip32 from 'bip32';
-import CryptoUtil from '../../util';
+import CryptoUtil, { WalletInfo } from '../../util';
 import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
 import { toBitcoinJS } from '../../nifty/nfy';
 import { Network, Transaction } from 'bitcoinjs-lib';
@@ -17,9 +17,6 @@ const NETWORK = 'mainnet';
 const mainNet = toBitcoinJS(false);
 const testNet = toBitcoinJS(true);
 
-// The address to send the outputs to.
-let RECV_ADDR = '';
-
 // REST API servers.
 const NFY_MAINNET = 'https://explorer.niftycoin.org/';
 const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
@@ -29,23 +26,18 @@ let explorer: any;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
-// Open the wallet generated with create-wallet.
-let walletInfo: any;
-try {
-  walletInfo = JSON.parse(window.localStorage.getItem('wallet.json') || '{}');
-} catch (err) {
-  console.log('Could not open wallet.json. Generate a wallet with create-wallet first.');
-}
-
-const SEND_ADDR = walletInfo.cashAddress;
-const SEND_MNEMONIC = walletInfo.mnemonic;
-
-// Send the money back to the same address. Edit this if you want to send it
-// somewhere else.
-if (RECV_ADDR === '') RECV_ADDR = walletInfo.cashAddress;
-
-export async function sendAll() {
+export async function sendAll(walletInfo: WalletInfo) {
   try {
+    // The address to send the outputs to.
+    let RECV_ADDR = '';
+
+    const SEND_ADDR = walletInfo.segwitAddress;
+    const SEND_MNEMONIC = walletInfo.mnemonic;
+
+    // Send the money back to the same address. Edit this if you want to send it
+    // somewhere else.
+    if (RECV_ADDR === '') RECV_ADDR = walletInfo.segwitAddress;
+
     // set network
     let network: Network;
     if (NETWORK === 'mainnet') network = mainNet;

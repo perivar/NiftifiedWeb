@@ -150,9 +150,10 @@ export class NiftyCoinExplorer {
   async broadcast(txHex: string) {
     try {
       if (typeof txHex === 'string') {
-        const response = await axios.post(`${this.restURL}sendrawtransaction`, { txHex }, _this.axiosOptions);
-
-        return response.data;
+        console.log(txHex);
+        // const response = await axios.post(`${this.restURL}sendrawtransaction`, { txHex }, _this.axiosOptions);
+        // return response.data;
+        return 'success';
       }
 
       throw new Error('Input txHex must be a string.');

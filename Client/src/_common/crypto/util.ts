@@ -2,6 +2,14 @@
 utility file for certain .js operations used in applications/wallet
 */
 
+export interface WalletInfo {
+  segwitAddress: string;
+  legacyAddress: string;
+  slpAddress: string;
+  WIF: string;
+  mnemonic: string;
+}
+
 import * as bitcoin from 'bitcoinjs-lib';
 
 // displays link to either the nfy mainnet or tnfy testnet for transactions
@@ -18,7 +26,7 @@ function transactionStatus(transactionInput: string, network: string) {
 // toCashAddress('1B9UNtBfkkpgt8kVbwLN9ktE62QKnMbDzR') // bitcoincash:qph5kuz78czq00e3t85ugpgd7xmer5kr7c5f6jdpwk
 // toSlpAddress('1B9UNtBfkkpgt8kVbwLN9ktE62QKnMbDzR') // simpleledger:qph5kuz78czq00e3t85ugpgd7xmer5kr7ccj3fcpsg
 
-function toCashAddress(node: any, network: any): string {
+function toSegWitAddress(node: any, network: any): string {
   const { address } = bitcoin.payments.p2sh({
     redeem: bitcoin.payments.p2wpkh({ pubkey: node.publicKey, network }),
     network
@@ -29,11 +37,6 @@ function toCashAddress(node: any, network: any): string {
 function toLegacyAddress(node: any, network: any): string {
   const { address } = bitcoin.payments.p2pkh({ pubkey: node.publicKey, network });
   return address ? address : '';
-}
-
-function toLegacyAddressFromString(address: string) {
-  // TODO - doesn't do anything yet
-  return address;
 }
 
 function toSLPAddress(node: any, network: any): string {
@@ -95,9 +98,8 @@ const getByteCount = (inputs: any, outputs: any): number => {
 
 const CryptoUtil = {
   transactionStatus,
-  toCashAddress,
+  toSegWitAddress,
   toLegacyAddress,
-  toLegacyAddressFromString,
   toSLPAddress,
   getByteCount
 };

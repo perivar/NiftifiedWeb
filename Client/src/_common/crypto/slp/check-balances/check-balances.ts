@@ -9,7 +9,7 @@
 import * as bitcoin from 'bitcoinjs-lib';
 import * as bip39 from 'bip39';
 import * as bip32 from 'bip32';
-import CryptoUtil from '../../util';
+import CryptoUtil, { WalletInfo } from '../../util';
 import CryptoLib from '../../lib';
 import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
 import { Network, Transaction } from 'bitcoinjs-lib';
@@ -31,15 +31,7 @@ let explorer: any;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
-// Open the wallet generated with create-wallet.
-let walletInfo: any;
-try {
-  walletInfo = JSON.parse(window.localStorage.getItem('wallet.json') || '{}');
-} catch (err) {
-  console.log('Could not open wallet.json. Generate a wallet with create-wallet first.');
-}
-
-export async function getBalance() {
+export async function getBalance(walletInfo: WalletInfo) {
   try {
     const { mnemonic } = walletInfo;
 
@@ -59,14 +51,15 @@ export async function getBalance() {
 
     const change = account.derivePath('0/0');
 
-    // get the cash address
-    const cashAddress = CryptoUtil.toCashAddress(change, network);
+    // get the segwit address
+    // const segwitAddress = CryptoUtil.toSegWitAddress(change, network);
     const slpAddress = CryptoUtil.toSLPAddress(change, network);
+    const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
 
     // first get NFY balance
-    const balance = await explorer.balance(cashAddress);
+    const balance = await explorer.balance(legacyAddress);
 
-    console.log(`NFY Balance information for ${slpAddress}:`);
+    console.log(`NFY Balance information for ${legacyAddress}:`);
     console.log(`${JSON.stringify(balance.balance, null, 2)}`);
     console.log('SLP Token information:');
 

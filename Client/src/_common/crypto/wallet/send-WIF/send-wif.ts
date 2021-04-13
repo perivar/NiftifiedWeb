@@ -1,14 +1,14 @@
 /*
   Same as send-nfy example, except this uses a WIF instead of a mnemonic to
   sign the transaction.
-  Send 1000 satoshis to RECV_ADDR.
+  Send 1000 satoshis to RECV_ADDR_LEGACY.
 */
 
 import * as bitcoin from 'bitcoinjs-lib';
 import { Network, Transaction } from 'bitcoinjs-lib';
 import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
 import { toBitcoinJS } from '../../nifty/nfy';
-import CryptoUtil from '../../util';
+import CryptoUtil, { WalletInfo } from '../../util';
 
 // Set NETWORK to either testnet or mainnet
 const NETWORK = 'mainnet';
@@ -16,11 +16,6 @@ const NETWORK = 'mainnet';
 // import networks
 const mainNet = toBitcoinJS(false);
 const testNet = toBitcoinJS(true);
-
-// Replace the address below with the address you want to send the NFY to.
-let RECV_ADDR = '';
-// set satoshi amount to send
-const SATOSHIS_TO_SEND = 1000;
 
 // REST API servers.
 const NFY_MAINNET = 'https://explorer.niftycoin.org/';
@@ -31,41 +26,36 @@ let explorer: any;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
-// Open the wallet generated with create-wallet.
-let walletInfo: any;
-try {
-  walletInfo = JSON.parse(window.localStorage.getItem('wallet.json') || '{}');
-} catch (err) {
-  console.log('Could not open wallet.json. Generate a wallet with create-wallet first.');
-}
-
-const SEND_ADDR = walletInfo.cashAddress;
-const SEND_WIF = walletInfo.WIF;
-
-export async function sendNFY() {
+export async function sendNFY(walletInfo: WalletInfo) {
   try {
-    // Send the money back to yourself if the users hasn't specified a destination.
-    if (RECV_ADDR === '') RECV_ADDR = SEND_ADDR;
+    const SEND_ADDR_LEGACY = walletInfo.legacyAddress;
+    const SEND_WIF = walletInfo.WIF;
+    let RECV_ADDR_LEGACY = '';
+
+    // set satoshi amount to send
+    const SATOSHIS_TO_SEND = 1000;
+
+    // If the user fails to specify a reciever address, just send the NFY back
+    // to the origination address, so the example doesn't fail.
+    if (RECV_ADDR_LEGACY === '') RECV_ADDR_LEGACY = SEND_ADDR_LEGACY;
 
     // Get the balance of the sending address.
-    const balance = await getNFYBalance(SEND_ADDR, false);
+    const balance = await getNFYBalance(SEND_ADDR_LEGACY, false);
     console.log(`balance: ${JSON.stringify(balance, null, 2)}`);
-    console.log(`Balance of sending address ${SEND_ADDR} is ${balance} NFY.`);
+    console.log(`Balance of sending address ${SEND_ADDR_LEGACY} is ${balance} NFY.`);
 
     // Exit if the balance is zero.
     if (balance <= 0.0) {
       console.log('Balance of sending address is zero. Exiting.');
     }
 
-    const SEND_ADDR_LEGACY = CryptoUtil.toLegacyAddressFromString(SEND_ADDR);
-    const RECV_ADDR_LEGACY = CryptoUtil.toLegacyAddressFromString(RECV_ADDR);
     console.log(`Sender Legacy Address: ${SEND_ADDR_LEGACY}`);
     console.log(`Receiver Legacy Address: ${RECV_ADDR_LEGACY}`);
 
-    const balance2 = await getNFYBalance(RECV_ADDR, false);
-    console.log(`Balance of recieving address ${RECV_ADDR} is ${balance2} NFY.`);
+    const balance2 = await getNFYBalance(RECV_ADDR_LEGACY, false);
+    console.log(`Balance of recieving address ${RECV_ADDR_LEGACY} is ${balance2} NFY.`);
 
-    const data = await explorer.utxo(SEND_ADDR);
+    const data = await explorer.utxo(SEND_ADDR_LEGACY);
     const { utxos } = data;
     // console.log('utxos: ', utxos)
 
@@ -100,8 +90,8 @@ export async function sendNFY() {
     const remainder = originalAmount - satoshisToSend - txFee;
 
     // add output w/ address and amount to send
-    transactionBuilder.addOutput(RECV_ADDR, satoshisToSend);
-    transactionBuilder.addOutput(SEND_ADDR, remainder);
+    transactionBuilder.addOutput(RECV_ADDR_LEGACY, satoshisToSend);
+    transactionBuilder.addOutput(SEND_ADDR_LEGACY, remainder);
 
     const ecPair = bitcoin.ECPair.fromWIF(SEND_WIF);
 
@@ -133,7 +123,7 @@ async function getNFYBalance(addr: string, verbose: boolean) {
 
     if (verbose) console.log(result);
 
-    const nfyBalance = Number(result.data);
+    const nfyBalance = Number(result);
     return nfyBalance;
   } catch (err) {
     console.error('Error in getNFYBalance: ', err);

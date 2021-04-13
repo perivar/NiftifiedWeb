@@ -276,7 +276,7 @@ export class Utils {
    * //     slpAddress: 'simpleledger:qr5agtachyxvrwxu76vzszan5pnvuzy8duhv4lxrsk',
    * //     decimalCount: 7 } ]
    *
-   * // balances for Cash Address
+   * // balances for SegWit Address
    * (async () => {
    *  try {
    *    let balances = await bchjs.SLP.Utils.balancesForAddress('bitcoincash:qr4zg7xth86yzq94gl8jvnf5z4wuupzt3g4hl47n9y');

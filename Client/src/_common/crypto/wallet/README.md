@@ -81,7 +81,7 @@ BEING SENT FROM (which will perform a similar action to the
 [consolidate-utxos](consolidate-utxos) example.
 To change the send-all address, change the .js file line from:
 
-`const RECV_ADDR = walletInfo.cashAddress`
+`const RECV_ADDR = walletInfo.segwitAddress`
 
 to
 

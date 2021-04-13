@@ -5,15 +5,11 @@
 import * as bitcoin from 'bitcoinjs-lib';
 import * as bip39 from 'bip39';
 import * as bip32 from 'bip32';
-import CryptoUtil from '../../util';
+import CryptoUtil, { WalletInfo } from '../../util';
 import CryptoLib from '../../lib';
 import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
 import { Network, Transaction } from 'bitcoinjs-lib';
 import { toBitcoinJS } from '../../nifty/nfy';
-
-// CUSTOMIZE THESE VALUES FOR YOUR USE
-const TOKENQTY = 1;
-const TOKENID = '8de4984472af772f144a74de473d6c21505a6d89686b57445c3e4fc7db3773b6';
 
 // Set NETWORK to either testnet or mainnet
 const NETWORK = 'mainnet';
@@ -31,16 +27,12 @@ let explorer: any;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
-// Open the wallet generated with create-wallet.
-let walletInfo: any;
-try {
-  walletInfo = JSON.parse(window.localStorage.getItem('wallet.json') || '{}');
-} catch (err) {
-  console.log('Could not open wallet.json. Generate a wallet with create-wallet first.');
-}
-
-export async function burnTokens() {
+export async function burnTokens(walletInfo: WalletInfo) {
   try {
+    // CUSTOMIZE THESE VALUES FOR YOUR USE
+    const TOKENQTY = 1;
+    const TOKENID = '8de4984472af772f144a74de473d6c21505a6d89686b57445c3e4fc7db3773b6';
+
     const { mnemonic } = walletInfo;
 
     // root seed buffer
@@ -61,11 +53,12 @@ export async function burnTokens() {
     // Generate an EC key pair for signing the transaction.
     const keyPair = change.derivePath('0/0'); // not sure if this is the correct to get keypair
 
-    // get the cash address
-    const cashAddress = CryptoUtil.toCashAddress(change, network);
+    // get the segwit address
+    // const segwitAddress = CryptoUtil.toSegWitAddress(change, network);
+    const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
 
     // Get UTXOs held by this address.
-    const data = await explorer.utxo(cashAddress);
+    const data = await explorer.utxo(legacyAddress);
     const { utxos } = data;
     console.log(`utxos: ${JSON.stringify(utxos, null, 2)}`);
 
@@ -150,7 +143,7 @@ export async function burnTokens() {
     // if (TO_SLPADDR === "") TO_SLPADDR = walletInfo.slpAddress;
 
     // Send dust transaction representing tokens being sent.
-    transactionBuilder.addOutput(CryptoUtil.toLegacyAddressFromString(walletInfo.slpAddress), 546);
+    transactionBuilder.addOutput(walletInfo.legacyAddress, 546);
 
     // Last output: send the NFY change back to the wallet.
     transactionBuilder.addOutput(CryptoUtil.toLegacyAddress(change, network), remainder);

@@ -5,7 +5,7 @@
 import * as bitcoin from 'bitcoinjs-lib';
 import * as bip39 from 'bip39';
 import * as bip32 from 'bip32';
-import CryptoUtil from '../../util';
+import CryptoUtil, { WalletInfo } from '../../util';
 import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
 import { toBitcoinJS } from '../../nifty/nfy';
 import { Network, Transaction } from 'bitcoinjs-lib';
@@ -26,19 +26,11 @@ let explorer: any;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
-// Open the wallet generated with create-wallet.
-let walletInfo: any;
-try {
-  walletInfo = JSON.parse(window.localStorage.getItem('wallet.json') || '{}');
-} catch (err) {
-  console.log('Could not open wallet.json. Generate a wallet with create-wallet first.');
-}
-
-const SEND_ADDR = walletInfo.cashAddress;
-const SEND_MNEMONIC = walletInfo.mnemonic;
-
-export async function consolidateUtxos() {
+export async function consolidateUtxos(walletInfo: WalletInfo) {
   try {
+    const SEND_ADDR = walletInfo.segwitAddress;
+    const SEND_MNEMONIC = walletInfo.mnemonic;
+
     // set network
     let network: Network;
     if (NETWORK === 'mainnet') network = mainNet;

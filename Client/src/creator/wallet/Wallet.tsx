@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { niftyService } from '../../_services';
-import { sendTransactions, sendNiftyCoin, generateWallet } from '../../_common/crypto/nifty/generate';
+// import { sendTransactions, sendNiftyCoin, generateWallet } from '../../_common/crypto/nifty/generate';
+import { WalletInfo } from '../../_common/crypto/util';
 import { createWallet } from '../../_common/crypto/wallet/create-wallet/create-wallet';
 import { getBalance } from '../../_common/crypto/wallet/check-balance/check-balance';
+import { sendNFY } from '../../_common/crypto/wallet/send-nfy/send-nfy';
 
 export const Wallet = ({ match }: { match: any }) => {
   // const { path } = match;
@@ -22,7 +24,38 @@ export const Wallet = ({ match }: { match: any }) => {
     //     console.log(err);
     //   });
 
-    getBalance().then(() => {});
+    // let walletInfo = {} as WalletInfo;
+    // const wallet = createWallet().then((res: any) => {
+    //   walletInfo = res;
+
+    //   getBalance(walletInfo).then((res: any) => {
+    //     console.log(res);
+    //   });
+    // });
+
+    const wallet1: WalletInfo = {
+      segwitAddress: '',
+      legacyAddress: 'NfNPPMJAYqWFHBpVakAaiEJrRB6ohqLi7Y',
+      WIF: '',
+      slpAddress: '',
+      mnemonic: ''
+    };
+
+    const wallet2: WalletInfo = {
+      segwitAddress: '',
+      legacyAddress: 'NUcBvW67GEqi8CXYPcL4Y5qzw7Vf9rp7wg',
+      WIF: '',
+      slpAddress: '',
+      mnemonic: ''
+    };
+
+    // getBalance(wallet2).then((res: any) => {
+    //   console.log(res);
+    // });
+
+    sendNFY(wallet1).then((res: any) => {
+      console.log(res);
+    });
   };
 
   return (

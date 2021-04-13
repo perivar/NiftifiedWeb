@@ -5,7 +5,7 @@
 import * as bitcoin from 'bitcoinjs-lib';
 import * as bip39 from 'bip39';
 import * as bip32 from 'bip32';
-import CryptoUtil from '../../util';
+import CryptoUtil, { WalletInfo } from '../../util';
 import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
 import { Network } from 'bitcoinjs-lib';
 import { toBitcoinJS } from '../../nifty/nfy';
@@ -26,15 +26,7 @@ let explorer: any;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
-// Open the wallet generated with create-wallet.
-let walletInfo: any;
-try {
-  walletInfo = JSON.parse(window.localStorage.getItem('wallet.json') || '{}');
-} catch (err) {
-  console.log('Could not open wallet.json. Generate a wallet with create-wallet first.');
-}
-
-export async function conversion() {
+export async function conversion(walletInfo: WalletInfo) {
   try {
     const { mnemonic } = walletInfo;
 
@@ -54,13 +46,13 @@ export async function conversion() {
 
     const change = account.derivePath('0/0');
 
-    // get the cash address
-    const cashAddress = CryptoUtil.toCashAddress(change, network);
+    // get the segwit address
+    const segwitAddress = CryptoUtil.toSegWitAddress(change, network);
     const slpAddress = CryptoUtil.toSLPAddress(change, network);
-    const legacyAddress = CryptoUtil.toLegacyAddressFromString(cashAddress);
+    const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
 
     console.log(`SLP Address: ${slpAddress}:`);
-    console.log(`Cash Address: ${cashAddress}:`);
+    console.log(`SegWit Address: ${segwitAddress}:`);
     console.log(`Legacy Address: ${legacyAddress}:`);
   } catch (err) {
     console.error('Error in conversion: ', err);

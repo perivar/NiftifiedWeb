@@ -9,15 +9,11 @@
 import * as bitcoin from 'bitcoinjs-lib';
 import * as bip39 from 'bip39';
 import * as bip32 from 'bip32';
-import CryptoUtil from '../../../util';
+import CryptoUtil, { WalletInfo } from '../../../util';
 import CryptoLib from '../../../lib';
 import { NiftyCoinExplorer } from '../../../NiftyCoinExplorer';
 import { Network, Transaction } from 'bitcoinjs-lib';
 import { toBitcoinJS } from '../../../nifty/nfy';
-
-// EDIT THESE VALUES FOR YOUR USE.
-const TOKENID = '8cd26481aaed66198e22e05450839fda763daadbb9938b0c71521ef43c642299';
-// const TO_SLPADDR = '' // The address to send the new tokens.
 
 // Set NETWORK to either testnet or mainnet
 const NETWORK = 'mainnet';
@@ -35,16 +31,12 @@ let explorer: any;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
-// Open the wallet generated with create-wallet.
-let walletInfo: any;
-try {
-  walletInfo = JSON.parse(window.localStorage.getItem('wallet.json') || '{}');
-} catch (err) {
-  console.log('Could not open wallet.json. Generate a wallet with create-wallet first.');
-}
-
-export async function createNFTChild() {
+export async function createNFTChild(walletInfo: WalletInfo) {
   try {
+    // EDIT THESE VALUES FOR YOUR USE.
+    const TOKENID = '8cd26481aaed66198e22e05450839fda763daadbb9938b0c71521ef43c642299';
+    // const TO_SLPADDR = '' // The address to send the new tokens.
+
     const { mnemonic } = walletInfo;
 
     // root seed buffer
@@ -64,11 +56,12 @@ export async function createNFTChild() {
     const change = account.derivePath('0/0');
 
     // ge-childt the cash address
-    const cashAddress = CryptoUtil.toCashAddress(change, network);
-    // const slpAddress = CryptoUtil.toSLPAddress(cashAddress)
+    // const segwitAddress = CryptoUtil.toSegWitAddress(change, network);
+    // const slpAddress = CryptoUtil.toSLPAddress(segwitAddress)
+    const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
 
     // Get a UTXO to pay for the transaction.
-    const data = await explorer.utxo(cashAddress);
+    const data = await explorer.utxo(legacyAddress);
     const { utxos } = data;
     console.log(`utxos: ${JSON.stringify(utxos, null, 2)}`);
 
@@ -149,16 +142,16 @@ export async function createNFTChild() {
     transactionBuilder.addOutput(script, 0);
 
     // Send dust transaction representing the tokens.
-    transactionBuilder.addOutput(CryptoUtil.toLegacyAddressFromString(cashAddress), 546);
+    transactionBuilder.addOutput(legacyAddress, 546);
 
     // Send dust transaction representing minting baton.
     // transactionBuilder.addOutput(
-    //   CryptoUtil.toLegacyAddress(cashAddress),
+    //   CryptoUtil.toLegacyAddressFromSegWit(segwitAddress),
     //   546
     // );
 
     // add output to send NFY remainder of UTXO.
-    transactionBuilder.addOutput(cashAddress, remainder);
+    transactionBuilder.addOutput(legacyAddress, remainder);
 
     // Generate a keypair from the change address.
     const keyPair = change.derivePath('0/0'); // not sure if this is the correct to get keypair

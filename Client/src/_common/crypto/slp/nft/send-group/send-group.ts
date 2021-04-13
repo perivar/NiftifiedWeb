@@ -5,16 +5,11 @@
 import * as bitcoin from 'bitcoinjs-lib';
 import * as bip39 from 'bip39';
 import * as bip32 from 'bip32';
-import CryptoUtil from '../../../util';
+import CryptoUtil, { WalletInfo } from '../../../util';
 import CryptoLib from '../../../lib';
 import { NiftyCoinExplorer } from '../../../NiftyCoinExplorer';
 import { Network, Transaction } from 'bitcoinjs-lib';
 import { toBitcoinJS } from '../../../nifty/nfy';
-
-// CUSTOMIZE THESE VALUES FOR YOUR USE
-const TOKENQTY = 5;
-const TOKENID = 'ba6c400e66190baf7f101c6ea54c0ab81c7fcfa45e9a239088f2ac0a570ec0e5';
-let TO_SLPADDR = 'simpleledger:qphnz7yl9xasyzd0aldxq3q875shts0dmgep39tq3e';
 
 // Set NETWORK to either testnet or mainnet
 const NETWORK = 'mainnet';
@@ -32,16 +27,13 @@ let explorer: any;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
-// Open the wallet generated with create-wallet.
-let walletInfo: any;
-try {
-  walletInfo = JSON.parse(window.localStorage.getItem('wallet.json') || '{}');
-} catch (err) {
-  console.log('Could not open wallet.json. Generate a wallet with create-wallet first.');
-}
-
-export async function sendGroupToken() {
+export async function sendGroupToken(walletInfo: WalletInfo) {
   try {
+    // CUSTOMIZE THESE VALUES FOR YOUR USE
+    const TOKENQTY = 5;
+    const TOKENID = 'ba6c400e66190baf7f101c6ea54c0ab81c7fcfa45e9a239088f2ac0a570ec0e5';
+    let TO_ADDR = 'simpleledger:qphnz7yl9xasyzd0aldxq3q875shts0dmgep39tq3e';
+
     const { mnemonic } = walletInfo;
 
     // root seed buffer
@@ -62,12 +54,13 @@ export async function sendGroupToken() {
     // Generate an EC key pair for signing the transaction.
     const keyPair = change.derivePath('0/0'); // not sure if this is the correct to get keypair
 
-    // get the cash address
-    const cashAddress = CryptoUtil.toCashAddress(change, network);
-    const slpAddress = CryptoUtil.toSLPAddress(change, network);
+    // get the segwit address
+    // const segwitAddress = CryptoUtil.toSegWitAddress(change, network);
+    // const slpAddress = CryptoUtil.toSLPAddress(change, network);
+    const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
 
     // Get UTXOs held by this address.
-    const data = await explorer.utxo(cashAddress);
+    const data = await explorer.utxo(legacyAddress);
     const { utxos } = data;
     // console.log(`utxos: ${JSON.stringify(utxos, null, 2)}`);
 
@@ -151,18 +144,19 @@ export async function sendGroupToken() {
 
     // Send the token back to the same wallet if the user hasn't specified a
     // different address.
-    if (TO_SLPADDR === '') TO_SLPADDR = walletInfo.slpAddress;
+    if (TO_ADDR === '') TO_ADDR = walletInfo.legacyAddress;
 
     // Send dust transaction representing tokens being sent.
-    transactionBuilder.addOutput(CryptoUtil.toLegacyAddressFromString(TO_SLPADDR), 546);
+    transactionBuilder.addOutput(TO_ADDR, 546);
 
     // Return any token change back to the sender.
-    if (slpSendObj.outputs > 1) {
-      transactionBuilder.addOutput(CryptoUtil.toLegacyAddressFromString(slpAddress), 546);
-    }
+    // TODO fix PIN
+    // if (slpSendObj.outputs > 1) {
+    //   transactionBuilder.addOutput(CryptoUtil.toLegacyAddress(slpAddress), 546);
+    // }
 
     // Last output: send the NFY change back to the wallet.
-    transactionBuilder.addOutput(CryptoUtil.toLegacyAddressFromString(cashAddress), remainder);
+    transactionBuilder.addOutput(legacyAddress, remainder);
 
     // Sign the transaction with the private key for the NFY UTXO paying the fees.
     const redeemScript = undefined;

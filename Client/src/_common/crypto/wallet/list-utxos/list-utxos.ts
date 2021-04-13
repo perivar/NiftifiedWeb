@@ -3,6 +3,7 @@
 */
 
 import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
+import { WalletInfo } from '../../util';
 
 // Set NETWORK to either testnet or mainnet
 const NETWORK = 'mainnet';
@@ -16,21 +17,13 @@ let explorer: any;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
-// Open the wallet generated with create-wallet.
-let walletInfo: any;
-try {
-  walletInfo = JSON.parse(window.localStorage.getItem('wallet.json') || '{}');
-} catch (err) {
-  console.log('Could not open wallet.json. Generate a wallet with create-wallet first.');
-}
-
 // Get the balance of the wallet.
-export async function listUtxos() {
+export async function listUtxos(walletInfo: WalletInfo) {
   try {
     // first get NFY balance
-    const balance = await explorer.utxo(walletInfo.cashAddress);
+    const balance = await explorer.utxo(walletInfo.segwitAddress);
 
-    console.log(`UTXOs associated with ${walletInfo.cashAddress}:`);
+    console.log(`UTXOs associated with ${walletInfo.segwitAddress}:`);
     console.log(JSON.stringify(balance, null, 2));
   } catch (err) {
     console.error('Error in listUtxos: ', err);

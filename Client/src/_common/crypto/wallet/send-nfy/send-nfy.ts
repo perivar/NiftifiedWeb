@@ -1,11 +1,11 @@
 /*
-  Send 1000 satoshis to RECV_ADDR.
+  Send 1000 satoshis to RECV_ADDR_LEGACY.
 */
 
 import * as bitcoin from 'bitcoinjs-lib';
 import * as bip39 from 'bip39';
 import * as bip32 from 'bip32';
-import CryptoUtil from '../../util';
+import CryptoUtil, { WalletInfo } from '../../util';
 import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
 import { toBitcoinJS } from '../../nifty/nfy';
 import { Network, Transaction } from 'bitcoinjs-lib';
@@ -17,11 +17,6 @@ const NETWORK = 'mainnet';
 const mainNet = toBitcoinJS(false);
 const testNet = toBitcoinJS(true);
 
-// Replace the address below with the address you want to send the NFY to.
-let RECV_ADDR = '';
-// set satoshi amount to send
-const SATOSHIS_TO_SEND = 1000;
-
 // REST API servers.
 const NFY_MAINNET = 'https://explorer.niftycoin.org/';
 const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
@@ -31,23 +26,20 @@ let explorer: any;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
-// Open the wallet generated with create-wallet.
-let walletInfo: any;
-try {
-  walletInfo = JSON.parse(window.localStorage.getItem('wallet.json') || '{}');
-} catch (err) {
-  console.log('Could not open wallet.json. Generate a wallet with create-wallet first.');
-}
-
-const SEND_ADDR = walletInfo.cashAddress;
-const SEND_MNEMONIC = walletInfo.mnemonic;
-
-export async function sendNFY() {
+export async function sendNFY(walletInfo: WalletInfo) {
   try {
+    // set satoshi amount to send
+    const SATOSHIS_TO_SEND = 1000;
+
+    const SEND_ADDR_LEGACY = walletInfo.legacyAddress;
+    let RECV_ADDR_LEGACY = '';
+
+    const SEND_MNEMONIC = walletInfo.mnemonic;
+
     // Get the balance of the sending address.
-    const balance = await getNFYBalance(SEND_ADDR, false);
+    const balance = await getNFYBalance(SEND_ADDR_LEGACY, false);
     console.log(`balance: ${JSON.stringify(balance, null, 2)}`);
-    console.log(`Balance of sending address ${SEND_ADDR} is ${balance} NFY.`);
+    console.log(`Balance of sending address ${SEND_ADDR_LEGACY} is ${balance} NFY.`);
 
     // Exit if the balance is zero.
     if (balance <= 0.0) {
@@ -56,23 +48,20 @@ export async function sendNFY() {
 
     // If the user fails to specify a reciever address, just send the NFY back
     // to the origination address, so the example doesn't fail.
-    if (RECV_ADDR === '') RECV_ADDR = SEND_ADDR;
+    if (RECV_ADDR_LEGACY === '') RECV_ADDR_LEGACY = SEND_ADDR_LEGACY;
 
-    // Convert to a legacy address (needed to build transactions).
-    const SEND_ADDR_LEGACY = CryptoUtil.toLegacyAddressFromString(SEND_ADDR);
-    const RECV_ADDR_LEGACY = CryptoUtil.toLegacyAddressFromString(RECV_ADDR);
     console.log(`Sender Legacy Address: ${SEND_ADDR_LEGACY}`);
     console.log(`Receiver Legacy Address: ${RECV_ADDR_LEGACY}`);
 
     // Get UTXOs held by the address.
     // https://developer.bitcoin.com/mastering-bitcoin-cash/4-transactions/
-    const utxos = await explorer.utxo(SEND_ADDR);
+    const utxos = await explorer.utxo(SEND_ADDR_LEGACY);
     // console.log(`utxos: ${JSON.stringify(utxos, null, 2)}`);
 
-    if (utxos.utxos.length === 0) throw new Error('No UTXOs found.');
+    if (utxos.length === 0) throw new Error('No UTXOs found.');
 
     // console.log(`u: ${JSON.stringify(u, null, 2)}`
-    const utxo = await findBiggestUtxo(utxos.utxos);
+    const utxo = await findBiggestUtxo(utxos);
     // console.log(`utxo: ${JSON.stringify(utxo, null, 2)}`);
 
     // set network
@@ -108,8 +97,8 @@ export async function sendNFY() {
     }
 
     // add output w/ address and amount to send
-    transactionBuilder.addOutput(RECV_ADDR, satoshisToSend);
-    transactionBuilder.addOutput(SEND_ADDR, remainder);
+    transactionBuilder.addOutput(RECV_ADDR_LEGACY, satoshisToSend);
+    transactionBuilder.addOutput(SEND_ADDR_LEGACY, remainder);
 
     // Generate a change address from a Mnemonic of a private key.
     const change = await changeAddrFromMnemonic(SEND_MNEMONIC);
@@ -167,7 +156,7 @@ async function getNFYBalance(addr: string, verbose: boolean) {
 
     if (verbose) console.log(result);
 
-    const nfyBalance = Number(result.data);
+    const nfyBalance = Number(result);
     return nfyBalance;
   } catch (err) {
     console.error('Error in getNFYBalance: ', err);
@@ -186,14 +175,14 @@ async function findBiggestUtxo(utxos: any) {
     // console.log(`thisUTXO: ${JSON.stringify(thisUtxo, null, 2)}`);
 
     // Validate the UTXO data with the full node.
-    const txout = await explorer.getTxOut(thisUtxo.tx_hash, thisUtxo.tx_pos);
-    if (txout === null) {
-      // If the UTXO has already been spent, the full node will respond with null.
-      console.log('Stale UTXO found. You may need to wait for the indexer to catch up.');
-      continue;
-    }
+    // const txout = await explorer.getTxOut(thisUtxo.tx_hash, thisUtxo.tx_pos);
+    // if (txout === null) {
+    //   // If the UTXO has already been spent, the full node will respond with null.
+    //   console.log('Stale UTXO found. You may need to wait for the indexer to catch up.');
+    //   continue;
+    // }
 
-    if (thisUtxo.value > largestAmount) {
+    if (thisUtxo.balance > largestAmount) {
       largestAmount = thisUtxo.value;
       largestIndex = i;
     }
