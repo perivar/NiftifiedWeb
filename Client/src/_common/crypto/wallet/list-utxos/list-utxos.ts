@@ -27,10 +27,13 @@ export async function listUtxos(walletInfo: WalletInfo) {
     // get utxos
     const utxos = await explorer.utxo(walletInfo.legacyAddress);
 
+    if (utxos.length === 0) throw new Error('No UTXOs found.');
+
     // find biggest
     const utxo = await explorer.findBiggestUtxo(utxos);
     console.log(`UTXOs associated with ${walletInfo.legacyAddress}:`);
     console.log(JSON.stringify(utxo, null, 2));
+    return utxo;
   } catch (err) {
     console.error('Error in listUtxos: ', err);
     throw err;

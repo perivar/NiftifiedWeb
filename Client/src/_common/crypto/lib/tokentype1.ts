@@ -20,6 +20,7 @@ export class TokenType1 {
     this.restURL = config.restURL;
     this.apiToken = config.apiToken;
     this.authToken = config.authToken;
+    this.axios = axios;
 
     if (this.authToken) {
       // Add Basic Authentication token to the authorization header.
@@ -28,16 +29,16 @@ export class TokenType1 {
           authorization: this.authToken
         }
       };
-    } else {
+    } else if (this.apiToken) {
       // Add JWT token to the authorization header.
       this.axiosOptions = {
         headers: {
           authorization: `Token ${this.apiToken}`
         }
       };
+    } else {
+      this.axiosOptions = {};
     }
-
-    this.axios = axios;
 
     _this = this;
   }

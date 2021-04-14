@@ -40,7 +40,7 @@ export async function sendWIF(walletInfo: WalletInfo) {
     if (RECV_ADDR_LEGACY === '') RECV_ADDR_LEGACY = SEND_ADDR_LEGACY;
 
     // Get the balance of the sending address.
-    const balance = await getNFYBalance(SEND_ADDR_LEGACY, false);
+    const balance = await explorer.balance(SEND_ADDR_LEGACY, false);
     console.log(`balance: ${JSON.stringify(balance, null, 2)}`);
     console.log(`Balance of sending address ${SEND_ADDR_LEGACY} is ${balance} NFY.`);
 
@@ -52,7 +52,7 @@ export async function sendWIF(walletInfo: WalletInfo) {
     console.log(`Sender Legacy Address: ${SEND_ADDR_LEGACY}`);
     console.log(`Receiver Legacy Address: ${RECV_ADDR_LEGACY}`);
 
-    const balance2 = await getNFYBalance(RECV_ADDR_LEGACY, false);
+    const balance2 = await explorer.balance(RECV_ADDR_LEGACY, false);
     console.log(`Balance of recieving address ${RECV_ADDR_LEGACY} is ${balance2} NFY.`);
 
     const utxos = await explorer.utxo(SEND_ADDR_LEGACY);
@@ -111,23 +111,8 @@ export async function sendWIF(walletInfo: WalletInfo) {
     console.log(`Transaction ID: ${txidStr}`);
     console.log('Check the status of your transaction on this block explorer:');
     CryptoUtil.transactionStatus(txidStr, NETWORK);
+    return txidStr;
   } catch (err) {
     console.log('error: ', err);
-  }
-}
-
-// Get the balance in NFY of a NFY address.
-async function getNFYBalance(addr: string, verbose: boolean) {
-  try {
-    const result = await explorer.balance(addr);
-
-    if (verbose) console.log(result);
-
-    const nfyBalance = Number(result);
-    return nfyBalance;
-  } catch (err) {
-    console.error('Error in getNFYBalance: ', err);
-    console.log(`addr: ${addr}`);
-    throw err;
   }
 }

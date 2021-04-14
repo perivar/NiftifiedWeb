@@ -65,12 +65,14 @@ export class NiftyCoinExplorer {
     }
   }
 
-  async balance(address: string | string[]) {
+  // this returns the NFY balance
+  // needs to multiply with 100000000 to get niftoshis
+  async balance(address: string | string[]): Promise<number> {
     try {
       // Handle single address.
       if (typeof address === 'string') {
         const response = await axios.get(`${this.restURL}ext/getbalance/${address}`, _this.axiosOptions);
-        return response.data;
+        return Number(response.data);
 
         // Handle array of addresses.
         // } else if (Array.isArray(address)) {
@@ -180,8 +182,9 @@ export class NiftyCoinExplorer {
       //   continue;
       // }
 
-      if (thisUtxo.balance > largestAmount) {
-        largestAmount = thisUtxo.balance;
+      // use sent field
+      if (thisUtxo.sent > largestAmount) {
+        largestAmount = thisUtxo.sent;
         largestIndex = i;
       }
     }
@@ -190,10 +193,16 @@ export class NiftyCoinExplorer {
     const found = utxos[largestIndex];
     const data = await this.txData(found.txid);
 
-    // use first output?
-    const vout0 = data.vout[0];
-    const niftoshis = vout0.value * 100000000;
+    // fint the right output
+    let vout: any = {};
+    for (let i = 0; i < data.vout.length; i++) {
+      vout = data.vout[i];
+      if (vout.value === largestAmount) {
+        break;
+      }
+    }
+    const niftoshis = vout.value * 100000000;
 
-    return { niftoshis, value: niftoshis, tx_pos: vout0.n, tx_hash: data.txid };
+    return { niftoshis, value: niftoshis, tx_pos: vout.n, tx_hash: data.txid };
   }
 }

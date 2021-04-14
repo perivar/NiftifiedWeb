@@ -4,8 +4,6 @@
 */
 
 import * as bitcoin from 'bitcoinjs-lib';
-import * as bip39 from 'bip39';
-import * as bip32 from 'bip32';
 import CryptoUtil, { WalletInfo } from '../../util';
 import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
 import { toBitcoinJS } from '../../nifty/nfy';
@@ -33,7 +31,7 @@ export async function splitUtxo(walletInfo: WalletInfo) {
     const SEND_MNEMONIC = walletInfo.mnemonic;
 
     // Get the balance of the sending address.
-    const balance = await getNFYBalance(SEND_ADDR, false);
+    const balance = await explorer.balance(SEND_ADDR, false);
 
     // Exit if the balance is zero.
     if (balance <= 0.0) {
@@ -94,7 +92,7 @@ export async function splitUtxo(walletInfo: WalletInfo) {
     }
 
     // Generate a change address from a Mnemonic of a private key.
-    const change = await changeAddrFromMnemonic(SEND_MNEMONIC);
+    const change = await CryptoUtil.changeAddrFromMnemonic(SEND_MNEMONIC, network);
 
     // Generate a keypair from the change address.
     const keyPair = change.derivePath('0/0'); // not sure if this is the correct to get keypair
@@ -117,43 +115,5 @@ export async function splitUtxo(walletInfo: WalletInfo) {
     CryptoUtil.transactionStatus(txidStr, NETWORK);
   } catch (err) {
     console.log('error: ', err);
-  }
-}
-
-// Generate a change address from a Mnemonic of a private key.
-async function changeAddrFromMnemonic(mnemonic: string) {
-  // root seed buffer
-  const rootSeed = await bip39.mnemonicToSeed(mnemonic); // creates seed buffer
-
-  // set network
-  let network: Network;
-  if (NETWORK === 'mainnet') network = mainNet;
-  else network = testNet;
-
-  // master HDNode
-  const masterHDNode = bip32.fromSeed(rootSeed, network);
-
-  // HDNode of BIP44 account
-  const account = masterHDNode.derivePath("m/44'/145'/0'");
-
-  // derive the first external change address HDNode which is going to spend utxo
-  const change = account.derivePath('0/0');
-
-  return change;
-}
-
-// Get the balance in NFY of a NFY address.
-async function getNFYBalance(addr: string, verbose: boolean) {
-  try {
-    const result = await explorer.balance(addr);
-
-    if (verbose) console.log(result);
-
-    const nfyBalance = Number(result);
-    return nfyBalance;
-  } catch (err) {
-    console.error('Error in getNFYBalance: ', err);
-    console.log(`addr: ${addr}`);
-    throw err;
   }
 }

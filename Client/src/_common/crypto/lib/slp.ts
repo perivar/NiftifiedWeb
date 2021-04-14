@@ -31,13 +31,15 @@ export class SLP {
           authorization: this.authToken
         }
       };
-    } else {
+    } else if (this.apiToken) {
       // Add JWT token to the authorization header.
       this.axiosOptions = {
         headers: {
           authorization: `Token ${this.apiToken}`
         }
       };
+    } else {
+      this.axiosOptions = {};
     }
 
     this.TokenType1 = new TokenType1(config);

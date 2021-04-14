@@ -32,21 +32,12 @@ export async function createToken(walletInfo: WalletInfo) {
   try {
     const { mnemonic } = walletInfo;
 
-    // root seed buffer
-    const rootSeed = await bip39.mnemonicToSeed(mnemonic); // creates seed buffer
-
     // set network
     let network: Network;
     if (NETWORK === 'mainnet') network = mainNet;
     else network = testNet;
 
-    // master HDNode
-    const masterHDNode = bip32.fromSeed(rootSeed, network);
-
-    // HDNode of BIP44 account
-    const account = masterHDNode.derivePath("m/44'/245'/0'");
-
-    const change = account.derivePath('0/0');
+    const change = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
 
     // get the segwit address
     // const segwitAddress = CryptoUtil.toSegWitAddress(change, network);
@@ -61,7 +52,7 @@ export async function createToken(walletInfo: WalletInfo) {
     }
 
     // Get the biggest UTXO to pay for the transaction.
-    const utxo = await findBiggestUtxo(utxos);
+    const utxo = await explorer.findBiggestUtxo(utxos);
     console.log(`utxo: ${JSON.stringify(utxo, null, 2)}`);
 
     // instance of transaction builder
@@ -130,30 +121,4 @@ export async function createToken(walletInfo: WalletInfo) {
   } catch (err) {
     console.error('Error in createToken: ', err);
   }
-}
-
-// Returns the utxo with the biggest balance from an array of utxos.
-async function findBiggestUtxo(utxos: any) {
-  let largestAmount = 0;
-  let largestIndex = 0;
-
-  for (let i = 0; i < utxos.length; i++) {
-    const thisUtxo = utxos[i];
-    // console.log(`thisUTXO: ${JSON.stringify(thisUtxo, null, 2)}`);
-
-    // Validate the UTXO data with the full node.
-    const txout = await explorer.getTxOut(thisUtxo.tx_hash, thisUtxo.tx_pos);
-    if (txout === null) {
-      // If the UTXO has already been spent, the full node will respond with null.
-      console.log('Stale UTXO found. You may need to wait for the indexer to catch up.');
-      continue;
-    }
-
-    if (thisUtxo.value > largestAmount) {
-      largestAmount = thisUtxo.value;
-      largestIndex = i;
-    }
-  }
-
-  return utxos[largestIndex];
 }

@@ -6,13 +6,10 @@
   - Add diffentiator for TokenType1 vs NFT1.
 */
 
-import * as bitcoin from 'bitcoinjs-lib';
-import * as bip39 from 'bip39';
-import * as bip32 from 'bip32';
 import CryptoUtil, { WalletInfo } from '../../util';
 import CryptoLib from '../../lib';
 import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
-import { Network, Transaction } from 'bitcoinjs-lib';
+import { Network } from 'bitcoinjs-lib';
 import { toBitcoinJS } from '../../nifty/nfy';
 
 // Set NETWORK to either testnet or mainnet
@@ -35,21 +32,12 @@ export async function getBalance(walletInfo: WalletInfo) {
   try {
     const { mnemonic } = walletInfo;
 
-    // root seed buffer
-    const rootSeed = await bip39.mnemonicToSeed(mnemonic); // creates seed buffer
-
     // set network
     let network: Network;
     if (NETWORK === 'mainnet') network = mainNet;
     else network = testNet;
 
-    // master HDNode
-    const masterHDNode = bip32.fromSeed(rootSeed, network);
-
-    // HDNode of BIP44 account
-    const account = masterHDNode.derivePath("m/44'/245'/0'");
-
-    const change = account.derivePath('0/0');
+    const change = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
 
     // get the segwit address
     // const segwitAddress = CryptoUtil.toSegWitAddress(change, network);

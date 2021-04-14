@@ -35,20 +35,12 @@ export async function burnTokens(walletInfo: WalletInfo) {
 
     const { mnemonic } = walletInfo;
 
-    // root seed buffer
-    const rootSeed = await bip39.mnemonicToSeed(mnemonic); // creates seed buffer
-
     // set network
     let network: Network;
     if (NETWORK === 'mainnet') network = mainNet;
     else network = testNet;
 
-    // master HDNode
-    const masterHDNode = bip32.fromSeed(rootSeed, network);
-
-    // HDNode of BIP44 account
-    const account = masterHDNode.derivePath("m/44'/245'/0'");
-    const change = account.derivePath('0/0');
+    const change = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
 
     // Generate an EC key pair for signing the transaction.
     const keyPair = change.derivePath('0/0'); // not sure if this is the correct to get keypair

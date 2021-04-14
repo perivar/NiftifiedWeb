@@ -4,8 +4,6 @@
 */
 
 import * as bitcoin from 'bitcoinjs-lib';
-import * as bip39 from 'bip39';
-import * as bip32 from 'bip32';
 import CryptoUtil, { WalletInfo } from '../../util';
 import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
 import { Network, Transaction } from 'bitcoinjs-lib';
@@ -51,8 +49,9 @@ export async function sendAll(walletInfo: WalletInfo) {
     let sendAmount = 0;
     const inputs = [];
 
-    let utxos = await explorer.utxo(SEND_ADDR);
-    utxos = utxos.utxos;
+    const utxos = await explorer.utxo(SEND_ADDR);
+
+    if (utxos.length === 0) throw new Error('No UTXOs found.');
 
     // Loop through each UTXO assigned to this address.
     for (let i = 0; i < utxos.length; i++) {
@@ -84,7 +83,7 @@ export async function sendAll(walletInfo: WalletInfo) {
     transactionBuilder.addOutput(RECV_ADDR, sendAmount - txFee);
 
     // Generate a change address from a Mnemonic of a private key.
-    const change = await changeAddrFromMnemonic(SEND_MNEMONIC);
+    const change = await CryptoUtil.changeAddrFromMnemonic(SEND_MNEMONIC, network);
 
     // Generate a keypair from the change address.
     const keyPair = change.derivePath('0/0'); // not sure if this is the correct to get keypair
@@ -109,32 +108,5 @@ export async function sendAll(walletInfo: WalletInfo) {
     CryptoUtil.transactionStatus(txid, NETWORK);
   } catch (err) {
     console.log('error: ', err);
-  }
-}
-
-// Generate a change address from a Mnemonic of a private key.
-async function changeAddrFromMnemonic(mnemonic: string) {
-  try {
-    // root seed buffer
-    const rootSeed = await bip39.mnemonicToSeed(mnemonic); // creates seed buffer
-
-    // set network
-    let network: Network;
-    if (NETWORK === 'mainnet') network = mainNet;
-    else network = testNet;
-
-    // master HDNode
-    const masterHDNode = bip32.fromSeed(rootSeed, network);
-
-    // HDNode of BIP44 account
-    const account = masterHDNode.derivePath("m/44'/245'/0'");
-
-    // derive the first external change address HDNode which is going to spend utxo
-    const change = account.derivePath('0/0');
-
-    return change;
-  } catch (err) {
-    console.error('Error in changeAddrFromMnemonic()');
-    throw err;
   }
 }

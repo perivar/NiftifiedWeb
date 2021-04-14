@@ -11,6 +11,9 @@ export interface WalletInfo {
 }
 
 import * as bitcoin from 'bitcoinjs-lib';
+import * as bip39 from 'bip39';
+import * as bip32 from 'bip32';
+import { Network } from 'bitcoinjs-lib';
 
 // displays link to either the nfy mainnet or tnfy testnet for transactions
 function transactionStatus(transactionInput: string, network: string) {
@@ -96,12 +99,30 @@ const getByteCount = (inputs: any, outputs: any): number => {
   return Math.ceil(totalWeight / 4);
 };
 
+// Generate a change address from a Mnemonic of a private key.
+async function changeAddrFromMnemonic(mnemonic: string, network: Network) {
+  // root seed buffer
+  const rootSeed = await bip39.mnemonicToSeed(mnemonic); // creates seed buffer
+
+  // master HDNode
+  const masterHDNode = bip32.fromSeed(rootSeed, network);
+
+  // HDNode of BIP44 account
+  const account = masterHDNode.derivePath("m/44'/145'/0'");
+
+  // derive the first external change address HDNode which is going to spend utxo
+  const change = account.derivePath('0/0');
+
+  return change;
+}
+
 const CryptoUtil = {
   transactionStatus,
   toSegWitAddress,
   toLegacyAddress,
   toSLPAddress,
-  getByteCount
+  getByteCount,
+  changeAddrFromMnemonic
 };
 
 export default CryptoUtil;

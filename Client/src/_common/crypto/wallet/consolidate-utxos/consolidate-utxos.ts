@@ -3,8 +3,6 @@
 */
 
 import * as bitcoin from 'bitcoinjs-lib';
-import * as bip39 from 'bip39';
-import * as bip32 from 'bip32';
 import CryptoUtil, { WalletInfo } from '../../util';
 import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
 import { toBitcoinJS } from '../../nifty/nfy';
@@ -76,7 +74,7 @@ export async function consolidateUtxos(walletInfo: WalletInfo) {
     transactionBuilder.addOutput(SEND_ADDR, sendAmount - txFee);
 
     // Generate a change address from a Mnemonic of a private key.
-    const change = await changeAddrFromMnemonic(SEND_MNEMONIC);
+    const change = await CryptoUtil.changeAddrFromMnemonic(SEND_MNEMONIC, network);
 
     // Generate a keypair from the change address.
     const keyPair = change.derivePath('0/0'); // not sure if this is the correct to get keypair
@@ -101,26 +99,4 @@ export async function consolidateUtxos(walletInfo: WalletInfo) {
   } catch (err) {
     console.log('error: ', err);
   }
-}
-
-// Generate a change address from a Mnemonic of a private key.
-async function changeAddrFromMnemonic(mnemonic: string) {
-  // root seed buffer
-  const rootSeed = await bip39.mnemonicToSeed(mnemonic); // creates seed buffer
-
-  // set network
-  let network: Network;
-  if (NETWORK === 'mainnet') network = mainNet;
-  else network = testNet;
-
-  // master HDNode
-  const masterHDNode = bip32.fromSeed(rootSeed, network);
-
-  // HDNode of BIP44 account
-  const account = masterHDNode.derivePath("m/44'/145'/0'");
-
-  // derive the first external change address HDNode which is going to spend utxo
-  const change = account.derivePath('0/0');
-
-  return change;
 }
