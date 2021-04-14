@@ -75,9 +75,9 @@ import { Network } from 'bitcoinjs-lib';
 // displays link to either the nfy mainnet or tnfy testnet for transactions
 function transactionStatus(transactionInput: string, network: string) {
   if (network === 'mainnet') {
-    console.log(`https://explorer.niftycoin.org/ext/gettx/${transactionInput}`);
+    console.log(`https://explorer.niftycoin.org/api/getrawtransaction?txid=${transactionInput}&decrypt=1`);
   } else {
-    console.log(`https://testexplorer.niftycoin.org/ext/gettx/${transactionInput}`);
+    console.log(`https://testexplorer.niftycoin.org/api/getrawtransaction?txid=${transactionInput}&decrypt=1`);
   }
 }
 

@@ -44,13 +44,13 @@ export const Wallet = ({ match }: { match: any }) => {
       segwitAddress: 'MWT7nzgsR57kWS88XRWVu9JBaCbQW313eP'
     };
 
-    sendNFY(wallet, 'NUcBvW67GEqi8CXYPcL4Y5qzw7Vf9rp7wg', 1000).then((res: any) => {
-      console.log(res);
-    });
-
-    // sendWIF(wallet).then((res: any) => {
+    // sendNFY(wallet, 'NUcBvW67GEqi8CXYPcL4Y5qzw7Vf9rp7wg', 2000).then((res: any) => {
     //   console.log(res);
     // });
+
+    sendWIF(wallet, 'NUcBvW67GEqi8CXYPcL4Y5qzw7Vf9rp7wg', 2000).then((res: any) => {
+      console.log(res);
+    });
 
     // listUtxos(wallet).then((res: any) => {
     //   console.log(res);

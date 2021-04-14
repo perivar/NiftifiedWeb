@@ -90,11 +90,12 @@ export async function sendWIF(walletInfo: WalletInfo, recvAddrLegacy: string, ni
     transactionBuilder.addOutput(RECV_ADDR_LEGACY, niftoshisToSend);
     transactionBuilder.addOutput(SEND_ADDR_LEGACY, remainder);
 
-    const ecPair = bitcoin.ECPair.fromWIF(SEND_WIF, network);
+    const keyPair = bitcoin.ECPair.fromWIF(SEND_WIF, network);
 
     // Sign the transaction with the HD node.
     const redeemScript = undefined;
-    transactionBuilder.sign(0, ecPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
+    transactionBuilder.sign(0, keyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
+    // transactionBuilder.sign(0, keyPair);
 
     // build tx
     const tx = transactionBuilder.build();
