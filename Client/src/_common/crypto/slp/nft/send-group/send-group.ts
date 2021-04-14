@@ -42,7 +42,7 @@ export async function sendGroupToken(walletInfo: WalletInfo) {
     const change = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
 
     // Generate an EC key pair for signing the transaction.
-    const keyPair = change.derivePath('0/0'); // not sure if this is the correct to get keypair
+    const keyPair = change; // not sure if this is the correct to get keypair
 
     // get the segwit address
     // const segwitAddress = CryptoUtil.toSegWitAddress(change, network);

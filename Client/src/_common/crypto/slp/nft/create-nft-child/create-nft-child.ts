@@ -142,7 +142,7 @@ export async function createNFTChild(walletInfo: WalletInfo) {
     transactionBuilder.addOutput(legacyAddress, remainder);
 
     // Generate a keypair from the change address.
-    const keyPair = change.derivePath('0/0'); // not sure if this is the correct to get keypair
+    const keyPair = change; // not sure if this is the correct to get keypair
 
     const redeemScript = undefined;
 

@@ -3,8 +3,6 @@
 */
 
 import * as bitcoin from 'bitcoinjs-lib';
-import * as bip39 from 'bip39';
-import * as bip32 from 'bip32';
 import CryptoUtil, { WalletInfo } from '../../util';
 import CryptoLib from '../../lib';
 import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
@@ -43,7 +41,7 @@ export async function burnTokens(walletInfo: WalletInfo) {
     const change = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
 
     // Generate an EC key pair for signing the transaction.
-    const keyPair = change.derivePath('0/0'); // not sure if this is the correct to get keypair
+    const keyPair = change; // not sure if this is the correct to get keypair
 
     // get the segwit address
     // const segwitAddress = CryptoUtil.toSegWitAddress(change, network);

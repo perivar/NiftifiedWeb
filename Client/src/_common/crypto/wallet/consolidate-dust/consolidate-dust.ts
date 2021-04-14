@@ -87,7 +87,7 @@ export async function consolidateDust(walletInfo: WalletInfo) {
     const change = await CryptoUtil.changeAddrFromMnemonic(SEND_MNEMONIC, explorer);
 
     // Generate a keypair from the change address.
-    const keyPair = change.derivePath('0/0'); // not sure if this is the correct to get keypair
+    const keyPair = change; // not sure if this is the correct to get keypair
 
     // sign w/ HDNode
     const redeemScript = undefined;

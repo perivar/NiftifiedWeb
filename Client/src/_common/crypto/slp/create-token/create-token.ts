@@ -4,8 +4,6 @@
 */
 
 import * as bitcoin from 'bitcoinjs-lib';
-import * as bip39 from 'bip39';
-import * as bip32 from 'bip32';
 import CryptoUtil, { WalletInfo } from '../../util';
 import CryptoLib from '../../lib';
 import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
@@ -101,7 +99,7 @@ export async function createToken(walletInfo: WalletInfo) {
     transactionBuilder.addOutput(legacyAddress, remainder);
 
     // Generate a keypair from the change address.
-    const keyPair = change.derivePath('0/0'); // not sure if this is the correct to get keypair
+    const keyPair = change; // not sure if this is the correct to get keypair
 
     // Sign the transaction with the HD node.
     const redeemScript = undefined;
