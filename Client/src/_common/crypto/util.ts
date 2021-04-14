@@ -3,12 +3,69 @@ utility file for certain .js operations used in applications/wallet
 */
 
 export interface WalletInfo {
+  hdNodePath: string;
   segwitAddress: string;
   legacyAddress: string;
-  slpAddress: string;
-  WIF: string;
+  slpAddress?: string;
   mnemonic: string;
+
+  // from original wallet interface
+  privateKey: string;
+  publicKey: string;
+  privateKeyWIF: string;
 }
+
+export interface UTXOInfo {
+  value: number; // in niftoshis
+  tx_pos: number;
+  tx_hash: string;
+}
+
+export interface TokenUTXOInfo extends UTXOInfo {
+  txid: string;
+  vout: any;
+  transactionType: string;
+  mintBatonVout: any;
+
+  // token
+  isValid: boolean | null;
+  tokenType: string;
+  utxoType: string;
+  tokenQty: string;
+  tokenId: string;
+  tokenTicker: string;
+  tokenName: string;
+  tokenDocumentUrl: string;
+  tokenDocumentHash: string;
+  decimals: number;
+}
+
+export interface SlpToken {
+  tokenType: string;
+  txType: string;
+  tokenId: string;
+}
+
+export interface SlpTokenGenesis extends SlpToken {
+  ticker: string;
+  name: string;
+  documentUri: string;
+  documentHash: string;
+  decimals: number;
+  mintBatonVout: string;
+  qty: string;
+}
+
+export interface SlpTokenMint extends SlpToken {
+  mintBatonVout: string;
+  qty: string;
+}
+
+export interface SlpTokenSend extends SlpToken {
+  amounts: string;
+}
+
+export type SlpTokenData = SlpTokenGenesis | SlpTokenMint | SlpTokenSend;
 
 import * as bitcoin from 'bitcoinjs-lib';
 import * as bip39 from 'bip39';
@@ -29,22 +86,38 @@ function transactionStatus(transactionInput: string, network: string) {
 // toCashAddress('1B9UNtBfkkpgt8kVbwLN9ktE62QKnMbDzR') // bitcoincash:qph5kuz78czq00e3t85ugpgd7xmer5kr7c5f6jdpwk
 // toSlpAddress('1B9UNtBfkkpgt8kVbwLN9ktE62QKnMbDzR') // simpleledger:qph5kuz78czq00e3t85ugpgd7xmer5kr7ccj3fcpsg
 
-function toSegWitAddress(node: any, network: any): string {
+function toSegWitAddress(keyPair: any, network: any): string {
   const { address } = bitcoin.payments.p2sh({
-    redeem: bitcoin.payments.p2wpkh({ pubkey: node.publicKey, network }),
+    redeem: bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey, network }),
     network
   });
   return address ? address : '';
 }
 
-function toLegacyAddress(node: any, network: any): string {
-  const { address } = bitcoin.payments.p2pkh({ pubkey: node.publicKey, network });
+function toLegacyAddress(keyPair: any, network: any): string {
+  const { address } = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey, network });
   return address ? address : '';
 }
 
-function toSLPAddress(node: any, network: any): string {
+function toSLPAddress(keyPair: any, network: any): string {
   // TODO - doesn't do anything yet
   return 'simpleledger:....';
+}
+
+function toKeyPairFromWIF(privateKeyWIF: string, network: any): any {
+  const keyPair = bitcoin.ECPair.fromWIF(privateKeyWIF, network);
+  return keyPair;
+}
+
+function toPublicKey(keyPair: any): string {
+  const publicKey = keyPair.publicKey.toString('hex');
+  return publicKey ? publicKey : '';
+}
+
+function toPrivateKeyFromWIF(privateKeyWIF: string, network: any): string {
+  const keyPair = toKeyPairFromWIF(privateKeyWIF, network);
+  const privateKey = keyPair.privateKey.toString('hex');
+  return privateKey ? privateKey : '';
 }
 
 const getByteCount = (inputs: any, outputs: any): number => {
@@ -116,13 +189,39 @@ async function changeAddrFromMnemonic(mnemonic: string, network: Network) {
   return change;
 }
 
+// Returns the utxo with the biggest balance from an array of utxos.
+function findBiggestUtxo(utxos: UTXOInfo[]): UTXOInfo {
+  let largestAmount = 0;
+  let largestIndex = 0;
+
+  for (let i = 0; i < utxos.length; i++) {
+    const thisUtxo = utxos[i];
+    // console.log(`thisUTXO: ${JSON.stringify(thisUtxo, null, 2)}`);
+
+    // TODO: Validate the UTXO data with the full node and check if it has been spent?
+
+    if (thisUtxo.value > largestAmount) {
+      largestAmount = thisUtxo.value;
+      largestIndex = i;
+    }
+  }
+
+  // lookup
+  const found = utxos[largestIndex];
+  return found;
+}
+
 const CryptoUtil = {
   transactionStatus,
   toSegWitAddress,
   toLegacyAddress,
   toSLPAddress,
   getByteCount,
-  changeAddrFromMnemonic
+  changeAddrFromMnemonic,
+  findBiggestUtxo,
+  toPublicKey,
+  toPrivateKeyFromWIF,
+  toKeyPairFromWIF
 };
 
 export default CryptoUtil;

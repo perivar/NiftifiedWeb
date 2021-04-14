@@ -4,6 +4,7 @@
 import axios from 'axios';
 import slpParser from 'slp-parser';
 import BigNumber from 'bignumber.js';
+import { UTXOInfo, TokenUTXOInfo, SlpTokenData, SlpTokenGenesis, SlpTokenMint, SlpTokenSend } from '../util';
 
 let _this: any;
 
@@ -925,7 +926,7 @@ export class Utils {
    *
    */
   // Reimplementation of decodeOpReturn() using slp-parser.
-  async decodeOpReturn(txid: string, cache: any = null, usrObj = null) {
+  async decodeOpReturn(txid: string, cache: any = null, usrObj = null): Promise<SlpTokenData> {
     // The cache object is an in-memory cache (JS Object) that can be passed
     // into this function. It helps if multiple vouts from the same TXID are
     // being evaluated. In that case, it can significantly reduce the number
@@ -973,7 +974,7 @@ export class Utils {
       // console.log(`parsedData: ${JSON.stringify(parsedData, null, 2)}`)
 
       // Convert Buffer data to hex strings or utf8 strings.
-      let tokenData = {};
+      let tokenData: SlpTokenData = {} as SlpTokenData;
       if (parsedData.transactionType === 'SEND') {
         tokenData = {
           tokenType: parsedData.tokenType,
@@ -1091,7 +1092,7 @@ export class Utils {
    *  "tokenType": 1
    * }
    */
-  async tokenUtxoDetails(utxos: any, usrObj = null) {
+  async tokenUtxoDetails(utxos: UTXOInfo[], usrObj = null): Promise<TokenUTXOInfo[]> {
     try {
       // Throw error if input is not an array.
       if (!Array.isArray(utxos)) throw new Error('Input must be an array.');
@@ -1101,7 +1102,7 @@ export class Utils {
       // Loop through each element in the array and validate the input before
       // further processing.
       for (let i = 0; i < utxos.length; i++) {
-        const utxo = utxos[i];
+        const utxo = utxos[i] as TokenUTXOInfo;
 
         // Ensure the UTXO has a txid or tx_hash property.
         if (!utxo.txid) {
@@ -1178,7 +1179,7 @@ export class Utils {
    * could burn tokens. It's safest to ignore UTXOs with a value of `null`.
    *
    */
-  async tokenUtxoDetailsWL(utxos: any, usrObj = null) {
+  async tokenUtxoDetailsWL(utxos: UTXOInfo[], usrObj = null): Promise<TokenUTXOInfo[]> {
     try {
       // Throw error if input is not an array.
       if (!Array.isArray(utxos)) throw new Error('Input must be an array.');
@@ -1186,7 +1187,7 @@ export class Utils {
       // Loop through each element in the array and validate the input before
       // further processing.
       for (let i = 0; i < utxos.length; i++) {
-        const utxo = utxos[i];
+        const utxo = utxos[i] as TokenUTXOInfo;
 
         // Ensure the UTXO has a txid or tx_hash property.
         if (!utxo.txid) {
@@ -1251,6 +1252,12 @@ export class Utils {
     }
   }
 
+  // delay in ms
+  // use like this await delayMs(1000); //for 1 sec delay
+  delayMs = (delay: number) => {
+    return new Promise((res) => setTimeout(res, delay));
+  };
+
   // This is a private function that is called by tokenUtxoDetails().
   // It loops through an array of UTXOs and tries to hydrate them with SLP
   // token information from the OP_RETURN data.
@@ -1268,24 +1275,23 @@ export class Utils {
   //
   // If the usrObj has a utxoDelay property, then it will delay the loop for
   // each UTXO by that many milliseconds.
-  async _hydrateUtxo(utxos: any, usrObj: any | null = null) {
+  async _hydrateUtxo(utxos: UTXOInfo[], usrObj: any | null = null): Promise<TokenUTXOInfo[]> {
     try {
       const decodeOpReturnCache = {};
 
       // console.log(`_hydrateUtxo usrObj: ${JSON.stringify(usrObj, null, 2)}`)
 
       // Output Array
-      const outAry = [];
+      const outAry: TokenUTXOInfo[] = [];
 
       // Loop through each utxo
       for (let i = 0; i < utxos.length; i++) {
-        const utxo = utxos[i];
+        const utxo = utxos[i] as TokenUTXOInfo;
 
         // If the user passes in a delay, then wait.
         if (usrObj && usrObj.utxoDelay && !isNaN(Number(usrObj.utxoDelay))) {
           const delayMs = Number(usrObj.utxoDelay);
-          // TODO: PIN commented out
-          // await this.util.sleep(delayMs);
+          await this.delayMs(delayMs);
         }
 
         // Get raw transaction data from the full node and attempt to decode
@@ -1293,11 +1299,11 @@ export class Utils {
         // If there is no OP_RETURN, mark the UTXO as false.
         let slpData: any = false;
         try {
-          slpData = await this.decodeOpReturn(
+          slpData = (await this.decodeOpReturn(
             utxo.txid,
             decodeOpReturnCache,
             usrObj // pass user data when making an internal call.
-          );
+          )) as SlpTokenData;
           // console.log(`slpData: ${JSON.stringify(slpData, null, 2)}`)
         } catch (err) {
           // console.log(
@@ -1391,11 +1397,11 @@ export class Utils {
           } else {
             // If UTXO passes validation, then return formatted token data.
 
-            const genesisData = await this.decodeOpReturn(
+            const genesisData = (await this.decodeOpReturn(
               slpData.tokenId,
               decodeOpReturnCache,
               usrObj // pass user data when making an internal call.
-            );
+            )) as SlpTokenGenesis;
             // console.log(`genesisData: ${JSON.stringify(genesisData, null, 2)}`)
 
             // Minting Baton
@@ -1446,11 +1452,11 @@ export class Utils {
           } else {
             // If UTXO passes validation, then return formatted token data.
 
-            const genesisData = await this.decodeOpReturn(
+            const genesisData = (await this.decodeOpReturn(
               slpData.tokenId,
               decodeOpReturnCache,
               usrObj // pass user data when making an internal call.
-            );
+            )) as SlpTokenGenesis;
             // console.log(`genesisData: ${JSON.stringify(genesisData, null, 2)}`)
 
             // console.log(`utxo: ${JSON.stringify(utxo, null, 2)}`)
@@ -1806,7 +1812,7 @@ export class Utils {
    */
   // Same as tokenUtxoDetails(), but reduces API calls by having bch-api server
   // do the heavy lifting.
-  async hydrateUtxos(utxos: any, usrObj: any) {
+  async hydrateUtxos(utxos: UTXOInfo[], usrObj: any) {
     try {
       // Throw error if input is not an array.
       if (!Array.isArray(utxos)) throw new Error('Input must be an array.');
@@ -1845,7 +1851,7 @@ export class Utils {
    */
   // Same as tokenUtxoDetailsWL(), but reduces API calls by having bch-api server
   // do the heavy lifting.
-  async hydrateUtxosWL(utxos: any) {
+  async hydrateUtxosWL(utxos: TokenUTXOInfo[]) {
     try {
       // Throw error if input is not an array.
       if (!Array.isArray(utxos)) throw new Error('Input must be an array.');

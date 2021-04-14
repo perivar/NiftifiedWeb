@@ -24,7 +24,7 @@ const NFY_MAINNET = 'https://explorer.niftycoin.org/';
 const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 
 // Instantiate explorer based on the network.
-let explorer: any;
+let explorer: NiftyCoinExplorer;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
@@ -48,7 +48,7 @@ export async function getBalance(walletInfo: WalletInfo) {
     const balance = await explorer.balance(legacyAddress);
 
     console.log(`NFY Balance information for ${legacyAddress}:`);
-    console.log(`${JSON.stringify(balance.balance, null, 2)}`);
+    console.log(`${JSON.stringify(balance, null, 2)}`);
     console.log('SLP Token information:');
 
     // get token balances

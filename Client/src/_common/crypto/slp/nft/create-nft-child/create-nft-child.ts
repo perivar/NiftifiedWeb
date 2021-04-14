@@ -25,7 +25,7 @@ const NFY_MAINNET = 'https://explorer.niftycoin.org/';
 const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 
 // Instantiate explorer based on the network.
-let explorer: any;
+let explorer: NiftyCoinExplorer;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
@@ -90,7 +90,7 @@ export async function createNFTChild(walletInfo: WalletInfo) {
     }
 
     // Get the biggest UTXO to pay for the transaction.
-    const utxo = await explorer.findBiggestUtxo(utxos);
+    const utxo = CryptoUtil.findBiggestUtxo(utxos);
     // console.log(`utxo: ${JSON.stringify(utxo, null, 2)}`)
 
     // instance of transaction builder

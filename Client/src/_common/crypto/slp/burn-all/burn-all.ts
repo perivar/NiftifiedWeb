@@ -21,7 +21,7 @@ const NFY_MAINNET = 'https://explorer.niftycoin.org/';
 const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 
 // Instantiate explorer based on the network.
-let explorer: any;
+let explorer: NiftyCoinExplorer;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
@@ -31,7 +31,7 @@ export async function sendAll(walletInfo: WalletInfo) {
     // will be sent to the address in the wallet.
     let RECV_ADDR = '';
 
-    const SEND_ADDR = walletInfo.segwitAddress;
+    const SEND_ADDR = walletInfo.legacyAddress;
     const SEND_MNEMONIC = walletInfo.mnemonic;
 
     // Send the money back to the same address. Edit this if you want to send it

@@ -3,6 +3,7 @@
 */
 // Public npm libraries
 import axios, { AxiosRequestConfig } from 'axios';
+import { UTXOInfo } from './util';
 
 let _this: NiftyCoinExplorer;
 
@@ -38,27 +39,38 @@ export class NiftyCoinExplorer {
     _this = this;
   }
 
-  async utxo(address: string | string[]) {
+  // warning this is a very heavy lookup that might take some time
+  async utxo(address: string, count = 50): Promise<UTXOInfo[]> {
     try {
       // Handle single address.
       if (typeof address === 'string') {
-        const response = await axios.get(`${this.restURL}ext/getaddresstxs/${address}/0/10`, _this.axiosOptions);
-        return response.data;
+        const response = await axios.get(`${this.restURL}ext/getaddresstxs/${address}/0/${count}`, _this.axiosOptions);
 
-        // Handle array of addresses.
-        // } else if (Array.isArray(address)) {
-        //   const response = await axios.post(
-        //     `${this.restURL}electrumx/utxos`,
-        //     {
-        //       addresses: address
-        //     },
-        //     _this.axiosOptions
-        //   );
+        // lookup tx data
+        const utxos: UTXOInfo[] = [];
 
-        //   return response.data;
+        await Promise.all(
+          response.data.map(async (element: any) => {
+            const data = await this.txData(element.txid);
+
+            // find a vout with money
+            let vout: any = {};
+            for (let i = 0; i < data.vout.length; i++) {
+              vout = data.vout[i];
+              if (vout.value > 0) {
+                break;
+              }
+            }
+            const niftoshis = vout.value * 100000000;
+            // add some of the same fields with different names to support older functions
+            utxos.push({ value: niftoshis, tx_pos: vout.n, tx_hash: data.txid });
+          })
+        );
+
+        return utxos;
       }
 
-      throw new Error('Input address must be a string or array of strings.');
+      throw new Error('Input address must be a string');
     } catch (error) {
       if (error.response && error.response.data) throw error.response.data;
       else throw error;
@@ -72,7 +84,10 @@ export class NiftyCoinExplorer {
       // Handle single address.
       if (typeof address === 'string') {
         const response = await axios.get(`${this.restURL}ext/getbalance/${address}`, _this.axiosOptions);
-        return Number(response.data);
+        if (!response.data.error) {
+          return Number(response.data);
+        }
+        throw `${response.data.error} : ${address}`;
 
         // Handle array of addresses.
         // } else if (Array.isArray(address)) {
@@ -152,10 +167,17 @@ export class NiftyCoinExplorer {
   async sendRawTransaction(txHex: string) {
     try {
       if (typeof txHex === 'string') {
-        console.log(txHex);
-        // const response = await axios.post(`${this.restURL}sendrawtransaction`, { txHex }, _this.axiosOptions);
-        // return response.data;
-        return 'RANDOM_RETURN_HEX';
+        // console.log(txHex);
+        // use GET, not POST
+        // const response = await axios.post(`${this.restURL}api/sendrawtransaction`, { txHex }, _this.axiosOptions);
+        const response = await axios.get(`${this.restURL}api/sendrawtransaction?hex=${txHex}`, _this.axiosOptions);
+
+        // use decode while testing
+        // txHex =
+        //   '02000000010000000000000000000000000000000000000000000000000000000000000000ffffffff1f02c80004024d3f60088100001401000000746865706f6f6c2e6c6966655c30000000000100f2052a010000001976a914d56967ed64a2f9557e80e5f654c7ba62b2c072cf88ac00000000';
+        // const response = await axios.get(`${this.restURL}api/decoderawtransaction?hex=${txHex}`, _this.axiosOptions);
+        return response.data;
+        // return 'RANDOM_RETURN_HEX';
       }
 
       throw new Error('Input txHex must be a string.');
@@ -163,46 +185,5 @@ export class NiftyCoinExplorer {
       if (error.response && error.response.data) throw error.response.data;
       else throw error;
     }
-  }
-
-  // Returns the utxo with the biggest balance from an array of utxos.
-  async findBiggestUtxo(utxos: any) {
-    let largestAmount = 0;
-    let largestIndex = 0;
-
-    for (let i = 0; i < utxos.length; i++) {
-      const thisUtxo = utxos[i];
-      // console.log(`thisUTXO: ${JSON.stringify(thisUtxo, null, 2)}`);
-
-      // Validate the UTXO data with the full node.
-      // const txout = await explorer.getTxOut(thisUtxo.tx_hash, thisUtxo.tx_pos);
-      // if (txout === null) {
-      //   // If the UTXO has already been spent, the full node will respond with null.
-      //   console.log('Stale UTXO found. You may need to wait for the indexer to catch up.');
-      //   continue;
-      // }
-
-      // use sent field
-      if (thisUtxo.sent > largestAmount) {
-        largestAmount = thisUtxo.sent;
-        largestIndex = i;
-      }
-    }
-
-    // lookup
-    const found = utxos[largestIndex];
-    const data = await this.txData(found.txid);
-
-    // fint the right output
-    let vout: any = {};
-    for (let i = 0; i < data.vout.length; i++) {
-      vout = data.vout[i];
-      if (vout.value === largestAmount) {
-        break;
-      }
-    }
-    const niftoshis = vout.value * 100000000;
-
-    return { niftoshis, value: niftoshis, tx_pos: vout.n, tx_hash: data.txid };
   }
 }

@@ -21,13 +21,13 @@ const NFY_MAINNET = 'https://explorer.niftycoin.org/';
 const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 
 // Instantiate explorer based on the network.
-let explorer: any;
+let explorer: NiftyCoinExplorer;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
 export async function consolidateDust(walletInfo: WalletInfo) {
   try {
-    const SEND_ADDR = walletInfo.segwitAddress;
+    const SEND_ADDR = walletInfo.legacyAddress;
     const SEND_MNEMONIC = walletInfo.mnemonic;
 
     // set network
@@ -84,7 +84,7 @@ export async function consolidateDust(walletInfo: WalletInfo) {
     transactionBuilder.addOutput(SEND_ADDR, sendAmount - txFee);
 
     // Generate a change address from a Mnemonic of a private key.
-    const change = await CryptoUtil.changeAddrFromMnemonic(SEND_MNEMONIC, explorer);
+    const change = await CryptoUtil.changeAddrFromMnemonic(SEND_MNEMONIC, network);
 
     // Generate a keypair from the change address.
     const keyPair = change; // not sure if this is the correct to get keypair

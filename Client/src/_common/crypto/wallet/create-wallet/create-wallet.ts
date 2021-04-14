@@ -55,9 +55,12 @@ export const createWallet = async (): Promise<WalletInfo | undefined> => {
 
       // Save the first seed address for use in the .json output file.
       if (i === 0) {
+        outObj.hdNodePath = `m/44'/145'/0'/0/${i}`;
         outObj.segwitAddress = CryptoUtil.toSegWitAddress(childNode, network);
         outObj.legacyAddress = CryptoUtil.toLegacyAddress(childNode, network);
-        outObj.WIF = childNode.toWIF();
+        outObj.privateKeyWIF = childNode.toWIF();
+        outObj.publicKey = CryptoUtil.toPublicKey(childNode);
+        outObj.privateKey = CryptoUtil.toPrivateKeyFromWIF(outObj.privateKeyWIF, network);
       }
     }
 

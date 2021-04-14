@@ -3,7 +3,7 @@
 */
 
 import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
-import { WalletInfo } from '../../util';
+import CryptoUtil, { WalletInfo } from '../../util';
 
 // Set NETWORK to either testnet or mainnet
 const NETWORK = 'mainnet';
@@ -13,7 +13,7 @@ const NFY_MAINNET = 'https://explorer.niftycoin.org/';
 const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 
 // Instantiate explorer based on the network.
-let explorer: any;
+let explorer: NiftyCoinExplorer;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
@@ -30,7 +30,7 @@ export async function listUtxos(walletInfo: WalletInfo) {
     if (utxos.length === 0) throw new Error('No UTXOs found.');
 
     // find biggest
-    const utxo = await explorer.findBiggestUtxo(utxos);
+    const utxo = CryptoUtil.findBiggestUtxo(utxos);
     console.log(`UTXOs associated with ${walletInfo.legacyAddress}:`);
     console.log(JSON.stringify(utxo, null, 2));
     return utxo;

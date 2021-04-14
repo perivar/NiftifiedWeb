@@ -21,7 +21,7 @@ const NFY_MAINNET = 'https://explorer.niftycoin.org/';
 const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 
 // Instantiate explorer based on the network.
-let explorer: any;
+let explorer: NiftyCoinExplorer;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
@@ -88,7 +88,7 @@ export async function mintNFTGroup(walletInfo: WalletInfo) {
     }
 
     // Choose a UTXO to pay for the transaction.
-    const utxo = await explorer.findBiggestUtxo(nfyUtxos);
+    const utxo = CryptoUtil.findBiggestUtxo(nfyUtxos);
     // console.log(`nfyUtxo: ${JSON.stringify(nfyUtxo, null, 2)}`);
 
     // instance of transaction builder

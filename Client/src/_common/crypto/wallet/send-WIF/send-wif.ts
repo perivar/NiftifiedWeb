@@ -22,25 +22,22 @@ const NFY_MAINNET = 'https://explorer.niftycoin.org/';
 const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 
 // Instantiate explorer based on the network.
-let explorer: any;
+let explorer: NiftyCoinExplorer;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
-export async function sendWIF(walletInfo: WalletInfo) {
+export async function sendWIF(walletInfo: WalletInfo, recvAddrLegacy: string, niftoshisToSend = 1000) {
   try {
     const SEND_ADDR_LEGACY = walletInfo.legacyAddress;
-    const SEND_WIF = walletInfo.WIF;
-    let RECV_ADDR_LEGACY = '';
-
-    // set satoshi amount to send
-    const NIFTOSHIS_TO_SEND = 1000;
+    const SEND_WIF = walletInfo.privateKeyWIF;
+    let RECV_ADDR_LEGACY = recvAddrLegacy;
 
     // If the user fails to specify a reciever address, just send the NFY back
     // to the origination address, so the example doesn't fail.
     if (RECV_ADDR_LEGACY === '') RECV_ADDR_LEGACY = SEND_ADDR_LEGACY;
 
     // Get the balance of the sending address.
-    const balance = await explorer.balance(SEND_ADDR_LEGACY, false);
+    const balance = await explorer.balance(SEND_ADDR_LEGACY);
     console.log(`balance: ${JSON.stringify(balance, null, 2)}`);
     console.log(`Balance of sending address ${SEND_ADDR_LEGACY} is ${balance} NFY.`);
 
@@ -52,7 +49,7 @@ export async function sendWIF(walletInfo: WalletInfo) {
     console.log(`Sender Legacy Address: ${SEND_ADDR_LEGACY}`);
     console.log(`Receiver Legacy Address: ${RECV_ADDR_LEGACY}`);
 
-    const balance2 = await explorer.balance(RECV_ADDR_LEGACY, false);
+    const balance2 = await explorer.balance(RECV_ADDR_LEGACY);
     console.log(`Balance of recieving address ${RECV_ADDR_LEGACY} is ${balance2} NFY.`);
 
     const utxos = await explorer.utxo(SEND_ADDR_LEGACY);
@@ -60,7 +57,7 @@ export async function sendWIF(walletInfo: WalletInfo) {
 
     if (utxos.length === 0) throw new Error('No UTXOs found.');
 
-    const utxo = await explorer.findBiggestUtxo(utxos);
+    const utxo = CryptoUtil.findBiggestUtxo(utxos);
     // console.log(`utxo: ${JSON.stringify(utxo, null, 2)}`)
 
     // set network
@@ -71,7 +68,6 @@ export async function sendWIF(walletInfo: WalletInfo) {
     // instance of transaction builder
     const transactionBuilder = new bitcoin.TransactionBuilder(network);
 
-    const niftoshisToSend = NIFTOSHIS_TO_SEND;
     const originalAmount = utxo.value;
     const vout = utxo.tx_pos;
     const txid = utxo.tx_hash;

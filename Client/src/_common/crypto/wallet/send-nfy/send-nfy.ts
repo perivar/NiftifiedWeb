@@ -20,22 +20,19 @@ const NFY_MAINNET = 'https://explorer.niftycoin.org/';
 const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 
 // Instantiate explorer based on the network.
-let explorer: any;
+let explorer: NiftyCoinExplorer;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
-export async function sendNFY(walletInfo: WalletInfo) {
+export async function sendNFY(walletInfo: WalletInfo, recvAddrLegacy: string, niftoshisToSend = 1000) {
   try {
-    // set satoshi amount to send
-    const NIFTOSHIS_TO_SEND = 1000;
-
     const SEND_ADDR_LEGACY = walletInfo.legacyAddress;
-    let RECV_ADDR_LEGACY = '';
+    let RECV_ADDR_LEGACY = recvAddrLegacy;
 
     const SEND_MNEMONIC = walletInfo.mnemonic;
 
     // Get the balance of the sending address.
-    const balance = await explorer.balance(SEND_ADDR_LEGACY, false);
+    const balance = await explorer.balance(SEND_ADDR_LEGACY);
     console.log(`balance: ${JSON.stringify(balance, null, 2)}`);
     console.log(`Balance of sending address ${SEND_ADDR_LEGACY} is ${balance} NFY.`);
 
@@ -59,7 +56,7 @@ export async function sendNFY(walletInfo: WalletInfo) {
     if (utxos.length === 0) throw new Error('No UTXOs found.');
 
     // console.log(`u: ${JSON.stringify(u, null, 2)}`
-    const utxo = await explorer.findBiggestUtxo(utxos);
+    const utxo = CryptoUtil.findBiggestUtxo(utxos);
     // console.log(`utxo: ${JSON.stringify(utxo, null, 2)}`);
 
     // set network
@@ -71,7 +68,6 @@ export async function sendNFY(walletInfo: WalletInfo) {
     const transactionBuilder = new bitcoin.TransactionBuilder(network);
 
     // Essential variables of a transaction.
-    const niftoshisToSend = NIFTOSHIS_TO_SEND;
     const originalAmount = utxo.value;
     const vout = utxo.tx_pos;
     const txid = utxo.tx_hash;
@@ -122,5 +118,6 @@ export async function sendNFY(walletInfo: WalletInfo) {
     return txidStr;
   } catch (err) {
     console.log('error: ', err);
+    return err;
   }
 }

@@ -20,13 +20,13 @@ const NFY_MAINNET = 'https://explorer.niftycoin.org/';
 const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 
 // Instantiate explorer based on the network.
-let explorer: any;
+let explorer: NiftyCoinExplorer;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
 export async function consolidateUtxos(walletInfo: WalletInfo) {
   try {
-    const SEND_ADDR = walletInfo.segwitAddress;
+    const SEND_ADDR = walletInfo.legacyAddress;
     const SEND_MNEMONIC = walletInfo.mnemonic;
 
     // set network
@@ -96,6 +96,7 @@ export async function consolidateUtxos(walletInfo: WalletInfo) {
     console.log(`Transaction ID: ${txid}`);
     console.log('Check the status of your transaction on this block explorer:');
     CryptoUtil.transactionStatus(txid, NETWORK);
+    return txid;
   } catch (err) {
     console.log('error: ', err);
   }

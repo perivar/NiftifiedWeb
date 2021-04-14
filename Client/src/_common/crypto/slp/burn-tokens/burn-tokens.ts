@@ -21,7 +21,7 @@ const NFY_MAINNET = 'https://explorer.niftycoin.org/';
 const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 
 // Instantiate explorer based on the network.
-let explorer: any;
+let explorer: NiftyCoinExplorer;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
@@ -85,7 +85,7 @@ export async function burnTokens(walletInfo: WalletInfo) {
     }
 
     // Choose a UTXO to pay for the transaction.
-    const nfyUtxo = await explorer.findBiggestUtxo(nfyUtxos);
+    const nfyUtxo = CryptoUtil.findBiggestUtxo(nfyUtxos);
     // console.log(`nfyUtxo: ${JSON.stringify(nfyUtxo, null, 2)}`);
 
     // Generate the SLP OP_RETURN.
@@ -97,7 +97,7 @@ export async function burnTokens(walletInfo: WalletInfo) {
     const transactionBuilder = new bitcoin.TransactionBuilder(network);
 
     // Add the NFY UTXO as input to pay for the transaction.
-    const originalAmount = nfyUtxo.niftoshis;
+    const originalAmount = nfyUtxo.value;
     transactionBuilder.addInput(nfyUtxo.tx_hash, nfyUtxo.tx_pos);
 
     // add each token UTXO as an input.

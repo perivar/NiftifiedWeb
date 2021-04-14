@@ -21,17 +21,17 @@ const NFY_MAINNET = 'https://explorer.niftycoin.org/';
 const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 
 // Instantiate explorer based on the network.
-let explorer: any;
+let explorer: NiftyCoinExplorer;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
 
 export async function splitUtxo(walletInfo: WalletInfo) {
   try {
-    const SEND_ADDR = walletInfo.segwitAddress;
+    const SEND_ADDR = walletInfo.legacyAddress;
     const SEND_MNEMONIC = walletInfo.mnemonic;
 
     // Get the balance of the sending address.
-    const balance = await explorer.balance(SEND_ADDR, false);
+    const balance = await explorer.balance(SEND_ADDR);
 
     // Exit if the balance is zero.
     if (balance <= 0.0) {
@@ -53,7 +53,7 @@ export async function splitUtxo(walletInfo: WalletInfo) {
     if (utxos.length === 0) throw new Error('No UTXOs found.');
 
     // console.log(`u: ${JSON.stringify(u, null, 2)}`
-    const utxo = await explorer.findBiggestUtxo(utxos);
+    const utxo = CryptoUtil.findBiggestUtxo(utxos);
     console.log(`utxo: ${JSON.stringify(utxo, null, 2)}`);
 
     // set network

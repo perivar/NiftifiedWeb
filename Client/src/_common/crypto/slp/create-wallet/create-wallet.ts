@@ -55,7 +55,7 @@ export const createWallet = async (): Promise<WalletInfo | undefined> => {
         outObj.segwitAddress = CryptoUtil.toSegWitAddress(childNode, network);
         outObj.slpAddress = CryptoUtil.toSLPAddress(childNode, network);
         outObj.legacyAddress = CryptoUtil.toLegacyAddress(childNode, network);
-        outObj.WIF = childNode.toWIF();
+        outObj.privateKeyWIF = childNode.toWIF();
       }
     }
 
