@@ -9,17 +9,24 @@ import { TokenType1 } from './tokentype1';
 import { NFT1 } from './nft1';
 import { Utils } from './utils';
 
+export interface CryptoLibConfig {
+  restURL: string;
+  apiToken?: string;
+  authToken?: string;
+}
+
 // SLP is a superset of BITBOX
 export class SLP {
   restURL: string;
-  apiToken: string;
-  authToken: string;
-  axiosOptions: any;
-  TokenType1: any;
-  NFT1: any;
-  Utils: any;
+  apiToken?: string;
+  authToken?: string;
 
-  constructor(config: any) {
+  axiosOptions: any;
+  TokenType1: TokenType1;
+  NFT1: NFT1;
+  Utils: Utils;
+
+  constructor(config: CryptoLibConfig) {
     this.restURL = config.restURL;
     this.apiToken = config.apiToken;
     this.authToken = config.authToken;
@@ -43,7 +50,7 @@ export class SLP {
     }
 
     this.TokenType1 = new TokenType1(config);
-    this.NFT1 = new NFT1(this.restURL);
+    this.NFT1 = new NFT1(config);
     this.Utils = new Utils(config);
   }
 }

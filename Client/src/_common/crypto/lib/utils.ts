@@ -1,46 +1,45 @@
 /* eslint-disable no-useless-catch */
 
 // Public npm libraries
-import axios from 'axios';
-import slpParser from 'slp-parser';
+import * as slpParser from 'slp-parser';
 import BigNumber from 'bignumber.js';
 import { UTXOInfo, TokenUTXOInfo, SlpTokenData, SlpTokenGenesis, SlpTokenMint, SlpTokenSend } from '../util';
+import { CryptoLibConfig } from './slp';
+import { NiftyCoinExplorer } from '../NiftyCoinExplorer';
+import axios from 'axios'; // delete when everything is moved to explorer
+
+// Set NETWORK to either testnet or mainnet
+const NETWORK = 'mainnet';
+
+// REST API servers.
+const NFY_MAINNET = 'https://explorer.niftycoin.org/';
+const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 
 let _this: any;
 
 export class Utils {
   restURL: string;
-  apiToken: string;
+  apiToken?: string;
+  authToken?: string;
+
   slpParser: any;
-  authToken: string;
+  explorer: NiftyCoinExplorer;
   axios: any;
-  axiosOptions: any;
   whitelist: any;
 
-  constructor(config: any) {
+  constructor(config: CryptoLibConfig) {
     this.restURL = config.restURL;
     this.apiToken = config.apiToken;
-    this.slpParser = slpParser;
     this.authToken = config.authToken;
-    this.axios = axios;
 
-    if (this.authToken) {
-      // Add Basic Authentication token to the authorization header.
-      this.axiosOptions = {
-        headers: {
-          authorization: this.authToken
-        }
-      };
-    } else if (this.apiToken) {
-      // Add JWT token to the authorization header.
-      this.axiosOptions = {
-        headers: {
-          authorization: `Token ${this.apiToken}`
-        }
-      };
-    } else {
-      this.axiosOptions = {};
-    }
+    // Instantiate explorer based on the network.
+    let explorer: NiftyCoinExplorer;
+    if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
+    else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
+
+    this.slpParser = slpParser;
+    this.explorer = explorer;
+    this.axios = axios;
 
     _this = this;
     this.whitelist = [];
@@ -953,17 +952,17 @@ export class Utils {
 
       // CT: 2/24/21 Deprected GET in favor of POST, to pass IP address.
       // Retrieve the transaction object from the full node.
-      const path = `${this.restURL}rawtransactions/getRawTransaction`;
-      const response = await _this.axios.post(
-        path,
-        {
-          verbose: true,
-          txids: [txid],
-          usrObj // pass user data when making an internal call.
-        },
-        _this.axiosOptions
-      );
-      const txDetails = response.data[0];
+      // const path = `${this.restURL}rawtransactions/getRawTransaction`;
+      // const response = await _this.axios.post(
+      //   path,
+      //   {
+      //     verbose: true,
+      //     txids: [txid],
+      //     usrObj // pass user data when making an internal call.
+      //   },
+      //   _this.axiosOptions
+      // );
+      const txDetails = await this.explorer.txData(txid);
       // console.log(`txDetails: ${JSON.stringify(txDetails, null, 2)}`)
 
       // SLP spec expects OP_RETURN to be the first output of the transaction.

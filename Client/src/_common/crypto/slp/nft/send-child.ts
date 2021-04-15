@@ -5,9 +5,9 @@
 import * as bitcoin from 'bitcoinjs-lib';
 import { Network, Transaction } from 'bitcoinjs-lib';
 import CryptoUtil, { WalletInfo } from '../../util';
-import CryptoLib from '../../lib';
 import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
-import { toBitcoinJS } from '../../nifty/nfy';
+import { toBitcoinJS } from '../../niftycoin/nfy';
+import { CryptoLibConfig, SLP } from '../../lib/slp';
 
 // Set NETWORK to either testnet or mainnet
 const NETWORK = 'mainnet';
@@ -24,6 +24,11 @@ const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 let explorer: NiftyCoinExplorer;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
+
+const config: CryptoLibConfig = {
+  restURL: NETWORK === 'mainnet' ? NFY_MAINNET : NFY_TESTNET
+};
+const slp = new SLP(config);
 
 export async function sendChildToken(walletInfo: WalletInfo) {
   try {
@@ -56,7 +61,7 @@ export async function sendChildToken(walletInfo: WalletInfo) {
     if (utxos.length === 0) throw new Error('No UTXOs to spend! Exiting.');
 
     // Identify the SLP token UTXOs.
-    let tokenUtxos = await CryptoLib.Utils.tokenUtxoDetails(utxos);
+    let tokenUtxos = await slp.Utils.tokenUtxoDetails(utxos);
     // console.log(`tokenUtxos: ${JSON.stringify(tokenUtxos, null, 2)}`);
 
     // Filter out the non-SLP token UTXOs.
@@ -91,7 +96,7 @@ export async function sendChildToken(walletInfo: WalletInfo) {
     const nfyUtxo = CryptoUtil.findBiggestUtxo(nfyUtxos);
     // console.log(`nfyUtxo: ${JSON.stringify(nfyUtxo, null, 2)}`);
 
-    const slpSendObj = CryptoLib.NFT1.generateNFTChildSendOpReturn(tokenUtxos, TOKENQTY);
+    const slpSendObj = slp.NFT1.generateNFTChildSendOpReturn(tokenUtxos, TOKENQTY);
     const slpData = slpSendObj.script;
     // console.log(`slpOutputs: ${slpSendObj.outputs}`);
 
@@ -173,6 +178,7 @@ export async function sendChildToken(walletInfo: WalletInfo) {
 
     console.log('Check the status of your transaction on this block explorer:');
     CryptoUtil.transactionStatus(txidStr, NETWORK);
+    return txidStr;
   } catch (err) {
     console.error('Error in sendToken: ', err);
     console.log(`Error message: ${err.message}`);

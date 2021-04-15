@@ -48,17 +48,33 @@ export const Wallet = ({ match }: { match: any }) => {
     //   console.log(res);
     // });
 
-    CryptoWallet.listUtxos(wallet).then((res: any) => {
-      console.log(res);
-    });
+    // CryptoWallet.listUtxos(wallet).then((res: any) => {
+    //   console.log(res);
+    // });
 
     // consolidateUtxos(wallet).then((res: any) => {
     //   console.log(res);
     // });
 
-    // CryptoNFT.createNFTGroup(wallet).then((res: any) => {
-    //   console.log(res);
-    // });
+    CryptoNFT.createNFTGroup(wallet).then((res: any) => {
+      console.log(res);
+    });
+
+    CryptoNFT.createNFTChild(wallet).then((res: any) => {
+      console.log(res);
+    });
+
+    CryptoNFT.mintNFTGroup(wallet).then((res: any) => {
+      console.log(res);
+    });
+
+    CryptoNFT.sendGroupToken(wallet).then((res: any) => {
+      console.log(res);
+    });
+
+    CryptoNFT.sendChildToken(wallet).then((res: any) => {
+      console.log(res);
+    });
   };
 
   return (

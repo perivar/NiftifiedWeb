@@ -6,7 +6,7 @@
 import * as bip39 from 'bip39';
 import * as bip32 from 'bip32';
 import { Network } from 'bitcoinjs-lib';
-import { toBitcoinJS } from '../nifty/nfy';
+import { toBitcoinJS } from '../niftycoin/nfy';
 import CryptoUtil, { WalletInfo } from '../util';
 
 // Set NETWORK to either testnet or mainnet

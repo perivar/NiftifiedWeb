@@ -5,9 +5,9 @@
 import * as bitcoin from 'bitcoinjs-lib';
 import { Network, Transaction } from 'bitcoinjs-lib';
 import CryptoUtil, { WalletInfo } from '../../util';
-import CryptoLib from '../../lib';
 import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
-import { toBitcoinJS } from '../../nifty/nfy';
+import { toBitcoinJS } from '../../niftycoin/nfy';
+import { CryptoLibConfig, SLP } from '../../lib/slp';
 
 // Set NETWORK to either testnet or mainnet
 const NETWORK = 'mainnet';
@@ -24,6 +24,11 @@ const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 let explorer: NiftyCoinExplorer;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
+
+const config: CryptoLibConfig = {
+  restURL: NETWORK === 'mainnet' ? NFY_MAINNET : NFY_TESTNET
+};
+const slp = new SLP(config);
 
 export async function mintNFTGroup(walletInfo: WalletInfo) {
   try {
@@ -55,7 +60,7 @@ export async function mintNFTGroup(walletInfo: WalletInfo) {
     }
 
     // Identify the SLP token UTXOs.
-    let tokenUtxos = await CryptoLib.Utils.tokenUtxoDetails(utxos);
+    let tokenUtxos = await slp.Utils.tokenUtxoDetails(utxos);
     // console.log(`tokenUtxos: ${JSON.stringify(tokenUtxos, null, 2)}`)
 
     // Filter out the non-SLP token UTXOs.
@@ -112,7 +117,7 @@ export async function mintNFTGroup(walletInfo: WalletInfo) {
     const remainder = originalAmount - 546 - txFee;
 
     // Generate the SLP OP_RETURN.
-    const script = CryptoLib.NFT1.mintNFTGroupOpReturn(tokenUtxos, TOKENQTY);
+    const script = slp.NFT1.mintNFTGroupOpReturn(tokenUtxos, TOKENQTY);
 
     // OP_RETURN needs to be the first output in the transaction.
     transactionBuilder.addOutput(script, 0);
@@ -147,6 +152,7 @@ export async function mintNFTGroup(walletInfo: WalletInfo) {
     const txidStr = await explorer.sendRawTransaction(hex);
     console.log('Check the status of your transaction on this block explorer:');
     CryptoUtil.transactionStatus(txidStr, NETWORK);
+    return txidStr;
   } catch (err) {
     console.error('Error in mintNFTGroup: ', err);
   }

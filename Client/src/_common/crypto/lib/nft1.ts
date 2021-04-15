@@ -9,13 +9,13 @@
   (Parent) token.
 */
 
-// import BigNumber from 'bignumber.js';
-import slpMdm from 'slp-mdm';
+import { slpMdm } from './slp-mdm';
+import { CryptoLibConfig } from './slp';
 
 export class NFT1 {
   restURL: string;
 
-  constructor(config: any) {
+  constructor(config: CryptoLibConfig) {
     this.restURL = config.restURL;
   }
 

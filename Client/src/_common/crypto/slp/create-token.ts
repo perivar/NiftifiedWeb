@@ -6,9 +6,9 @@
 import * as bitcoin from 'bitcoinjs-lib';
 import { Network, Transaction } from 'bitcoinjs-lib';
 import CryptoUtil, { WalletInfo } from '../util';
-import CryptoLib from '../lib';
+import { CryptoLibConfig, SLP } from '../lib/slp';
 import { NiftyCoinExplorer } from '../NiftyCoinExplorer';
-import { toBitcoinJS } from '../nifty/nfy';
+import { toBitcoinJS } from '../niftycoin/nfy';
 
 // Set NETWORK to either testnet or mainnet
 const NETWORK = 'mainnet';
@@ -25,6 +25,11 @@ const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 let explorer: NiftyCoinExplorer;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
+
+const config: CryptoLibConfig = {
+  restURL: NETWORK === 'mainnet' ? NFY_MAINNET : NFY_TESTNET
+};
+const slp = new SLP(config);
 
 export async function createToken(walletInfo: WalletInfo) {
   try {
@@ -82,9 +87,8 @@ export async function createToken(walletInfo: WalletInfo) {
     };
 
     // Generate the OP_RETURN entry for an SLP GENESIS transaction.
-    const script = CryptoLib.TokenType1.generateGenesisOpReturn(configObj);
-    // const data = bitcoin.Script.encode(script)
-    // const data = compile(script)
+    const script = slp.TokenType1.generateGenesisOpReturn(configObj);
+
 
     // OP_RETURN needs to be the first output in the transaction.
     transactionBuilder.addOutput(script, 0);

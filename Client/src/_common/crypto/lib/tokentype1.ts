@@ -4,22 +4,24 @@
 */
 
 import axios from 'axios';
-// import BigNumber from 'bignumber.js';
-import slpMdm from 'slp-mdm';
+import { slpMdm } from './slp-mdm';
+import { CryptoLibConfig } from './slp';
 
 let _this: any; // local global
 
 export class TokenType1 {
   restURL: string;
-  apiToken: string;
-  authToken: string;
+  apiToken?: string;
+  authToken?: string;
+
   axiosOptions: any;
   axios: any;
 
-  constructor(config: any) {
+  constructor(config: CryptoLibConfig) {
     this.restURL = config.restURL;
     this.apiToken = config.apiToken;
     this.authToken = config.authToken;
+
     this.axios = axios;
 
     if (this.authToken) {

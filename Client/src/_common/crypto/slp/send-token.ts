@@ -5,9 +5,9 @@
 import * as bitcoin from 'bitcoinjs-lib';
 import { Network, Transaction } from 'bitcoinjs-lib';
 import CryptoUtil, { WalletInfo } from '../util';
-import CryptoLib from '../lib';
+import { CryptoLibConfig, SLP } from '../lib/slp';
 import { NiftyCoinExplorer } from '../NiftyCoinExplorer';
-import { toBitcoinJS } from '../nifty/nfy';
+import { toBitcoinJS } from '../niftycoin/nfy';
 
 // Set NETWORK to either testnet or mainnet
 const NETWORK = 'mainnet';
@@ -24,6 +24,11 @@ const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 let explorer: NiftyCoinExplorer;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
+
+const config: CryptoLibConfig = {
+  restURL: NETWORK === 'mainnet' ? NFY_MAINNET : NFY_TESTNET
+};
+const slp = new SLP(config);
 
 export async function sendToken(walletInfo: WalletInfo) {
   try {
@@ -51,13 +56,13 @@ export async function sendToken(walletInfo: WalletInfo) {
 
     // Get UTXOs held by this address.
     const utxos = await explorer.utxo(legacyAddress);
-    console.log(`utxos: ${JSON.stringify(utxos, null, 2)}`);
+    // console.log(`utxos: ${JSON.stringify(utxos, null, 2)}`);
 
     if (utxos.length === 0) throw new Error('No UTXOs to spend! Exiting.');
 
     // Identify the SLP token UTXOs.
-    let tokenUtxos = await CryptoLib.Utils.tokenUtxoDetails(utxos);
-    console.log(`tokenUtxos: ${JSON.stringify(tokenUtxos, null, 2)}`);
+    let tokenUtxos = await slp.Utils.tokenUtxoDetails(utxos);
+    // console.log(`tokenUtxos: ${JSON.stringify(tokenUtxos, null, 2)}`);
 
     // Filter out the non-SLP token UTXOs.
     const nfyUtxos = utxos.filter((utxo: any, index: number) => {
@@ -91,7 +96,7 @@ export async function sendToken(walletInfo: WalletInfo) {
     // console.log(`nfyUtxo: ${JSON.stringify(nfyUtxo, null, 2)}`);
 
     // Generate the OP_RETURN code.
-    const slpSendObj = CryptoLib.TokenType1.generateSendOpReturn(tokenUtxos, TOKENQTY);
+    const slpSendObj = slp.TokenType1.generateSendOpReturn(tokenUtxos, TOKENQTY);
     const slpData = slpSendObj.script;
     // console.log(`slpOutputs: ${slpSendObj.outputs}`);
 

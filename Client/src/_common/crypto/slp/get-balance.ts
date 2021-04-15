@@ -8,9 +8,9 @@
 
 import { Network } from 'bitcoinjs-lib';
 import CryptoUtil, { WalletInfo } from '../util';
-import CryptoLib from '../lib';
+import { CryptoLibConfig, SLP } from '../lib/slp';
 import { NiftyCoinExplorer } from '../NiftyCoinExplorer';
-import { toBitcoinJS } from '../nifty/nfy';
+import { toBitcoinJS } from '../niftycoin/nfy';
 
 // Set NETWORK to either testnet or mainnet
 const NETWORK = 'mainnet';
@@ -27,6 +27,11 @@ const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 let explorer: NiftyCoinExplorer;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
+
+const config: CryptoLibConfig = {
+  restURL: NETWORK === 'mainnet' ? NFY_MAINNET : NFY_TESTNET
+};
+const slp = new SLP(config);
 
 export async function getBalance(walletInfo: WalletInfo) {
   try {
@@ -53,7 +58,7 @@ export async function getBalance(walletInfo: WalletInfo) {
 
     // get token balances
     try {
-      const tokens = await CryptoLib.Utils.balancesForAddress(slpAddress);
+      const tokens = await slp.Utils.balancesForAddress(slpAddress);
 
       console.log(JSON.stringify(tokens, null, 2));
     } catch (error) {

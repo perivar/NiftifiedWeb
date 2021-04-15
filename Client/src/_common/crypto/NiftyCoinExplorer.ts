@@ -211,10 +211,10 @@ export class NiftyCoinExplorer {
         // console.log(txHex);
         // use GET, not POST
         // const response = await axios.post(`${this.restURL}api/sendrawtransaction`, { txHex }, _this.axiosOptions);
-        const response = await axios.get(`${this.restURL}api/sendrawtransaction?hex=${txHex}`, _this.axiosOptions);
+        // const response = await axios.get(`${this.restURL}api/sendrawtransaction?hex=${txHex}`, _this.axiosOptions);
 
         // use decode while testing
-        // const response = await axios.get(`${this.restURL}api/decoderawtransaction?hex=${txHex}`, _this.axiosOptions);
+        const response = await axios.get(`${this.restURL}api/decoderawtransaction?hex=${txHex}`, _this.axiosOptions);
         return response.data;
         // return 'RANDOM_RETURN_HEX';
       }

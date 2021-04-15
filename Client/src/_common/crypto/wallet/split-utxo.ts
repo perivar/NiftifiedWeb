@@ -7,7 +7,7 @@ import * as bitcoin from 'bitcoinjs-lib';
 import { Network, Transaction } from 'bitcoinjs-lib';
 import CryptoUtil, { WalletInfo } from '../util';
 import { NiftyCoinExplorer } from '../NiftyCoinExplorer';
-import { toBitcoinJS } from '../nifty/nfy';
+import { toBitcoinJS } from '../niftycoin/nfy';
 
 // Set NETWORK to either testnet or mainnet
 const NETWORK = 'mainnet';

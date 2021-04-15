@@ -8,10 +8,10 @@
 
 import * as bitcoin from 'bitcoinjs-lib';
 import CryptoUtil, { WalletInfo } from '../../util';
-import CryptoLib from '../../lib';
 import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
 import { Network, Transaction } from 'bitcoinjs-lib';
-import { toBitcoinJS } from '../../nifty/nfy';
+import { toBitcoinJS } from '../../niftycoin/nfy';
+import { CryptoLibConfig, SLP } from '../../lib/slp';
 
 // Set NETWORK to either testnet or mainnet
 const NETWORK = 'mainnet';
@@ -28,6 +28,11 @@ const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 let explorer: NiftyCoinExplorer;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
+
+const config: CryptoLibConfig = {
+  restURL: NETWORK === 'mainnet' ? NFY_MAINNET : NFY_TESTNET
+};
+const slp = new SLP(config);
 
 export async function createNFTChild(walletInfo: WalletInfo) {
   try {
@@ -51,15 +56,15 @@ export async function createNFTChild(walletInfo: WalletInfo) {
 
     // Get a UTXO to pay for the transaction.
     const utxos = await explorer.utxo(legacyAddress);
-    console.log(`utxos: ${JSON.stringify(utxos, null, 2)}`);
+    // console.log(`utxos: ${JSON.stringify(utxos, null, 2)}`);
 
     if (utxos.length === 0) {
       throw new Error('No UTXOs to pay for transaction! Exiting.');
     }
 
     // Identify the SLP token UTXOs.
-    let tokenUtxos = await CryptoLib.Utils.tokenUtxoDetails(utxos);
-    console.log(`tokenUtxos: ${JSON.stringify(tokenUtxos, null, 2)}`);
+    let tokenUtxos = await slp.Utils.tokenUtxoDetails(utxos);
+    // console.log(`tokenUtxos: ${JSON.stringify(tokenUtxos, null, 2)}`);
 
     // Filter out the non-SLP token UTXOs.
     const nfyUtxos = utxos.filter((utxo: any, index: number) => {
@@ -122,9 +127,7 @@ export async function createNFTChild(walletInfo: WalletInfo) {
     };
 
     // Generate the OP_RETURN entry for an SLP GENESIS transaction.
-    const script = CryptoLib.NFT1.generateNFTChildGenesisOpReturn(configObj);
-    // const data = bitcoin.Script.encode(script)
-    // const data = compile(script)
+    const script = slp.NFT1.generateNFTChildGenesisOpReturn(configObj);
 
     // OP_RETURN needs to be the first output in the transaction.
     transactionBuilder.addOutput(script, 0);
@@ -164,6 +167,7 @@ export async function createNFTChild(walletInfo: WalletInfo) {
     const txidStr = await explorer.sendRawTransaction(hex);
     console.log('Check the status of your transaction on this block explorer:');
     CryptoUtil.transactionStatus(txidStr, NETWORK);
+    return txidStr;
   } catch (err) {
     console.error('Error in createNFTChild: ', err);
   }

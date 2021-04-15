@@ -5,9 +5,9 @@
 import * as bitcoin from 'bitcoinjs-lib';
 import { Network, Transaction } from 'bitcoinjs-lib';
 import CryptoUtil, { WalletInfo } from '../util';
-import CryptoLib from '../lib';
+import { CryptoLibConfig, SLP } from '../lib/slp';
 import { NiftyCoinExplorer } from '../NiftyCoinExplorer';
-import { toBitcoinJS } from '../nifty/nfy';
+import { toBitcoinJS } from '../niftycoin/nfy';
 
 // Set NETWORK to either testnet or mainnet
 const NETWORK = 'mainnet';
@@ -24,6 +24,11 @@ const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 let explorer: NiftyCoinExplorer;
 if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
 else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
+
+const config: CryptoLibConfig = {
+  restURL: NETWORK === 'mainnet' ? NFY_MAINNET : NFY_TESTNET
+};
+const slp = new SLP(config);
 
 export async function mintToken(walletInfo: WalletInfo) {
   try {
@@ -56,7 +61,7 @@ export async function mintToken(walletInfo: WalletInfo) {
     if (utxos.length === 0) throw new Error('No UTXOs to spend! Exiting.');
 
     // Identify the SLP token UTXOs.
-    let tokenUtxos = await CryptoLib.Utils.tokenUtxoDetails(utxos);
+    let tokenUtxos = await slp.Utils.tokenUtxoDetails(utxos);
     // console.log(`tokenUtxos: ${JSON.stringify(tokenUtxos, null, 2)}`);
 
     // Filter out the non-SLP token UTXOs.
@@ -92,7 +97,7 @@ export async function mintToken(walletInfo: WalletInfo) {
     // console.log(`nfyUtxo: ${JSON.stringify(nfyUtxo, null, 2)}`);
 
     // Generate the SLP OP_RETURN.
-    const slpData = CryptoLib.TokenType1.generateMintOpReturn(tokenUtxos, TOKENQTY);
+    const slpData = slp.TokenType1.generateMintOpReturn(tokenUtxos, TOKENQTY);
 
     // BEGIN transaction construction.
 
