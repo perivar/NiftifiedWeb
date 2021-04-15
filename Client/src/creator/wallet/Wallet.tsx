@@ -3,12 +3,8 @@ import { Link } from 'react-router-dom';
 import { niftyService } from '../../_services';
 // import { sendTransactions, sendNiftyCoin, generateWallet } from '../../_common/crypto/nifty/generate';
 import { WalletInfo } from '../../_common/crypto/util';
-import { createWallet } from '../../_common/crypto/wallet/create-wallet/create-wallet';
-import { getBalance } from '../../_common/crypto/wallet/check-balance/check-balance';
-import { sendNFY } from '../../_common/crypto/wallet/send-nfy/send-nfy';
-import { sendWIF } from '../../_common/crypto/wallet/send-WIF/send-wif';
-import { listUtxos } from '../../_common/crypto/wallet/list-utxos/list-utxos';
-import { consolidateUtxos } from '../../_common/crypto/wallet/consolidate-utxos/consolidate-utxos';
+import CryptoWallet from '../../_common/crypto/wallet';
+import CryptoNFT from '../../_common/crypto/slp/nft';
 
 export const Wallet = ({ match }: { match: any }) => {
   // const { path } = match;
@@ -48,15 +44,19 @@ export const Wallet = ({ match }: { match: any }) => {
     //   console.log(res);
     // });
 
-    sendWIF(wallet, 'NUcBvW67GEqi8CXYPcL4Y5qzw7Vf9rp7wg', 2000).then((res: any) => {
-      console.log(res);
-    });
-
-    // listUtxos(wallet).then((res: any) => {
+    // sendWIF(wallet, 'NUcBvW67GEqi8CXYPcL4Y5qzw7Vf9rp7wg', 2000).then((res: any) => {
     //   console.log(res);
     // });
 
+    CryptoWallet.listUtxos(wallet).then((res: any) => {
+      console.log(res);
+    });
+
     // consolidateUtxos(wallet).then((res: any) => {
+    //   console.log(res);
+    // });
+
+    // CryptoNFT.createNFTGroup(wallet).then((res: any) => {
     //   console.log(res);
     // });
   };
