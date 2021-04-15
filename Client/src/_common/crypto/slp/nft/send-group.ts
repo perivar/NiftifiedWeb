@@ -34,7 +34,7 @@ export async function sendGroupToken(walletInfo: WalletInfo) {
   try {
     // CUSTOMIZE THESE VALUES FOR YOUR USE
     const TOKENQTY = 5;
-    const TOKENID = 'ba6c400e66190baf7f101c6ea54c0ab81c7fcfa45e9a239088f2ac0a570ec0e5';
+    const TOKENID = '3d815beb4639e446aff5e0dd60a9a800e7349dc3c390c6375c063faddd7c2618';
     let TO_ADDR = 'simpleledger:qphnz7yl9xasyzd0aldxq3q875shts0dmgep39tq3e';
 
     const { mnemonic } = walletInfo;

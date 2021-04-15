@@ -69,15 +69,15 @@ export const Wallet = ({ match }: { match: any }) => {
     // });
 
     CryptoNFT.createNFTGroup(wallet).then((res: any) => {
-      // console.log(res);
-
-      const tokenData = slp.Utils.decodeTxData(res);
-      console.log(tokenData);
-    });
-
-    CryptoNFT.createNFTChild(wallet, '').then((res: any) => {
       console.log(res);
+
+      // const tokenData = slp.Utils.decodeTxData(res);
+      // console.log(tokenData);
     });
+
+    // CryptoNFT.createNFTChild(wallet, '').then((res: any) => {
+    //   console.log(res);
+    // });
 
     // CryptoNFT.mintNFTGroup(wallet).then((res: any) => {
     //   console.log(res);
