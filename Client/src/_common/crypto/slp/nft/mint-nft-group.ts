@@ -30,12 +30,10 @@ const config: CryptoLibConfig = {
 };
 const slp = new SLP(config);
 
-export async function mintNFTGroup(walletInfo: WalletInfo) {
+export async function mintNFTGroup(walletInfo: WalletInfo, tokenId: string, tokenQty = 10) {
   try {
-    // EDIT THESE VALUES FOR YOUR USE.
-    const TOKENID = 'ba6c400e66190baf7f101c6ea54c0ab81c7fcfa45e9a239088f2ac0a570ec0e5';
-    const TOKENQTY = 10; // The quantity of new tokens to mint.
-    // const TO_SLPADDR = '' // The address to send the new tokens.
+    const TOKENQTY = tokenQty;
+    const TOKENID = tokenId;
 
     const { mnemonic } = walletInfo;
 
@@ -86,7 +84,7 @@ export async function mintNFTGroup(walletInfo: WalletInfo) {
         return true;
       }
     });
-    console.log(`tokenUtxos: ${JSON.stringify(tokenUtxos, null, 2)}`);
+    // console.log(`tokenUtxos: ${JSON.stringify(tokenUtxos, null, 2)}`);
 
     if (tokenUtxos.length === 0) {
       throw new Error('No token UTXOs for the specified token could be found.');

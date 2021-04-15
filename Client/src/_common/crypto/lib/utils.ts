@@ -3,7 +3,7 @@
 // Public npm libraries
 import * as slpParser from 'slp-parser';
 import BigNumber from 'bignumber.js';
-import { UTXOInfo, TokenUTXOInfo, SlpTokenData, SlpTokenGenesis, SlpTokenMint, SlpTokenSend } from '../util';
+import { UTXOInfo, TokenUTXOInfo, SlpTokenData, SlpTokenGenesis } from '../util';
 import { CryptoLibConfig } from './slp';
 import { NiftyCoinExplorer } from '../NiftyCoinExplorer';
 import axios from 'axios'; // delete when everything is moved to explorer
@@ -965,45 +965,7 @@ export class Utils {
       const txDetails = await this.explorer.txData(txid);
       // console.log(`txDetails: ${JSON.stringify(txDetails, null, 2)}`)
 
-      // SLP spec expects OP_RETURN to be the first output of the transaction.
-      const opReturn = txDetails.vout[0].scriptPubKey.hex;
-      // console.log(`opReturn hex: ${opReturn}`)
-
-      const parsedData = _this.slpParser.parseSLP(Buffer.from(opReturn, 'hex'));
-      // console.log(`parsedData: ${JSON.stringify(parsedData, null, 2)}`)
-
-      // Convert Buffer data to hex strings or utf8 strings.
-      let tokenData: SlpTokenData = {} as SlpTokenData;
-      if (parsedData.transactionType === 'SEND') {
-        tokenData = {
-          tokenType: parsedData.tokenType,
-          txType: parsedData.transactionType,
-          tokenId: parsedData.data.tokenId.toString('hex'),
-          amounts: parsedData.data.amounts
-        };
-      } else if (parsedData.transactionType === 'GENESIS') {
-        tokenData = {
-          tokenType: parsedData.tokenType,
-          txType: parsedData.transactionType,
-          ticker: parsedData.data.ticker.toString(),
-          name: parsedData.data.name.toString(),
-          tokenId: txid,
-          documentUri: parsedData.data.documentUri.toString(),
-          documentHash: parsedData.data.documentHash.toString(),
-          decimals: parsedData.data.decimals,
-          mintBatonVout: parsedData.data.mintBatonVout,
-          qty: parsedData.data.qty
-        };
-      } else if (parsedData.transactionType === 'MINT') {
-        tokenData = {
-          tokenType: parsedData.tokenType,
-          txType: parsedData.transactionType,
-          tokenId: parsedData.data.tokenId.toString('hex'),
-          mintBatonVout: parsedData.data.mintBatonVout,
-          qty: parsedData.data.qty
-        };
-      }
-      // console.log(`tokenData: ${JSON.stringify(tokenData, null, 2)}`)
+      const tokenData = this.decodeTxData(txDetails);
 
       if (cache) cache[txid] = tokenData;
 
@@ -1022,6 +984,51 @@ export class Utils {
       throw error;
     }
   }
+
+  decodeTxData = (txDetails: any): SlpTokenData => {
+    const { txid } = txDetails;
+
+    // SLP spec expects OP_RETURN to be the first output of the transaction.
+    const opReturn = txDetails.vout[0].scriptPubKey.hex;
+    // console.log(`opReturn hex: ${opReturn}`)
+
+    const parsedData = _this.slpParser.parseSLP(Buffer.from(opReturn, 'hex'));
+    // console.log(`parsedData: ${JSON.stringify(parsedData, null, 2)}`)
+
+    // Convert Buffer data to hex strings or utf8 strings.
+    let tokenData: SlpTokenData = {} as SlpTokenData;
+    if (parsedData.transactionType === 'SEND') {
+      tokenData = {
+        tokenType: parsedData.tokenType,
+        txType: parsedData.transactionType,
+        tokenId: parsedData.data.tokenId.toString('hex'),
+        amounts: parsedData.data.amounts
+      };
+    } else if (parsedData.transactionType === 'GENESIS') {
+      tokenData = {
+        tokenType: parsedData.tokenType,
+        txType: parsedData.transactionType,
+        ticker: parsedData.data.ticker.toString(),
+        name: parsedData.data.name.toString(),
+        tokenId: txid,
+        documentUri: parsedData.data.documentUri.toString(),
+        documentHash: parsedData.data.documentHash.toString(),
+        decimals: parsedData.data.decimals,
+        mintBatonVout: parsedData.data.mintBatonVout,
+        qty: parsedData.data.qty
+      };
+    } else if (parsedData.transactionType === 'MINT') {
+      tokenData = {
+        tokenType: parsedData.tokenType,
+        txType: parsedData.transactionType,
+        tokenId: parsedData.data.tokenId.toString('hex'),
+        mintBatonVout: parsedData.data.mintBatonVout,
+        qty: parsedData.data.qty
+      };
+    }
+    // console.log(`tokenData: ${JSON.stringify(tokenData, null, 2)}`)
+    return tokenData;
+  };
 
   /**
    * @api SLP.Utils.tokenUtxoDetails() tokenUtxoDetails()

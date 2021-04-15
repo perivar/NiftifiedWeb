@@ -5,7 +5,7 @@
 
 import * as bitcoin from 'bitcoinjs-lib';
 import { Network, Transaction } from 'bitcoinjs-lib';
-import CryptoUtil, { WalletInfo } from '../../util';
+import CryptoUtil, { NFTGroupOpReturnConfig, WalletInfo } from '../../util';
 import { CryptoLibConfig, SLP } from '../../lib/slp';
 import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
 import { toBitcoinJS } from '../../niftycoin/nfy';
@@ -77,12 +77,12 @@ export async function createNFTGroup(walletInfo: WalletInfo) {
     const remainder = originalAmount - 546 * 2 - txFee;
 
     // Generate SLP config object
-    const configObj = {
+    const configObj: NFTGroupOpReturnConfig = {
       name: 'NFT Test Token',
-      ticker: 'NFTTT',
-      documentUrl: 'https://FullStack.cash',
+      ticker: 'NFTY',
+      documentUrl: 'https://www.niftycoin.org',
       mintBatonVout: 2,
-      initialQty: 1
+      initialQty: 123
     };
 
     // Generate the OP_RETURN entry for an SLP GENESIS transaction.

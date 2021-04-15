@@ -5,7 +5,7 @@
 
 import * as bitcoin from 'bitcoinjs-lib';
 import { Network, Transaction } from 'bitcoinjs-lib';
-import CryptoUtil, { WalletInfo } from '../util';
+import CryptoUtil, { SLPGenesisOpReturnConfig, WalletInfo } from '../util';
 import { CryptoLibConfig, SLP } from '../lib/slp';
 import { NiftyCoinExplorer } from '../NiftyCoinExplorer';
 import { toBitcoinJS } from '../niftycoin/nfy';
@@ -76,7 +76,7 @@ export async function createToken(walletInfo: WalletInfo) {
     const remainder = originalAmount - 546 * 2 - txFee;
 
     // Generate SLP config object
-    const configObj = {
+    const configObj: SLPGenesisOpReturnConfig = {
       name: 'SLP Test Token',
       ticker: 'SLPTEST',
       documentUrl: 'https://FullStack.cash',
@@ -88,7 +88,6 @@ export async function createToken(walletInfo: WalletInfo) {
 
     // Generate the OP_RETURN entry for an SLP GENESIS transaction.
     const script = slp.TokenType1.generateGenesisOpReturn(configObj);
-
 
     // OP_RETURN needs to be the first output in the transaction.
     transactionBuilder.addOutput(script, 0);

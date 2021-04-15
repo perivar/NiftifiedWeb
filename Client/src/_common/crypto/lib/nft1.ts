@@ -11,6 +11,7 @@
 
 import { slpMdm } from './slp-mdm';
 import { CryptoLibConfig } from './slp';
+import { NFTChildGenesisOpReturnConfig, NFTGroupOpReturnConfig, TokenUTXOInfo } from '../util';
 
 export class NFT1 {
   restURL: string;
@@ -51,10 +52,8 @@ export class NFT1 {
    *  // https://github.com/Permissionless-Software-Foundation/bch-js-examples/tree/master/applications/slp/nft
    *
    */
-  newNFTGroupOpReturn(configObj: any) {
+  newNFTGroupOpReturn(configObj: NFTGroupOpReturnConfig) {
     try {
-      // TODO: Add input validation.
-
       // Prevent error if user fails to add the document hash.
       if (!configObj.documentHash) configObj.documentHash = '';
 
@@ -122,7 +121,7 @@ export class NFT1 {
    *  // See additional code here:
    *  // https://github.com/Permissionless-Software-Foundation/bch-js-examples/tree/master/applications/slp/nft
    */
-  mintNFTGroupOpReturn(tokenUtxos: any, mintQty: number, destroyBaton = false) {
+  mintNFTGroupOpReturn(tokenUtxos: TokenUTXOInfo[], mintQty: number, destroyBaton = false) {
     // try {
     // Throw error if input is not an array.
     if (!Array.isArray(tokenUtxos)) {
@@ -192,10 +191,8 @@ export class NFT1 {
    *  // https://github.com/Permissionless-Software-Foundation/bch-js-examples/tree/master/applications/slp/nft
    *
    */
-  generateNFTChildGenesisOpReturn(configObj: any) {
+  generateNFTChildGenesisOpReturn(configObj: NFTChildGenesisOpReturnConfig) {
     try {
-      // TODO: Add input validation.
-
       // Prevent error if user fails to add the document hash.
       if (!configObj.documentHash) configObj.documentHash = '';
 
@@ -207,9 +204,6 @@ export class NFT1 {
         configObj.name,
         configObj.documentUrl,
         configObj.documentHash
-        // 0,
-        // configObj.mintBatonVout,
-        // new slpMdm.BN('1')
       );
 
       return script;
@@ -350,10 +344,8 @@ export class NFT1 {
    *  // See additional code here:
    *  // https://github.com/Permissionless-Software-Foundation/bch-js-examples/tree/master/applications/slp/nft
    */
-  generateNFTGroupSendOpReturn(tokenUtxos: any, sendQty: number) {
+  generateNFTGroupSendOpReturn(tokenUtxos: TokenUTXOInfo[], sendQty: number) {
     try {
-      // TODO: Add input validation.
-
       const { tokenId } = tokenUtxos[0];
 
       // Calculate the total amount of tokens owned by the wallet.
@@ -377,7 +369,6 @@ export class NFT1 {
 
         // Generate the OP_RETURN as a Buffer.
         script = slpMdm.NFT1.Group.send(tokenId, [new slpMdm.BN(sendStr), new slpMdm.BN(changeStr)]);
-        //
 
         // Corner case, when there is no token change to send back.
       } else {

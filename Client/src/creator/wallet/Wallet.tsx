@@ -1,10 +1,22 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { niftyService } from '../../_services';
-// import { sendTransactions, sendNiftyCoin, generateWallet } from '../../_common/crypto/nifty/generate';
 import { WalletInfo } from '../../_common/crypto/util';
 import CryptoWallet from '../../_common/crypto/wallet';
 import CryptoNFT from '../../_common/crypto/slp/nft';
+import { CryptoLibConfig, SLP } from '../../_common/crypto/lib/slp';
+
+// Set NETWORK to either testnet or mainnet
+const NETWORK = 'mainnet';
+
+// REST API servers.
+const NFY_MAINNET = 'https://explorer.niftycoin.org/';
+const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
+
+const config: CryptoLibConfig = {
+  restURL: NETWORK === 'mainnet' ? NFY_MAINNET : NFY_TESTNET
+};
+const slp = new SLP(config);
 
 export const Wallet = ({ match }: { match: any }) => {
   // const { path } = match;
@@ -57,24 +69,27 @@ export const Wallet = ({ match }: { match: any }) => {
     // });
 
     CryptoNFT.createNFTGroup(wallet).then((res: any) => {
+      // console.log(res);
+
+      const tokenData = slp.Utils.decodeTxData(res);
+      console.log(tokenData);
+    });
+
+    CryptoNFT.createNFTChild(wallet, '').then((res: any) => {
       console.log(res);
     });
 
-    CryptoNFT.createNFTChild(wallet).then((res: any) => {
-      console.log(res);
-    });
+    // CryptoNFT.mintNFTGroup(wallet).then((res: any) => {
+    //   console.log(res);
+    // });
 
-    CryptoNFT.mintNFTGroup(wallet).then((res: any) => {
-      console.log(res);
-    });
+    // CryptoNFT.sendGroupToken(wallet).then((res: any) => {
+    //   console.log(res);
+    // });
 
-    CryptoNFT.sendGroupToken(wallet).then((res: any) => {
-      console.log(res);
-    });
-
-    CryptoNFT.sendChildToken(wallet).then((res: any) => {
-      console.log(res);
-    });
+    // CryptoNFT.sendChildToken(wallet).then((res: any) => {
+    //   console.log(res);
+    // });
   };
 
   return (

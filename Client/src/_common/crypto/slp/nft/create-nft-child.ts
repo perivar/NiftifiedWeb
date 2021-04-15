@@ -7,7 +7,7 @@
 */
 
 import * as bitcoin from 'bitcoinjs-lib';
-import CryptoUtil, { WalletInfo } from '../../util';
+import CryptoUtil, { NFTChildGenesisOpReturnConfig, WalletInfo } from '../../util';
 import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
 import { Network, Transaction } from 'bitcoinjs-lib';
 import { toBitcoinJS } from '../../niftycoin/nfy';
@@ -34,11 +34,9 @@ const config: CryptoLibConfig = {
 };
 const slp = new SLP(config);
 
-export async function createNFTChild(walletInfo: WalletInfo) {
+export async function createNFTChild(walletInfo: WalletInfo, tokenId: string) {
   try {
-    // EDIT THESE VALUES FOR YOUR USE.
-    const TOKENID = '8cd26481aaed66198e22e05450839fda763daadbb9938b0c71521ef43c642299';
-    // const TO_SLPADDR = '' // The address to send the new tokens.
+    const TOKENID = tokenId;
 
     const { mnemonic } = walletInfo;
 
@@ -120,7 +118,7 @@ export async function createNFTChild(walletInfo: WalletInfo) {
     const remainder = originalAmount - txFee;
 
     // Generate SLP config object
-    const configObj = {
+    const configObj: NFTChildGenesisOpReturnConfig = {
       name: 'NFT Child',
       ticker: 'NFT004',
       documentUrl: 'https://FullStack.cash'

@@ -6,6 +6,7 @@
 import axios from 'axios';
 import { slpMdm } from './slp-mdm';
 import { CryptoLibConfig } from './slp';
+import { SLPGenesisOpReturnConfig, TokenUTXOInfo } from '../util';
 
 let _this: any; // local global
 
@@ -199,7 +200,7 @@ export class TokenType1 {
    *  // https://github.com/Permissionless-Software-Foundation/bch-js-examples/blob/master/applications/slp/burn-tokens/burn-tokens.js
    *
    */
-  generateBurnOpReturn(tokenUtxos: any, burnQty: number) {
+  generateBurnOpReturn(tokenUtxos: TokenUTXOInfo[], burnQty: number) {
     try {
       const { tokenId } = tokenUtxos[0];
       const { decimals } = tokenUtxos[0];
@@ -269,10 +270,8 @@ export class TokenType1 {
    *  // https://github.com/Permissionless-Software-Foundation/bch-js-examples/blob/master/applications/slp/create-token/create-token.js
    *
    */
-  generateGenesisOpReturn(configObj: any) {
+  generateGenesisOpReturn(configObj: SLPGenesisOpReturnConfig) {
     try {
-      // TODO: Add input validation.
-
       let baseQty = new slpMdm.BN(configObj.initialQty).times(10 ** configObj.decimals);
       baseQty = baseQty.absoluteValue();
       // baseQty = Math.floor(baseQty);
@@ -348,7 +347,7 @@ export class TokenType1 {
    *  // See additional code here:
    *  // https://github.com/Permissionless-Software-Foundation/bch-js-examples/blob/master/applications/slp/mint-token/mint-token.js
    */
-  generateMintOpReturn(tokenUtxos: any, mintQty: number, destroyBaton = false) {
+  generateMintOpReturn(tokenUtxos: TokenUTXOInfo[], mintQty: number, destroyBaton = false) {
     try {
       // Throw error if input is not an array.
       if (!Array.isArray(tokenUtxos)) {

@@ -2,6 +2,12 @@
 utility file for certain .js operations used in applications/wallet
 */
 
+import * as bitcoin from 'bitcoinjs-lib';
+import * as bip39 from 'bip39';
+import * as bip32 from 'bip32';
+import { Network } from 'bitcoinjs-lib';
+import BigNumber from 'bignumber.js';
+
 export interface WalletInfo {
   hdNodePath: string;
   segwitAddress: string;
@@ -25,13 +31,13 @@ export interface TokenUTXOInfo extends UTXOInfo {
   txid: string;
   vout: any;
   transactionType: string;
-  mintBatonVout: any;
 
   // token
+  mintBatonVout: number | null;
   isValid: boolean | null;
   tokenType: string;
   utxoType: string;
-  tokenQty: string;
+  tokenQty: any; // number and string?
   tokenId: string;
   tokenTicker: string;
   tokenName: string;
@@ -52,12 +58,12 @@ export interface SlpTokenGenesis extends SlpToken {
   documentUri: string;
   documentHash: string;
   decimals: number;
-  mintBatonVout: string;
+  mintBatonVout: number | null;
   qty: string;
 }
 
 export interface SlpTokenMint extends SlpToken {
-  mintBatonVout: string;
+  mintBatonVout: number | null;
   qty: string;
 }
 
@@ -67,10 +73,34 @@ export interface SlpTokenSend extends SlpToken {
 
 export type SlpTokenData = SlpTokenGenesis | SlpTokenMint | SlpTokenSend;
 
-import * as bitcoin from 'bitcoinjs-lib';
-import * as bip39 from 'bip39';
-import * as bip32 from 'bip32';
-import { Network } from 'bitcoinjs-lib';
+export interface NFTGroupOpReturnConfig {
+  documentHash?: string;
+  mintBatonVout?: number | null;
+  ticker: string;
+  name: string;
+  documentUrl: string;
+  initialQty: number;
+}
+
+export interface SLPGenesisOpReturnConfig {
+  documentHash?: string;
+  mintBatonVout?: number | null;
+  ticker: string;
+  name: string;
+  documentUrl: string;
+  initialQty: number;
+  decimals: number;
+}
+
+export interface NFTChildGenesisOpReturnConfig {
+  documentHash?: string;
+  mintBatonVout?: number | null;
+  ticker: string;
+  name: string;
+  documentUrl: string;
+}
+
+// see slp types here from https://github.com/simpleledger/slpjs/blob/master/lib/slp.ts
 
 // displays link to either the nfy mainnet or tnfy testnet for transactions
 function transactionStatus(transactionInput: string, network: string) {
