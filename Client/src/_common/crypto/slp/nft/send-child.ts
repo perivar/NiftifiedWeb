@@ -30,12 +30,11 @@ const config: CryptoLibConfig = {
 };
 const slp = new SLP(config);
 
-export async function sendChildToken(walletInfo: WalletInfo) {
+export async function sendChildToken(walletInfo: WalletInfo, tokenQty: number, tokenId: string, toAddr: string) {
   try {
-    // CUSTOMIZE THESE VALUES FOR YOUR USE
-    const TOKENQTY = 1;
-    const TOKENID = '2df556ef00cf41de47ac389bc2295a9c932b70af8f47e837480c8f89fb780853';
-    let TO_ADDR = 'simpleledger:qphnz7yl9xasyzd0aldxq3q875shts0dmgep39tq3e';
+    const TOKENQTY = tokenQty; // should always be 1?
+    const TOKENID = tokenId;
+    let TO_ADDR = toAddr;
 
     const { mnemonic } = walletInfo;
 

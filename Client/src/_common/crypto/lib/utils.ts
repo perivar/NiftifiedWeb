@@ -1146,9 +1146,11 @@ export class Utils {
           // Only execute this code-path if the current UTXO has a 'tokenType'
           // property. i.e. it has been successfully hydrated with SLP
           // information.
-
           // Validate using a 'waterfall' of validators.
-          utxo.isValid = await this.waterfallValidateTxid(utxo.txid, usrObj);
+          // utxo.isValid = await this.waterfallValidateTxid(utxo.txid, usrObj);
+
+          // PIN: set to valid
+          utxo.isValid = true;
           // console.log(`isValid: ${JSON.stringify(utxo.isValid, null, 2)}`)
         }
       }

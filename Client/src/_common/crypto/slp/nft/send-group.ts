@@ -30,12 +30,11 @@ const config: CryptoLibConfig = {
 };
 const slp = new SLP(config);
 
-export async function sendGroupToken(walletInfo: WalletInfo) {
+export async function sendGroupToken(walletInfo: WalletInfo, tokenQty: number, tokenId: string, toAddr: string) {
   try {
-    // CUSTOMIZE THESE VALUES FOR YOUR USE
-    const TOKENQTY = 5;
-    const TOKENID = '3d815beb4639e446aff5e0dd60a9a800e7349dc3c390c6375c063faddd7c2618';
-    let TO_ADDR = 'simpleledger:qphnz7yl9xasyzd0aldxq3q875shts0dmgep39tq3e';
+    const TOKENQTY = tokenQty;
+    const TOKENID = tokenId;
+    let TO_ADDR = toAddr;
 
     const { mnemonic } = walletInfo;
 
