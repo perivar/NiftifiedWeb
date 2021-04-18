@@ -39,13 +39,13 @@ export const Wallet = ({ match }: { match: any }) => {
       segwitAddress: 'MWT7nzgsR57kWS88XRWVu9JBaCbQW313eP'
     };
 
-    // CryptoWallet.sendNFY(wallet, 'NUcBvW67GEqi8CXYPcL4Y5qzw7Vf9rp7wg', 2000).then((res: any) => {
-    //   console.log(res);
-    // });
-
-    CryptoWallet.sendWIF(wallet, 'NUcBvW67GEqi8CXYPcL4Y5qzw7Vf9rp7wg', 2000).then((res: any) => {
+    CryptoWallet.sendNFY(wallet, 'NUcBvW67GEqi8CXYPcL4Y5qzw7Vf9rp7wg', 3000).then((res: any) => {
       console.log(res);
     });
+
+    // CryptoWallet.sendWIF(wallet, 'NUcBvW67GEqi8CXYPcL4Y5qzw7Vf9rp7wg', 2000).then((res: any) => {
+    //   console.log(res);
+    // });
 
     // CryptoWallet.listUtxos(wallet).then((res: any) => {
     //   console.log(res);
