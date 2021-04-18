@@ -8,42 +8,19 @@
 
 import * as bitcoin from 'bitcoinjs-lib';
 import CryptoUtil, { NFTChildGenesisOpReturnConfig, WalletInfo } from '../../util';
-import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
-import { Network, Transaction } from 'bitcoinjs-lib';
-import { toBitcoinJS } from '../../niftycoin/nfy';
-import { CryptoLibConfig, SLP } from '../../lib/slp';
 
-// Set NETWORK to either testnet or mainnet
-const NETWORK = 'mainnet';
+import { Transaction } from 'bitcoinjs-lib';
 
-// import networks
-const mainNet = toBitcoinJS(false);
-const testNet = toBitcoinJS(true);
-
-// REST API servers.
-const NFY_MAINNET = 'https://explorer.niftycoin.org/';
-const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
-
-// Instantiate explorer based on the network.
-let explorer: NiftyCoinExplorer;
-if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
-else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
-
-const config: CryptoLibConfig = {
-  restURL: NETWORK === 'mainnet' ? NFY_MAINNET : NFY_TESTNET
-};
-const slp = new SLP(config);
-
-export async function createNFTChild(walletInfo: WalletInfo, tokenId: string) {
+export async function createNFTChild(walletInfo: WalletInfo, tokenId: string, NETWORK = 'mainnet') {
   try {
     const TOKENID = tokenId;
 
     const { mnemonic } = walletInfo;
 
-    // set network
-    let network: Network;
-    if (NETWORK === 'mainnet') network = mainNet;
-    else network = testNet;
+    // network
+    const electrumx = CryptoUtil.getElectrumX(NETWORK);
+    const { network } = electrumx;
+    const slp = CryptoUtil.getSLP(NETWORK);
 
     const change = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
 
@@ -53,7 +30,7 @@ export async function createNFTChild(walletInfo: WalletInfo, tokenId: string) {
     const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
 
     // Get a UTXO to pay for the transaction.
-    const utxos = await explorer.utxo(legacyAddress);
+    const utxos = await electrumx.getUtxos(legacyAddress);
     // console.log(`utxos: ${JSON.stringify(utxos, null, 2)}`);
 
     if (utxos.length === 0) {
@@ -77,7 +54,7 @@ export async function createNFTChild(walletInfo: WalletInfo, tokenId: string) {
 
     // Filter out the token UTXOs that match the user-provided token ID
     // and contain the minting baton.
-    tokenUtxos = tokenUtxos.filter((utxo: any, index: number) => {
+    tokenUtxos = tokenUtxos.filter((utxo: any) => {
       if (
         utxo && // UTXO is associated with a token.
         utxo.tokenId === TOKENID && // UTXO matches the token ID.
@@ -162,7 +139,7 @@ export async function createNFTChild(walletInfo: WalletInfo, tokenId: string) {
     // console.log(` `)
 
     // Broadcast transation to the network
-    const txidStr = await explorer.sendRawTransaction(hex);
+    const txidStr = await electrumx.broadcast(hex);
     console.log('Check the status of your transaction on this block explorer:');
     CryptoUtil.transactionStatus(txidStr, NETWORK);
     return txidStr;

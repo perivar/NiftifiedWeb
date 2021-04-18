@@ -6,6 +6,10 @@ import * as bitcoin from 'bitcoinjs-lib';
 import * as bip39 from 'bip39';
 import * as bip32 from 'bip32';
 import { Network } from 'bitcoinjs-lib';
+import { toBitcoinJS } from './niftycoin/nfy';
+import { NiftyCoinExplorer } from './NiftyCoinExplorer';
+import { NiftyCoinElectrumX } from './NiftyCoinElectrumX';
+import { CryptoLibConfig, SLP } from './lib/slp';
 
 export interface WalletInfo {
   hdNodePath: string;
@@ -337,6 +341,64 @@ function decodeError(err: any) {
   }
 }
 
+function getNetwork(NETWORK = 'mainnet') {
+  // import networks
+  const mainNet = toBitcoinJS(false);
+  const testNet = toBitcoinJS(true);
+
+  // set network
+  let network: Network;
+  if (NETWORK === 'mainnet') network = mainNet;
+  else network = testNet;
+
+  return network;
+}
+
+function getExplorer(NETWORK = 'mainnet') {
+  const network = getNetwork(NETWORK);
+
+  // REST API servers.
+  const NFY_MAINNET = 'https://explorer.niftycoin.org/';
+  const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
+
+  // Instantiate explorer based on the network.
+  let explorer: NiftyCoinExplorer;
+  if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET, network });
+  else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET, network });
+
+  return explorer;
+}
+
+function getElectrumX(NETWORK = 'mainnet') {
+  const network = getNetwork(NETWORK);
+
+  // REST API servers.
+  const NFY_MAINNET = 'http://116.203.83.168:50005/';
+  const NFY_TESTNET = 'http://116.203.83.168:50006/';
+
+  let electrumx: NiftyCoinElectrumX;
+  if (NETWORK === 'mainnet') electrumx = new NiftyCoinElectrumX({ restURL: NFY_MAINNET, network });
+  else electrumx = new NiftyCoinElectrumX({ restURL: NFY_TESTNET, network });
+
+  return electrumx;
+}
+
+function getSLP(NETWORK = 'mainnet') {
+  // REST API servers.
+  const NFY_MAINNET = 'https://explorer.niftycoin.org/';
+  const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
+
+  const explorer = getExplorer(NETWORK);
+
+  const config: CryptoLibConfig = {
+    restURL: NETWORK === 'mainnet' ? NFY_MAINNET : NFY_TESTNET,
+    explorer
+  };
+  const slp = new SLP(config);
+
+  return slp;
+}
+
 const CryptoUtil = {
   transactionStatus,
   toSegWitAddress,
@@ -349,7 +411,11 @@ const CryptoUtil = {
   toPrivateKeyFromWIF,
   toKeyPairFromWIF,
   validateNetwork,
-  decodeError
+  decodeError,
+  getNetwork,
+  getExplorer,
+  getElectrumX,
+  getSLP
 };
 
 export default CryptoUtil;

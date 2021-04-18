@@ -6,41 +6,16 @@
   - Add diffentiator for TokenType1 vs NFT1.
 */
 
-import { Network } from 'bitcoinjs-lib';
 import CryptoUtil, { WalletInfo } from '../util';
-import { CryptoLibConfig, SLP } from '../lib/slp';
-import { NiftyCoinExplorer } from '../NiftyCoinExplorer';
-import { toBitcoinJS } from '../niftycoin/nfy';
 
-// Set NETWORK to either testnet or mainnet
-const NETWORK = 'mainnet';
-
-// import networks
-const mainNet = toBitcoinJS(false);
-const testNet = toBitcoinJS(true);
-
-// REST API servers.
-const NFY_MAINNET = 'https://explorer.niftycoin.org/';
-const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
-
-// Instantiate explorer based on the network.
-let explorer: NiftyCoinExplorer;
-if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
-else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
-
-const config: CryptoLibConfig = {
-  restURL: NETWORK === 'mainnet' ? NFY_MAINNET : NFY_TESTNET
-};
-const slp = new SLP(config);
-
-export async function getBalance(walletInfo: WalletInfo) {
+export async function getBalance(walletInfo: WalletInfo, NETWORK = 'mainnet') {
   try {
     const { mnemonic } = walletInfo;
 
-    // set network
-    let network: Network;
-    if (NETWORK === 'mainnet') network = mainNet;
-    else network = testNet;
+    // network
+    const electrumx = CryptoUtil.getElectrumX(NETWORK);
+    const { network } = electrumx;
+    const slp = CryptoUtil.getSLP(NETWORK);
 
     const change = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
 
@@ -50,7 +25,7 @@ export async function getBalance(walletInfo: WalletInfo) {
     const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
 
     // first get NFY balance
-    const balance = await explorer.balance(legacyAddress);
+    const balance = await electrumx.getBalance(legacyAddress);
 
     console.log(`NFY Balance information for ${legacyAddress}:`);
     console.log(`${JSON.stringify(balance, null, 2)}`);

@@ -4,28 +4,10 @@
 */
 
 import * as bitcoin from 'bitcoinjs-lib';
-import { Network, Transaction } from 'bitcoinjs-lib';
+import { Transaction } from 'bitcoinjs-lib';
 import CryptoUtil, { WalletInfo } from '../util';
-import { NiftyCoinExplorer } from '../NiftyCoinExplorer';
-import { toBitcoinJS } from '../niftycoin/nfy';
 
-// Set NETWORK to either testnet or mainnet
-const NETWORK = 'mainnet';
-
-// import networks
-const mainNet = toBitcoinJS(false);
-const testNet = toBitcoinJS(true);
-
-// REST API servers.
-const NFY_MAINNET = 'https://explorer.niftycoin.org/';
-const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
-
-// Instantiate explorer based on the network.
-let explorer: NiftyCoinExplorer;
-if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
-else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
-
-export async function sendDust(walletInfo: WalletInfo) {
+export async function sendDust(walletInfo: WalletInfo, NETWORK = 'mainnet') {
   try {
     // Set the number of dust outputs to send.
     const NUM_OUTPUTS = 5;
@@ -36,8 +18,12 @@ export async function sendDust(walletInfo: WalletInfo) {
     const SEND_ADDR = walletInfo.legacyAddress;
     const SEND_MNEMONIC = walletInfo.mnemonic;
 
+    // network
+    const electrumx = CryptoUtil.getElectrumX(NETWORK);
+    const { network } = electrumx;
+
     // Get the balance of the sending address.
-    const balance = await explorer.balance(SEND_ADDR);
+    const balance = await electrumx.getBalance(SEND_ADDR);
 
     // Exit if the balance is zero.
     if (balance <= 0.0) {
@@ -53,7 +39,7 @@ export async function sendDust(walletInfo: WalletInfo) {
 
     // Get UTXOs held by the address.
     // https://developer.bitcoin.com/mastering-bitcoin-cash/4-transactions/
-    const utxos = await explorer.utxo(SEND_ADDR);
+    const utxos = await electrumx.getUtxos(SEND_ADDR);
     // console.log(`utxos: ${JSON.stringify(utxos, null, 2)}`)
 
     if (utxos.length === 0) throw new Error('No UTXOs found.');
@@ -67,11 +53,6 @@ export async function sendDust(walletInfo: WalletInfo) {
     if (utxo.value < outNFY) {
       throw new Error('Not enough niftoshis to send desired number of dust outputs.');
     }
-
-    // set network
-    let network: Network;
-    if (NETWORK === 'mainnet') network = mainNet;
-    else network = testNet;
 
     // instance of transaction builder
     const transactionBuilder = new bitcoin.TransactionBuilder(network);
@@ -123,7 +104,7 @@ export async function sendDust(walletInfo: WalletInfo) {
     // console.log(`TX hex: ${hex}`)
 
     // Broadcast transation to the network
-    const txidStr = await explorer.sendRawTransaction(hex);
+    const txidStr = await electrumx.broadcast(hex);
 
     console.log(`Transaction ID: ${txidStr}`);
     console.log('Check the status of your transaction on this block explorer:');

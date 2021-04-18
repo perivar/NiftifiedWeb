@@ -3,36 +3,17 @@
 */
 
 import * as bitcoin from 'bitcoinjs-lib';
-import { Network, Transaction } from 'bitcoinjs-lib';
+import { Transaction } from 'bitcoinjs-lib';
 import CryptoUtil, { WalletInfo } from '../util';
-import { NiftyCoinExplorer } from '../NiftyCoinExplorer';
-import { toBitcoinJS } from '../niftycoin/nfy';
 
-// Set NETWORK to either testnet or mainnet
-const NETWORK = 'mainnet';
-
-// import networks
-const mainNet = toBitcoinJS(false);
-const testNet = toBitcoinJS(true);
-
-// REST API servers.
-const NFY_MAINNET = 'https://explorer.niftycoin.org/';
-const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
-
-// Instantiate explorer based on the network.
-let explorer: NiftyCoinExplorer;
-if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
-else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
-
-export async function consolidateUtxos(walletInfo: WalletInfo) {
+export async function consolidateUtxos(walletInfo: WalletInfo, NETWORK = 'mainnet') {
   try {
     const SEND_ADDR = walletInfo.legacyAddress;
     const SEND_MNEMONIC = walletInfo.mnemonic;
 
-    // set network
-    let network: Network;
-    if (NETWORK === 'mainnet') network = mainNet;
-    else network = testNet;
+    // network
+    const electrumx = CryptoUtil.getElectrumX(NETWORK);
+    const { network } = electrumx;
 
     // instance of transaction builder
     const transactionBuilder = new bitcoin.TransactionBuilder(network);
@@ -40,7 +21,7 @@ export async function consolidateUtxos(walletInfo: WalletInfo) {
     let sendAmount = 0;
     const inputs = [];
 
-    const utxos = await explorer.utxo(SEND_ADDR);
+    const utxos = await electrumx.getUtxos(SEND_ADDR);
 
     if (utxos.length === 0) throw new Error('No UTXOs found.');
 
@@ -92,7 +73,7 @@ export async function consolidateUtxos(walletInfo: WalletInfo) {
     // console.log(`TX hex: ${hex}`)
 
     // Broadcast transation to the network
-    const txid = await explorer.sendRawTransaction(hex);
+    const txid = await electrumx.broadcast(hex);
     console.log(`Transaction ID: ${txid}`);
     console.log('Check the status of your transaction on this block explorer:');
     CryptoUtil.transactionStatus(txid, NETWORK);

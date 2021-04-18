@@ -4,19 +4,6 @@ import { niftyService } from '../../_services';
 import { WalletInfo } from '../../_common/crypto/util';
 import CryptoWallet from '../../_common/crypto/wallet';
 import CryptoNFT from '../../_common/crypto/slp/nft';
-import { CryptoLibConfig, SLP } from '../../_common/crypto/lib/slp';
-
-// Set NETWORK to either testnet or mainnet
-const NETWORK = 'mainnet';
-
-// REST API servers.
-const NFY_MAINNET = 'https://explorer.niftycoin.org/';
-const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
-
-const config: CryptoLibConfig = {
-  restURL: NETWORK === 'mainnet' ? NFY_MAINNET : NFY_TESTNET
-};
-const slp = new SLP(config);
 
 export const Wallet = ({ match }: { match: any }) => {
   // const { path } = match;
@@ -52,17 +39,17 @@ export const Wallet = ({ match }: { match: any }) => {
       segwitAddress: 'MWT7nzgsR57kWS88XRWVu9JBaCbQW313eP'
     };
 
-    // sendNFY(wallet, 'NUcBvW67GEqi8CXYPcL4Y5qzw7Vf9rp7wg', 2000).then((res: any) => {
+    // CryptoWallet.sendNFY(wallet, 'NUcBvW67GEqi8CXYPcL4Y5qzw7Vf9rp7wg', 2000).then((res: any) => {
     //   console.log(res);
     // });
 
-    // sendWIF(wallet, 'NUcBvW67GEqi8CXYPcL4Y5qzw7Vf9rp7wg', 2000).then((res: any) => {
-    //   console.log(res);
-    // });
-
-    CryptoWallet.listUtxos(wallet).then((res: any) => {
+    CryptoWallet.sendWIF(wallet, 'NUcBvW67GEqi8CXYPcL4Y5qzw7Vf9rp7wg', 2000).then((res: any) => {
       console.log(res);
     });
+
+    // CryptoWallet.listUtxos(wallet).then((res: any) => {
+    //   console.log(res);
+    // });
 
     // consolidateUtxos(wallet).then((res: any) => {
     //   console.log(res);

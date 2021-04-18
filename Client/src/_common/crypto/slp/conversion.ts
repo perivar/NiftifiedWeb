@@ -2,35 +2,14 @@
   Convert between address formats
 */
 
-import { Network } from 'bitcoinjs-lib';
 import CryptoUtil, { WalletInfo } from '../util';
-import { NiftyCoinExplorer } from '../NiftyCoinExplorer';
-import { toBitcoinJS } from '../niftycoin/nfy';
 
-// Set NETWORK to either testnet or mainnet
-const NETWORK = 'mainnet';
-
-// import networks
-const mainNet = toBitcoinJS(false);
-const testNet = toBitcoinJS(true);
-
-// REST API servers.
-const NFY_MAINNET = 'https://explorer.niftycoin.org/';
-const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
-
-// Instantiate explorer based on the network.
-let explorer: NiftyCoinExplorer;
-if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
-else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
-
-export async function conversion(walletInfo: WalletInfo) {
+export async function conversion(walletInfo: WalletInfo, NETWORK = 'mainnet') {
   try {
     const { mnemonic } = walletInfo;
 
-    // set network
-    let network: Network;
-    if (NETWORK === 'mainnet') network = mainNet;
-    else network = testNet;
+    // network
+    const network = CryptoUtil.getNetwork(NETWORK);
 
     const change = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
 

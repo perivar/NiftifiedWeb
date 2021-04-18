@@ -6,15 +6,8 @@
 import * as bitcoin from 'bitcoinjs-lib';
 import axios, { AxiosRequestConfig } from 'axios';
 import CryptoUtil, { UTXOInfo } from './util';
-import { toBitcoinJS } from './niftycoin/nfy';
+
 import { Network } from 'bitcoinjs-lib';
-
-// Set NETWORK to either testnet or mainnet
-const NETWORK = 'mainnet';
-
-// import networks
-const mainNet = toBitcoinJS(false);
-const testNet = toBitcoinJS(true);
 
 let _this: NiftyCoinElectrumX;
 
@@ -29,6 +22,7 @@ export class NiftyCoinElectrumX {
     this.restURL = config.restURL;
     this.apiToken = config.apiToken;
     this.authToken = config.authToken;
+    this.network = config.network;
 
     if (this.authToken) {
       // Add Basic Authentication token to the authorization header.
@@ -47,9 +41,6 @@ export class NiftyCoinElectrumX {
     } else {
       this.axiosOptions = {};
     }
-
-    if (NETWORK === 'mainnet') this.network = mainNet;
-    else this.network = testNet;
 
     _this = this;
   }
@@ -150,7 +141,7 @@ export class NiftyCoinElectrumX {
 
       // Loops through each address and creates an array of Promises, querying
       // Insight API in parallel.
-      const addressesPromise = addresses.map(async (address, index) => {
+      const addressesPromise = addresses.map(async (address) => {
         // console.log(`address: ${address}`)
         const utxos = await _this._utxosFromElectrumx(address);
 
@@ -257,7 +248,7 @@ export class NiftyCoinElectrumX {
 
       // Loops through each address and creates an array of Promises, querying
       // ElectrumX API in parallel.
-      const addressesPromise = addresses.map(async (address, index) => {
+      const addressesPromise = addresses.map(async (address) => {
         // console.log(`address: ${address}`)
         const balance = await _this._balanceFromElectrumx(address);
 
@@ -360,7 +351,7 @@ export class NiftyCoinElectrumX {
 
       // Loops through each address and creates an array of Promises, querying
       // ElectrumX API in parallel.
-      const addressesPromise = addresses.map(async (address, index) => {
+      const addressesPromise = addresses.map(async (address) => {
         // console.log(`address: ${address}`)
         const transactions = await _this._transactionsFromElectrumx(address);
 
@@ -465,7 +456,7 @@ export class NiftyCoinElectrumX {
 
       // Loops through each address and creates an array of Promises, querying
       // Insight API in parallel.
-      const addressesPromise = addresses.map(async (address, index) => {
+      const addressesPromise = addresses.map(async (address) => {
         // console.log(`address: ${address}`)
         const utxos = await _this._mempoolFromElectrumx(address);
 
@@ -484,6 +475,23 @@ export class NiftyCoinElectrumX {
       console.log('Error in electrumx.js/mempoolBulk().', err);
 
       throw new Error(_this.errorHandler(err));
+    }
+  }
+
+  async broadcast(txHex: string) {
+    try {
+      if (typeof txHex === 'string') {
+        // Query the utxos from the ElectrumX server.
+        const electrumResponse = await _this.electrumxRequest('blockchain.transaction.broadcast', txHex);
+        // console.log(`electrumResponse: ${JSON.stringify(electrumResponse, null, 2)}`);
+
+        return electrumResponse;
+      }
+
+      throw new Error('Input txHex must be a string.');
+    } catch (error) {
+      if (error.response && error.response.data) throw error.response.data;
+      else throw error;
     }
   }
 

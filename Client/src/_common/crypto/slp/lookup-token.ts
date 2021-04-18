@@ -2,23 +2,14 @@
   Get the token information based on the id.
 */
 
-import { CryptoLibConfig, SLP } from '../lib/slp';
+import CryptoUtil from '../util';
 
-// Set NETWORK to either testnet or mainnet
-const NETWORK = 'mainnet';
-
-// REST API servers.
-const NFY_MAINNET = 'https://explorer.niftycoin.org/';
-const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
-
-const config: CryptoLibConfig = {
-  restURL: NETWORK === 'mainnet' ? NFY_MAINNET : NFY_TESTNET
-};
-const slp = new SLP(config);
-
-export async function lookupToken(tokenId: string) {
+export async function lookupToken(tokenId: string, NETWORK = 'mainnet') {
   try {
     const TOKENID = tokenId;
+
+    // network
+    const slp = CryptoUtil.getSLP(NETWORK);
 
     const properties = await slp.Utils.list(TOKENID);
     console.log(properties);

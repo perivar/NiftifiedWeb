@@ -3,34 +3,16 @@
 */
 
 import * as bitcoin from 'bitcoinjs-lib';
-import { Network, Transaction } from 'bitcoinjs-lib';
+import { Transaction } from 'bitcoinjs-lib';
 import CryptoUtil, { WalletInfo } from '../../util';
-import { NiftyCoinExplorer } from '../../NiftyCoinExplorer';
-import { toBitcoinJS } from '../../niftycoin/nfy';
-import { CryptoLibConfig, SLP } from '../../lib/slp';
 
-// Set NETWORK to either testnet or mainnet
-const NETWORK = 'mainnet';
-
-// import networks
-const mainNet = toBitcoinJS(false);
-const testNet = toBitcoinJS(true);
-
-// REST API servers.
-const NFY_MAINNET = 'https://explorer.niftycoin.org/';
-const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
-
-// Instantiate explorer based on the network.
-let explorer: NiftyCoinExplorer;
-if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
-else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
-
-const config: CryptoLibConfig = {
-  restURL: NETWORK === 'mainnet' ? NFY_MAINNET : NFY_TESTNET
-};
-const slp = new SLP(config);
-
-export async function sendGroupToken(walletInfo: WalletInfo, tokenQty: number, tokenId: string, toAddr: string) {
+export async function sendGroupToken(
+  walletInfo: WalletInfo,
+  tokenQty: number,
+  tokenId: string,
+  toAddr: string,
+  NETWORK: string
+) {
   try {
     const TOKENQTY = tokenQty;
     const TOKENID = tokenId;
@@ -38,10 +20,10 @@ export async function sendGroupToken(walletInfo: WalletInfo, tokenQty: number, t
 
     const { mnemonic } = walletInfo;
 
-    // set network
-    let network: Network;
-    if (NETWORK === 'mainnet') network = mainNet;
-    else network = testNet;
+    // network
+    const electrumx = CryptoUtil.getElectrumX(NETWORK);
+    const { network } = electrumx;
+    const slp = CryptoUtil.getSLP(NETWORK);
 
     const change = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
 
@@ -54,7 +36,7 @@ export async function sendGroupToken(walletInfo: WalletInfo, tokenQty: number, t
     const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
 
     // Get UTXOs held by this address.
-    const utxos = await explorer.utxo(legacyAddress);
+    const utxos = await electrumx.getUtxos(legacyAddress);
     // console.log(`utxos: ${JSON.stringify(utxos, null, 2)}`);
 
     if (utxos.length === 0) throw new Error('No UTXOs to spend! Exiting.');
@@ -172,7 +154,7 @@ export async function sendGroupToken(walletInfo: WalletInfo, tokenQty: number, t
     // END transaction construction.
 
     // Broadcast transation to the network
-    const txidStr = await explorer.sendRawTransaction(hex);
+    const txidStr = await electrumx.broadcast(hex);
     console.log(`Transaction ID: ${txidStr}`);
 
     console.log('Check the status of your transaction on this block explorer:');

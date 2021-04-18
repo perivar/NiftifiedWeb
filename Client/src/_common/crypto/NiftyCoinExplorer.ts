@@ -4,6 +4,7 @@
 */
 // Public npm libraries
 import axios, { AxiosRequestConfig } from 'axios';
+import { Network } from 'bitcoinjs-lib';
 import { UTXOInfo } from './util';
 
 let _this: NiftyCoinExplorer;
@@ -13,11 +14,13 @@ export class NiftyCoinExplorer {
   apiToken: string;
   authToken: string;
   axiosOptions: AxiosRequestConfig;
+  network: Network;
 
   constructor(config: any) {
     this.restURL = config.restURL;
     this.apiToken = config.apiToken;
     this.authToken = config.authToken;
+    this.network = config.network;
 
     if (this.authToken) {
       // Add Basic Authentication token to the authorization header.

@@ -3,26 +3,16 @@
   with the create-wallet example.
 */
 
-import { NiftyCoinExplorer } from '../NiftyCoinExplorer';
-import { WalletInfo } from '../util';
-
-// Set NETWORK to either testnet or mainnet
-const NETWORK = 'mainnet';
-
-// REST API servers.
-const NFY_MAINNET = 'https://explorer.niftycoin.org/';
-const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
-
-// Instantiate explorer based on the network.
-let explorer: NiftyCoinExplorer;
-if (NETWORK === 'mainnet') explorer = new NiftyCoinExplorer({ restURL: NFY_MAINNET });
-else explorer = new NiftyCoinExplorer({ restURL: NFY_TESTNET });
+import CryptoUtil, { WalletInfo } from '../util';
 
 // Get the balance of the wallet.
-export async function getBalance(walletInfo: WalletInfo) {
+export async function getBalance(walletInfo: WalletInfo, NETWORK = 'mainnet') {
   try {
+    // network
+    const electrumx = CryptoUtil.getElectrumX(NETWORK);
+
     // first get NFY balance
-    const balance = await explorer.balance(walletInfo.legacyAddress);
+    const balance = await electrumx.getBalance(walletInfo.legacyAddress);
     console.log('NFY Balance information:');
     console.log(JSON.stringify(balance, null, 2));
     return balance;

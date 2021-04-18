@@ -20,38 +20,6 @@ export class NFT1 {
     this.restURL = config.restURL;
   }
 
-  /**
-   * @api SLP.NFT1.newNFTGroupOpReturn() newNFTGroupOpReturn()
-   * @apiName newNFTGroupOpReturn
-   * @apiGroup SLP NFT1
-   * @apiDescription Generate the OP_RETURN value needed to create an SLP
-   * NFT Group token.
-   * It's assumed all elements in the tokenUtxos array belong to the same token.
-   *
-   * Returns a Buffer representing a transaction output, ready to be added to
-   * the Transaction Builder.
-   *
-   * @apiExample Example usage:
-   *
-   *   const configObj = {
-   *     name: "SLP Test Token",
-   *     ticker: "SLPTEST",
-   *     documentUrl: "https://FullStack.cash",
-   *     initialQty: 1
-   *   }
-   *
-   *   const result = await bchjs.SLP.NFT1.newNFTGroupOpReturn(
-   *     configObj
-   *   )
-   *
-   *  ...
-   *  // Add OP_RETURN as first output.
-   *  transactionBuilder.addOutput(slpData, 0);
-   *
-   *  // See additional code here:
-   *  // https://github.com/Permissionless-Software-Foundation/bch-js-examples/tree/master/applications/slp/nft
-   *
-   */
   newNFTGroupOpReturn(configObj: NFTGroupOpReturnConfig) {
     try {
       // Prevent error if user fails to add the document hash.
@@ -78,49 +46,6 @@ export class NFT1 {
   }
 
   // Mint additional NFT Group 'Parent' tokens.
-  /**
-   * @api SLP.NFT1.mintNFTGroupOpReturn() mintNFTGroupOpReturn()
-   * @apiName mintNFTGroupOpReturn
-   * @apiGroup SLP NFT1
-   * @apiDescription Generate the OP_RETURN value needed to create an SLP Mint
-   * transaction for an NFT Group token.
-   * It's assumed all elements in the tokenUtxos array belong to the same token.
-   *
-   * Returns a Buffer representing a transaction output, ready to be added to
-   * the Transaction Builder.
-   *
-   * @apiExample Example usage:
-   *
-   *  const addr = "bitcoincash:qq6xz6wwcy78uh79vgjvfyahj4arq269w5an8pcjak"
-   *  const utxos = await bchjs.Blockbook.utxos(addr)
-   *
-   *  // Identify the SLP token UTXOs.
-   *  let tokenUtxos = await bchjs.SLP.Utils.tokenUtxoDetails(utxos);
-   *
-   *  // Filter out the minting baton.
-   *  tokenUtxos = tokenUtxos.filter((utxo, index) => {
-   *    if (
-   *      utxo && // UTXO is associated with a token.
-   *      utxo.tokenId === TOKENID && // UTXO matches the token ID.
-   *      utxo.utxoType === "minting-baton" && // UTXO is not a minting baton.
-   *      utxo.tokenType === 129 // UTXO is for NFT Group
-   *    )
-   *    return true;
-   *  });
-   *
-   *  // Generate the SLP OP_RETURN
-   *  const slpData = bchjs.SLP.NFT1.mintNFTGroupOpReturn(
-   *    tokenUtxos,
-   *    1 // Mint 1 new token.
-   *  );
-   *
-   *  ...
-   *  // Add OP_RETURN as first output.
-   *  transactionBuilder.addOutput(slpData, 0);
-   *
-   *  // See additional code here:
-   *  // https://github.com/Permissionless-Software-Foundation/bch-js-examples/tree/master/applications/slp/nft
-   */
   mintNFTGroupOpReturn(tokenUtxos: TokenUTXOInfo[], mintQty: number, destroyBaton = false) {
     // try {
     // Throw error if input is not an array.
@@ -160,37 +85,6 @@ export class NFT1 {
     // }
   }
 
-  /**
-   * @api SLP.NFT1.generateNFTChildGenesisOpReturn() generateNFTChildGenesisOpReturn()
-   * @apiName generateNFTChildGenesisOpReturn
-   * @apiGroup SLP NFT1
-   * @apiDescription Generate the OP_RETURN value needed to create an SLP
-   * NFT Child token.
-   * It's assumed all elements in the tokenUtxos array belong to the same token.
-   *
-   * Returns a Buffer representing a transaction output, ready to be added to
-   * the Transaction Builder.
-   *
-   * @apiExample Example usage:
-   *
-   *   const configObj = {
-   *     name: "NFT Child",
-   *     ticker: "NFTC",
-   *     documentUrl: "https://FullStack.cash",
-   *   }
-   *
-   *   const result = await bchjs.SLP.NFT1.generateNFTChildGenesisOpReturn(
-   *     configObj
-   *   )
-   *
-   *  ...
-   *  // Add OP_RETURN as first output.
-   *  transactionBuilder.addOutput(slpData, 0);
-   *
-   *  // See additional code here:
-   *  // https://github.com/Permissionless-Software-Foundation/bch-js-examples/tree/master/applications/slp/nft
-   *
-   */
   generateNFTChildGenesisOpReturn(configObj: NFTChildGenesisOpReturnConfig) {
     try {
       // Prevent error if user fails to add the document hash.
@@ -213,49 +107,6 @@ export class NFT1 {
     }
   }
 
-  /**
-   * @api SLP.NFT1.generateNFTChildSendOpReturn() generateNFTChildSendOpReturn()
-   * @apiName generateNFTChildSendOpReturn
-   * @apiGroup SLP NFT1
-   * @apiDescription Generate the OP_RETURN value needed to send an SLP NFT
-   * Child token to another address.
-   * It's assumed all elements in the tokenUtxos array belong to the same token.
-   *
-   * Returns a Buffer representing a transaction output, ready to be added to
-   * the Transaction Builder.
-   *
-   * @apiExample Example usage:
-   *
-   *  const addr = "bitcoincash:qq6xz6wwcy78uh79vgjvfyahj4arq269w5an8pcjak"
-   *  const utxos = await bchjs.Blockbook.utxos(addr)
-   *
-   *  // Identify the SLP token UTXOs.
-   *  let tokenUtxos = await bchjs.SLP.Utils.tokenUtxoDetails(utxos);
-   *
-   *  // Filter out the token UTXOs that match the user-provided token ID.
-   *  tokenUtxos = tokenUtxos.filter((utxo, index) => {
-   *    if (
-   *      utxo && // UTXO is associated with a token.
-   *      utxo.tokenId === TOKENID && // UTXO matches the token ID.
-   *      utxo.tokenType === "token" && // UTXO is not a minting baton.
-   *      utxo.tokenType === 65 // UTXO is for an NFT Child
-   *    )
-   *    return true;
-   *  });
-   *
-   *  // Generate the SEND OP_RETURN
-   *  const slpData = bchjs.SLP.NFT1.generateNFTChildSendOpReturn(
-   *    tokenUtxos,
-   *    TOKENQTY
-   *  );
-   *
-   *  ...
-   *  // Add OP_RETURN as first output.
-   *  transactionBuilder.addOutput(slpData, 0);
-   *
-   *  // See additional code here:
-   *  // https://github.com/Permissionless-Software-Foundation/bch-js-examples/tree/master/applications/slp/nft
-   */
   generateNFTChildSendOpReturn(tokenUtxos: any, sendQty: number) {
     try {
       // TODO: Add input validation.
@@ -301,49 +152,6 @@ export class NFT1 {
     }
   }
 
-  /**
-   * @api SLP.NFT1.generateNFTGroupSendOpReturn() generateNFTGroupSendOpReturn()
-   * @apiName generateNFTGroupSendOpReturn
-   * @apiGroup SLP NFT1
-   * @apiDescription Generate the OP_RETURN value needed to send an SLP NFT
-   * Group token to another address.
-   * It's assumed all elements in the tokenUtxos array belong to the same token.
-   *
-   * Returns a Buffer representing a transaction output, ready to be added to
-   * the Transaction Builder.
-   *
-   * @apiExample Example usage:
-   *
-   *  const addr = "bitcoincash:qq6xz6wwcy78uh79vgjvfyahj4arq269w5an8pcjak"
-   *  const utxos = await bchjs.Blockbook.utxos(addr)
-   *
-   *  // Identify the SLP token UTXOs.
-   *  let tokenUtxos = await bchjs.SLP.Utils.tokenUtxoDetails(utxos);
-   *
-   *  // Filter out the token UTXOs that match the user-provided token ID.
-   *  tokenUtxos = tokenUtxos.filter((utxo, index) => {
-   *    if (
-   *      utxo && // UTXO is associated with a token.
-   *      utxo.tokenId === TOKENID && // UTXO matches the token ID.
-   *      utxo.tokenType === "token" && // UTXO is not a minting baton.
-   *      utxo.tokenType === 129 // UTXO is for an NFT Group
-   *    )
-   *    return true;
-   *  });
-   *
-   *  // Generate the SEND OP_RETURN
-   *  const slpData = bchjs.SLP.NFT1.generateNFTGroupSendOpReturn(
-   *    tokenUtxos,
-   *    TOKENQTY
-   *  );
-   *
-   *  ...
-   *  // Add OP_RETURN as first output.
-   *  transactionBuilder.addOutput(slpData, 0);
-   *
-   *  // See additional code here:
-   *  // https://github.com/Permissionless-Software-Foundation/bch-js-examples/tree/master/applications/slp/nft
-   */
   generateNFTGroupSendOpReturn(tokenUtxos: TokenUTXOInfo[], sendQty: number) {
     try {
       const { tokenId } = tokenUtxos[0];

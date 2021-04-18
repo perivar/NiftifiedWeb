@@ -5,22 +5,17 @@
 
 import * as bip39 from 'bip39';
 import * as bip32 from 'bip32';
-import { Network } from 'bitcoinjs-lib';
-import { toBitcoinJS } from '../niftycoin/nfy';
+
 import CryptoUtil, { WalletInfo } from '../util';
 
-// Set NETWORK to either testnet or mainnet
-const NETWORK = 'mainnet';
-
-// import networks
-const mainNet = toBitcoinJS(false);
-const testNet = toBitcoinJS(true);
-
-export const createWallet = async (): Promise<WalletInfo | undefined> => {
+export const createWallet = async (NETWORK: string): Promise<WalletInfo | undefined> => {
   try {
     const lang = 'english';
     // let outStr = '';
     const outObj: WalletInfo = {} as WalletInfo;
+
+    // network
+    const network = CryptoUtil.getNetwork(NETWORK);
 
     // create 256 bit BIP39 mnemonic
     const mnemonic = bip39.generateMnemonic();
@@ -32,11 +27,6 @@ export const createWallet = async (): Promise<WalletInfo | undefined> => {
 
     // root seed buffer
     const rootSeed = await bip39.mnemonicToSeed(mnemonic); // creates seed buffer
-
-    // set network
-    let network: Network;
-    if (NETWORK === 'mainnet') network = mainNet;
-    else network = testNet;
 
     // master HDNode
     const masterHDNode = bip32.fromSeed(rootSeed, network);
