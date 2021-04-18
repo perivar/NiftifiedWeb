@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 /*
   This library interacts with the NiftyCoin Explorer REST API endpoints
 */
@@ -29,7 +30,7 @@ export class NiftyCoinExplorer {
       // Add JWT token to the authorization header.
       this.axiosOptions = {
         headers: {
-          authorization: `Token ${this.apiToken}`
+          authorization: `Token ${_this.apiToken}`
         }
       };
     } else {
@@ -44,7 +45,7 @@ export class NiftyCoinExplorer {
     try {
       // Handle single address.
       if (typeof address === 'string') {
-        const response = await axios.get(`${this.restURL}ext/getaddresstxs/${address}/0/${count}`, _this.axiosOptions);
+        const response = await axios.get(`${_this.restURL}ext/getaddresstxs/${address}/0/${count}`, _this.axiosOptions);
 
         // lookup tx data
         const utxos: UTXOInfo[] = [];
@@ -56,7 +57,7 @@ export class NiftyCoinExplorer {
 
         await Promise.all(
           elements.map(async (element: any) => {
-            const data = await this.txDataExplorer(element.txid);
+            const data = await _this.txDataExplorer(element.txid);
 
             let isSpent = true;
 
@@ -119,7 +120,7 @@ export class NiftyCoinExplorer {
     try {
       // Handle single address.
       if (typeof address === 'string') {
-        const response = await axios.get(`${this.restURL}ext/getbalance/${address}`, _this.axiosOptions);
+        const response = await axios.get(`${_this.restURL}ext/getbalance/${address}`, _this.axiosOptions);
         if (!response.data.error) {
           return Number(response.data);
         }
@@ -128,7 +129,7 @@ export class NiftyCoinExplorer {
         // Handle array of addresses.
         // } else if (Array.isArray(address)) {
         //   const response = await axios.post(
-        //     `${this.restURL}electrumx/balance`,
+        //     `${_this.restURL}electrumx/balance`,
         //     {
         //       addresses: address
         //     },
@@ -149,13 +150,13 @@ export class NiftyCoinExplorer {
     try {
       // Handle single address.
       if (typeof address === 'string') {
-        const response = await axios.get(`${this.restURL}ext/getaddress/${address}`, _this.axiosOptions);
+        const response = await axios.get(`${_this.restURL}ext/getaddress/${address}`, _this.axiosOptions);
         return response.data;
 
         // Handle array of addresses.
         // } else if (Array.isArray(address)) {
         //   const response = await axios.post(
-        //     `${this.restURL}electrumx/transactions`,
+        //     `${_this.restURL}electrumx/transactions`,
         //     {
         //       addresses: address
         //     },
@@ -177,7 +178,7 @@ export class NiftyCoinExplorer {
       // Handle single transaction.
       if (typeof txid === 'string') {
         const response = await axios.get(
-          `${this.restURL}api/getrawtransaction?txid=${txid}&decrypt=1`,
+          `${_this.restURL}api/getrawtransaction?txid=${txid}&decrypt=1`,
           _this.axiosOptions
         );
         return response.data;
@@ -194,7 +195,7 @@ export class NiftyCoinExplorer {
     try {
       // Handle single transaction.
       if (typeof txid === 'string') {
-        const response = await axios.get(`${this.restURL}ext/gettx/${txid}`, _this.axiosOptions);
+        const response = await axios.get(`${_this.restURL}ext/gettx/${txid}`, _this.axiosOptions);
         return response.data;
       }
 
@@ -210,11 +211,11 @@ export class NiftyCoinExplorer {
       if (typeof txHex === 'string') {
         // console.log(txHex);
         // use GET, not POST
-        // const response = await axios.post(`${this.restURL}api/sendrawtransaction`, { txHex }, _this.axiosOptions);
-        const response = await axios.get(`${this.restURL}api/sendrawtransaction?hex=${txHex}`, _this.axiosOptions);
+        // const response = await axios.post(`${_this.restURL}api/sendrawtransaction`, { txHex }, _this.axiosOptions);
+        const response = await axios.get(`${_this.restURL}api/sendrawtransaction?hex=${txHex}`, _this.axiosOptions);
 
         // use decode while testing
-        // const response = await axios.get(`${this.restURL}api/decoderawtransaction?hex=${txHex}`, _this.axiosOptions);
+        // const response = await axios.get(`${_this.restURL}api/decoderawtransaction?hex=${txHex}`, _this.axiosOptions);
         return response.data;
         // return 'RANDOM_RETURN_HEX';
       }

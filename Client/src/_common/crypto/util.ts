@@ -6,7 +6,6 @@ import * as bitcoin from 'bitcoinjs-lib';
 import * as bip39 from 'bip39';
 import * as bip32 from 'bip32';
 import { Network } from 'bitcoinjs-lib';
-import BigNumber from 'bignumber.js';
 
 export interface WalletInfo {
   hdNodePath: string;
@@ -243,6 +242,101 @@ function findBiggestUtxo(utxos: UTXOInfo[]): UTXOInfo {
   return found;
 }
 
+// Returns true if user-provided cash address matches the correct network,
+// mainnet or testnet. If NETWORK env var is not defined, it returns false.
+// This prevent a common user-error issue that is easy to make: passing a
+// testnet address into rest.bitcoin.com or passing a mainnet address into
+// trest.bitcoin.com.
+function validateNetwork(addr: string) {
+  try {
+    // const network = process.env.NETWORK;
+
+    // Return false if NETWORK is not defined.
+    // if (!network || network === '') {
+    //   console.log('Warning: NETWORK environment variable is not defined!');
+    //   return false;
+    // }
+
+    // // Convert the user-provided address to a cashaddress, for easy detection
+    // // of the intended network.
+    // const cashAddr = this.bchjs.Address.toCashAddress(addr);
+
+    // // Return true if the network and address both match testnet
+    // const addrIsTest = this.bchjs.Address.isTestnetAddress(cashAddr);
+    // if (network === 'testnet' && addrIsTest) return true;
+
+    // // Return true if the network and address both match mainnet
+    // const addrIsMain = this.bchjs.Address.isMainnetAddress(cashAddr);
+    // if (network === 'mainnet' && addrIsMain) return true;
+
+    // disabled for now
+    return true;
+    // return false;
+  } catch (err) {
+    console.log('Error in validateNetwork()');
+    return false;
+  }
+}
+
+// Error messages returned by a full node can be burried pretty deep inside the
+// error object returned by Axios. This function attempts to extract and interpret
+// error messages.
+// Returns an object. If successful, obj.msg is a string.
+// If there is a failure, obj.msg is false.
+function decodeError(err: any) {
+  try {
+    // Attempt to extract the full node error message.
+    if (err.response && err.response.data && err.response.data.error && err.response.data.error.message) {
+      return { msg: err.response.data.error.message, status: 400 };
+    }
+
+    // Attempt to extract the Insight error message
+    if (err.response && err.response.data) {
+      return { msg: err.response.data, status: err.response.status };
+    }
+
+    // console.log(`err.message: ${err.message}`)
+    // console.log(`err: `, err)
+
+    // Attempt to detect a network connection error.
+    if (err.message && err.message.indexOf('ENOTFOUND') > -1) {
+      return {
+        msg: 'Network error: Could not communicate with full node or other external service.',
+        status: 503
+      };
+    }
+
+    // Different kind of network error
+    if (err.message && err.message.indexOf('ENETUNREACH') > -1) {
+      return {
+        msg: 'Network error: Could not communicate with full node or other external service.',
+        status: 503
+      };
+    }
+
+    // Different kind of network error
+    if (err.message && err.message.indexOf('EAI_AGAIN') > -1) {
+      return {
+        msg: 'Network error: Could not communicate with full node or other external service.',
+        status: 503
+      };
+    }
+
+    // Axios timeout (aborted) error, or service is down (connection refused).
+    if (err.code && (err.code === 'ECONNABORTED' || err.code === 'ECONNREFUSED')) {
+      return {
+        msg: 'Network error: Could not communicate with full node or other external service.',
+        status: 503
+      };
+    }
+
+    return { msg: false, status: 500 };
+  } catch (err) {
+    console.log('unhandled error in route-utils.js/decodeError(): ', err);
+    return { msg: false, status: 500 };
+  }
+}
+
 const CryptoUtil = {
   transactionStatus,
   toSegWitAddress,
@@ -253,7 +347,9 @@ const CryptoUtil = {
   findBiggestUtxo,
   toPublicKey,
   toPrivateKeyFromWIF,
-  toKeyPairFromWIF
+  toKeyPairFromWIF,
+  validateNetwork,
+  decodeError
 };
 
 export default CryptoUtil;

@@ -60,9 +60,9 @@ export const Wallet = ({ match }: { match: any }) => {
     //   console.log(res);
     // });
 
-    // CryptoWallet.listUtxos(wallet).then((res: any) => {
-    //   console.log(res);
-    // });
+    CryptoWallet.listUtxos(wallet).then((res: any) => {
+      console.log(res);
+    });
 
     // consolidateUtxos(wallet).then((res: any) => {
     //   console.log(res);
@@ -75,9 +75,9 @@ export const Wallet = ({ match }: { match: any }) => {
     //   // console.log(tokenData);
     // });
 
-    CryptoNFT.getNFT('3d815beb4639e446aff5e0dd60a9a800e7349dc3c390c6375c063faddd7c2618').then((res: any) => {
-      console.log(res);
-    });
+    // CryptoNFT.getNFT('3d815beb4639e446aff5e0dd60a9a800e7349dc3c390c6375c063faddd7c2618').then((res: any) => {
+    //   console.log(res);
+    // });
 
     // CryptoNFT.createNFTChild(wallet, '').then((res: any) => {
     //   console.log(res);
