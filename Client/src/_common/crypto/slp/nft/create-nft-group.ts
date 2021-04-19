@@ -7,7 +7,7 @@ import * as bitcoin from 'bitcoinjs-lib';
 import { Transaction } from 'bitcoinjs-lib';
 import CryptoUtil, { NFTGroupOpReturnConfig, WalletInfo } from '../../util';
 
-export async function createNFTGroup(walletInfo: WalletInfo, NETWORK = 'mainnet') {
+export async function createNFTGroup(walletInfo: WalletInfo, configObj: NFTGroupOpReturnConfig, NETWORK = 'mainnet') {
   try {
     const { mnemonic } = walletInfo;
 
@@ -50,15 +50,6 @@ export async function createNFTGroup(walletInfo: WalletInfo, NETWORK = 'mainnet'
     // amount to send back to the sending address.
     // Subtract two dust transactions for minting baton and tokens.
     const remainder = originalAmount - 546 * 2 - txFee;
-
-    // Generate SLP config object
-    const configObj: NFTGroupOpReturnConfig = {
-      name: 'NFT Test Token',
-      ticker: 'NFTY',
-      documentUrl: 'https://www.niftycoin.org',
-      mintBatonVout: 2,
-      initialQty: 123
-    };
 
     // Generate the OP_RETURN entry for an SLP GENESIS transaction.
     const script = slp.NFT1.newNFTGroupOpReturn(configObj);

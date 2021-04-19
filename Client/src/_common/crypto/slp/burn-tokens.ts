@@ -1,5 +1,5 @@
 /*
-  Burn a specific quantity of tokens of type TOKENID
+  Burn a specific quantity of tokens of type tokenId
 */
 
 import * as bitcoin from 'bitcoinjs-lib';
@@ -8,9 +8,6 @@ import CryptoUtil, { WalletInfo } from '../util';
 
 export async function burnTokens(walletInfo: WalletInfo, tokenId: string, tokenQty: number, NETWORK = 'mainnet') {
   try {
-    const TOKENQTY = tokenQty;
-    const TOKENID = tokenId;
-
     const { mnemonic } = walletInfo;
 
     // network
@@ -52,7 +49,7 @@ export async function burnTokens(walletInfo: WalletInfo, tokenId: string, tokenQ
     tokenUtxos = tokenUtxos.filter((utxo: any) => {
       if (
         utxo && // UTXO is associated with a token.
-        utxo.tokenId === TOKENID && // UTXO matches the token ID.
+        utxo.tokenId === tokenId && // UTXO matches the token ID.
         utxo.utxoType === 'token' // UTXO is not a minting baton.
       ) {
         return true;
@@ -70,7 +67,7 @@ export async function burnTokens(walletInfo: WalletInfo, tokenId: string, tokenQ
     // console.log(`nfyUtxo: ${JSON.stringify(nfyUtxo, null, 2)}`);
 
     // Generate the SLP OP_RETURN.
-    const slpData = slp.TokenType1.generateBurnOpReturn(tokenUtxos, TOKENQTY);
+    const slpData = slp.TokenType1.generateBurnOpReturn(tokenUtxos, tokenQty);
 
     // BEGIN transaction construction.
 
@@ -96,7 +93,7 @@ export async function burnTokens(walletInfo: WalletInfo, tokenId: string, tokenQ
     // const niftoshisPerByte = 1.1
     // const txFee = Math.floor(niftoshisPerByte * byteCount)
     // console.log(`txFee: ${txFee} niftoshis\n`)
-    const txFee = 250;
+    const txFee = 550;
 
     // amount to send back to the sending address. It's the original amount - 1 sat/byte for tx size
     const remainder = originalAmount - txFee - 546;

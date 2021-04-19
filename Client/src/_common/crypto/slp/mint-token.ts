@@ -9,17 +9,13 @@ import CryptoUtil, { WalletInfo } from '../util';
 export async function mintToken(
   walletInfo: WalletInfo,
   tokenId: string,
-  tokenQty: number,
-  toAddr = '',
+  tokenQty: number, // The quantity of new tokens to mint.
+  toAddress = '',
   NETWORK = 'mainnet'
 ) {
   try {
-    const TOKENID = tokenId;
-    const TOKENQTY = tokenQty; // The quantity of new tokens to mint.
-
     // Defaults to sending the token back to the same wallet if the user hasn't specified a
     // different address.
-    let TO_ADDR = toAddr; // The address to send the new tokens.
 
     const { mnemonic } = walletInfo;
 
@@ -63,7 +59,7 @@ export async function mintToken(
     tokenUtxos = tokenUtxos.filter((utxo: any) => {
       if (
         utxo && // UTXO is associated with a token.
-        utxo.tokenId === TOKENID && // UTXO matches the token ID.
+        utxo.tokenId === tokenId && // UTXO matches the token ID.
         utxo.utxoType === 'minting-baton' // UTXO is not a minting baton.
       ) {
         return true;
@@ -81,7 +77,7 @@ export async function mintToken(
     // console.log(`nfyUtxo: ${JSON.stringify(nfyUtxo, null, 2)}`);
 
     // Generate the SLP OP_RETURN.
-    const slpData = slp.TokenType1.generateMintOpReturn(tokenUtxos, TOKENQTY);
+    const slpData = slp.TokenType1.generateMintOpReturn(tokenUtxos, tokenQty);
 
     // BEGIN transaction construction.
 
@@ -107,7 +103,7 @@ export async function mintToken(
     // const niftoshisPerByte = 1.1
     // const txFee = Math.floor(niftoshisPerByte * byteCount)
     // console.log(`txFee: ${txFee} niftoshis\n`)
-    const txFee = 250;
+    const txFee = 550;
 
     // amount to send back to the sending address. It's the original amount - 1 sat/byte for tx size
     const remainder = originalAmount - txFee - 546 * 2;
@@ -121,10 +117,10 @@ export async function mintToken(
 
     // Send the token back to the same wallet if the user hasn't specified a
     // different address.
-    if (TO_ADDR === '') TO_ADDR = walletInfo.legacyAddress;
+    if (toAddress === '') toAddress = walletInfo.legacyAddress;
 
     // Send dust transaction representing tokens being sent.
-    transactionBuilder.addOutput(TO_ADDR, 546);
+    transactionBuilder.addOutput(toAddress, 546);
 
     // Send dust transaction representing new minting baton.
     transactionBuilder.addOutput(walletInfo.legacyAddress, 546);

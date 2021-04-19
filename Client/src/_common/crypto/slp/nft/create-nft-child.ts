@@ -11,10 +11,13 @@ import CryptoUtil, { NFTChildGenesisOpReturnConfig, WalletInfo } from '../../uti
 
 import { Transaction } from 'bitcoinjs-lib';
 
-export async function createNFTChild(walletInfo: WalletInfo, tokenId: string, NETWORK = 'mainnet') {
+export async function createNFTChild(
+  walletInfo: WalletInfo,
+  tokenId: string,
+  configObj: NFTChildGenesisOpReturnConfig,
+  NETWORK = 'mainnet'
+) {
   try {
-    const TOKENID = tokenId;
-
     const { mnemonic } = walletInfo;
 
     // network
@@ -59,7 +62,7 @@ export async function createNFTChild(walletInfo: WalletInfo, tokenId: string, NE
     tokenUtxos = tokenUtxos.filter((utxo: any) => {
       if (
         utxo && // UTXO is associated with a token.
-        utxo.tokenId === TOKENID && // UTXO matches the token ID.
+        utxo.tokenId === tokenId && // UTXO matches the token ID.
         utxo.utxoType === 'token' // UTXO is not a minting baton.
       ) {
         return true;
@@ -96,13 +99,6 @@ export async function createNFTChild(walletInfo: WalletInfo, tokenId: string, NE
     // amount to send back to the sending address.
     // subtract one dust transactions for tokens. (not a baton)
     const remainder = originalAmount - 546 * 1 - txFee;
-
-    // Generate SLP config object
-    const configObj: NFTChildGenesisOpReturnConfig = {
-      name: 'NFT Test Token Child',
-      ticker: 'NFTY0001',
-      documentUrl: 'https://www.niftycoin.org'
-    };
 
     // Generate the OP_RETURN entry for an SLP GENESIS transaction.
     const script = slp.NFT1.generateNFTChildGenesisOpReturn(configObj);

@@ -6,12 +6,12 @@ import CryptoUtil from '../util';
 
 export async function lookupToken(tokenId: string, NETWORK = 'mainnet') {
   try {
-    const TOKENID = tokenId;
+    
 
     // network
     const slp = CryptoUtil.getSLP(NETWORK);
 
-    // const properties = await slp.Utils.list(TOKENID);
+    // const properties = await slp.Utils.list(tokenId);
     // console.log(properties);
     // PIN: TODO - implement this?
     const properties = null;

@@ -55,11 +55,11 @@ export async function createToken(walletInfo: WalletInfo, NETWORK = 'mainnet') {
     const configObj: SLPGenesisOpReturnConfig = {
       name: 'SLP Test Token',
       ticker: 'SLPTEST',
-      documentUrl: 'https://niftycoin.org',
+      documentUrl: 'https://www.niftycoin.org',
       decimals: 8,
       initialQty: 100,
       documentHash: '',
-      mintBatonVout: 2
+      mintBatonVout: 2 // the minting baton is always on vout 2
     };
 
     // Generate the OP_RETURN entry for an SLP GENESIS transaction.

@@ -8,9 +8,6 @@ import CryptoUtil, { WalletInfo } from '../../util';
 
 export async function mintNFTGroup(walletInfo: WalletInfo, tokenId: string, tokenQty: number, NETWORK = 'mainnet') {
   try {
-    const TOKENQTY = tokenQty;
-    const TOKENID = tokenId;
-
     const { mnemonic } = walletInfo;
 
     // network
@@ -55,7 +52,7 @@ export async function mintNFTGroup(walletInfo: WalletInfo, tokenId: string, toke
     tokenUtxos = tokenUtxos.filter((utxo: any) => {
       if (
         utxo && // UTXO is associated with a token.
-        utxo.tokenId === TOKENID && // UTXO matches the token ID.
+        utxo.tokenId === tokenId && // UTXO matches the token ID.
         utxo.utxoType === 'minting-baton' && // UTXO is not a minting baton.
         utxo.tokenType === 129 // UTXO is for NFT Group
       ) {
@@ -94,7 +91,7 @@ export async function mintNFTGroup(walletInfo: WalletInfo, tokenId: string, toke
     const remainder = originalAmount - 546 * 2 - txFee;
 
     // Generate the SLP OP_RETURN.
-    const script = slp.NFT1.mintNFTGroupOpReturn(tokenUtxos, TOKENQTY);
+    const script = slp.NFT1.mintNFTGroupOpReturn(tokenUtxos, tokenQty);
 
     // OP_RETURN needs to be the first output in the transaction.
     transactionBuilder.addOutput(script, 0);

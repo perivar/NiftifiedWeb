@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { niftyService } from '../../_services';
-import { WalletInfo } from '../../_common/crypto/util';
+import { NFTChildGenesisOpReturnConfig, NFTGroupOpReturnConfig, WalletInfo } from '../../_common/crypto/util';
 import CryptoWallet from '../../_common/crypto/wallet';
 import CryptoNFT from '../../_common/crypto/slp/nft';
 
@@ -39,6 +39,33 @@ export const Wallet = ({ match }: { match: any }) => {
       segwitAddress: 'MWT7nzgsR57kWS88XRWVu9JBaCbQW313eP'
     };
 
+    // // SLP NFT config object for the Group
+    // const configObjGroup: NFTGroupOpReturnConfig = {
+    //   name: 'NFT Test Token',
+    //   ticker: 'NFTY',
+    //   documentUrl: 'https://www.niftycoin.org',
+    //   mintBatonVout: 2, // the minting baton is always on vout 2
+    //   initialQty: 1
+    // };
+
+    // CryptoNFT.createNFTGroup(wallet, configObjGroup).then((res: any) => {
+    //   console.log(res);
+    // });
+
+    // Group NFT
+    const groupNFTId = '3d815beb4639e446aff5e0dd60a9a800e7349dc3c390c6375c063faddd7c2618';
+
+    // // SLP NFT config object for the child (the actual token)
+    // const configObjChild: NFTChildGenesisOpReturnConfig = {
+    //   name: 'NFT Test Token Child',
+    //   ticker: 'NFTY0001',
+    //   documentUrl: 'https://www.niftycoin.org'
+    // };
+
+    // CryptoNFT.createNFTChild(wallet, groupNFTId, configObjChild).then((res: any) => {
+    //   console.log(res);
+    // });
+
     // CryptoWallet.sendNFY(wallet, 'NUcBvW67GEqi8CXYPcL4Y5qzw7Vf9rp7wg', 3000).then((res: any) => {
     //   console.log(res);
     // });
@@ -55,42 +82,27 @@ export const Wallet = ({ match }: { match: any }) => {
     //   console.log(res);
     // });
 
-    // CryptoNFT.createNFTGroup(wallet).then((res: any) => {
+    // CryptoNFT.getNFT(groupNFTId).then((res: any) => {
     //   console.log(res);
-
-    //   // const tokenData = slp.Utils.decodeTxData(res);
-    //   // console.log(tokenData);
     // });
 
-    // Group NFT
-    const groupNFTId = '3d815beb4639e446aff5e0dd60a9a800e7349dc3c390c6375c063faddd7c2618';
-    CryptoNFT.getNFT(groupNFTId).then((res: any) => {
-      console.log(res);
-    });
+    // CryptoNFT.sendGroupToken(wallet, groupNFTId, 1).then((res: any) => {
+    //   console.log(res);
+    // });
 
-    CryptoNFT.sendGroupToken(wallet, groupNFTId, 1).then((res: any) => {
-      console.log(res);
-    });
+    // CryptoNFT.mintNFTGroup(wallet, groupNFTId, 1).then((res: any) => {
+    //   console.log(res);
+    // });
 
-    CryptoNFT.mintNFTGroup(wallet, groupNFTId, 1).then((res: any) => {
-      console.log(res);
-    });
+    // // child NFT
+    // const childNFTId = 'c0c754f9b9ffcb4b678dcaef550f811d90c4534724be9ca760c8cf209e27e6bb';
+    // CryptoNFT.getNFT(childNFTId).then((res: any) => {
+    //   console.log(res);
+    // });
 
-    // CryptoNFT.createNFTChild(wallet, '3d815beb4639e446aff5e0dd60a9a800e7349dc3c390c6375c063faddd7c2618').then(
-    //   (res: any) => {
-    //     console.log(res);
-    //   }
-    // );
-
-    // child NFT
-    const childNFTId = 'c0c754f9b9ffcb4b678dcaef550f811d90c4534724be9ca760c8cf209e27e6bb';
-    CryptoNFT.getNFT(childNFTId).then((res: any) => {
-      console.log(res);
-    });
-
-    CryptoNFT.sendChildToken(wallet, childNFTId, 1).then((res: any) => {
-      console.log(res);
-    });
+    // CryptoNFT.sendChildToken(wallet, childNFTId, 1).then((res: any) => {
+    //   console.log(res);
+    // });
   };
 
   return (

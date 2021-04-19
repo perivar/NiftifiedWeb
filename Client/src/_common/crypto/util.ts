@@ -15,7 +15,6 @@ export interface WalletInfo {
   hdNodePath: string;
   segwitAddress: string;
   legacyAddress: string;
-  slpAddress?: string;
   mnemonic: string;
 
   // from original wallet interface

@@ -102,7 +102,7 @@ export class NiftyCoinElectrumX {
         throw new Error('Invalid network. Trying to use a testnet address on mainnet, or vice versa.');
       }
 
-      console.log('Executing electrumx/getUtxos with this address: ', address);
+      // console.log('Executing electrumx/getUtxos with this address: ', address);
 
       // data from ElectrumX server.
       const electrumResponse = await _this._utxosFromElectrumx(address);
@@ -130,7 +130,7 @@ export class NiftyCoinElectrumX {
         throw new Error('addresses needs to be an array. Use for single address.');
       }
 
-      console.log('Executing electrumx.js/utxoBulk with these addresses: ', addresses);
+      // console.log('Executing electrumx.js/utxoBulk with these addresses: ', addresses);
 
       // Validate each element in the address array.
       for (let i = 0; i < addresses.length; i++) {
@@ -205,7 +205,7 @@ export class NiftyCoinElectrumX {
         throw new Error('Invalid network. Trying to use a testnet address on mainnet, or vice versa.');
       }
 
-      console.log('Executing electrumx/getBalance with this address: ', address);
+      // console.log('Executing electrumx/getBalance with this address: ', address);
 
       // data from ElectrumX server.
       const electrumResponse = await _this._balanceFromElectrumx(address);
@@ -235,7 +235,7 @@ export class NiftyCoinElectrumX {
         throw new Error('addresses needs to be an array. Use for single address.');
       }
 
-      console.log('Executing electrumx.js/balanceBulk with these addresses: ', addresses);
+      // console.log('Executing electrumx.js/balanceBulk with these addresses: ', addresses);
 
       // Validate each element in the address array.
       for (let i = 0; i < addresses.length; i++) {
@@ -310,7 +310,7 @@ export class NiftyCoinElectrumX {
         throw new Error('Invalid network. Trying to use a testnet address on mainnet, or vice versa.');
       }
 
-      console.log('Executing electrumx/getTransactions with this address: ', address);
+      // console.log('Executing electrumx/getTransactions with this address: ', address);
 
       // data from ElectrumX server.
       const electrumResponse = await _this._transactionsFromElectrumx(address);
@@ -338,7 +338,7 @@ export class NiftyCoinElectrumX {
         throw new Error('addresses needs to be an array. Use for single address.');
       }
 
-      console.log('Executing electrumx.js/transactionsBulk with these addresses: ', addresses);
+      // console.log('Executing electrumx.js/transactionsBulk with these addresses: ', addresses);
 
       // Validate each element in the address array.
       for (let i = 0; i < addresses.length; i++) {
@@ -415,7 +415,7 @@ export class NiftyCoinElectrumX {
         throw new Error('Invalid network. Trying to use a testnet address on mainnet, or vice versa.');
       }
 
-      console.log('Executing electrumx/getMempool with this address: ', address);
+      // console.log('Executing electrumx/getMempool with this address: ', address);
 
       // data from ElectrumX server.
       const electrumResponse = await _this._mempoolFromElectrumx(address);
@@ -443,7 +443,7 @@ export class NiftyCoinElectrumX {
         throw new Error('addresses needs to be an array. Use for single address.');
       }
 
-      console.log('Executing electrumx.js/mempoolBulk with these addresses: ', addresses);
+      // console.log('Executing electrumx.js/mempoolBulk with these addresses: ', addresses);
 
       // Validate each element in the address array.
       for (let i = 0; i < addresses.length; i++) {
@@ -527,7 +527,7 @@ export class NiftyCoinElectrumX {
       // console.log(`scripthash: ${scripthash}`);
 
       const reversedHash = new Buffer(scripthash.reverse()).toString('hex');
-      console.log(addrStr, ' maps to ', reversedHash);
+      // console.log(addrStr, ' maps to ', reversedHash);
 
       return reversedHash;
     } catch (err) {

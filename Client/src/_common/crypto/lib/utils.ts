@@ -1,7 +1,9 @@
+/* eslint-disable class-methods-use-this */
 /* eslint-disable no-useless-catch */
 
 // Public npm libraries
 import * as slpParser from 'slp-parser';
+import * as slpValidator from 'slp-validate';
 import BigNumber from 'bignumber.js';
 import { UTXOInfo, TokenUTXOInfo, SlpTokenData, SlpTokenGenesis } from '../util';
 import { CryptoLibConfig } from './slp';
@@ -37,259 +39,6 @@ export class Utils {
     this.whitelist = [];
   }
 
-  /*
-  async list(id: string) {
-    let path;
-    let method;
-
-    if (!id) {
-      method = 'get';
-      path = `${this.restURL}slp/list`;
-    } else if (typeof id === 'string') {
-      method = 'get';
-      path = `${this.restURL}slp/list/${id}`;
-    } else if (typeof id === 'object') {
-      method = 'post';
-      path = `${this.restURL}slp/list`;
-    }
-
-    // console.log(`path: ${path}`)
-
-    try {
-      let response;
-      if (method === 'get') {
-        response = await _this.axios.get(path, _this.axiosOptions);
-      } else {
-        response = await _this.axios.post(
-          path,
-          {
-            tokenIds: id
-          },
-          _this.axiosOptions
-        );
-      }
-      return response.data;
-    } catch (error) {
-      if (error.response && error.response.data) throw error.response.data;
-      throw error;
-    }
-  }
-
-  // Retrieve token balances for a given address.
-  async balancesForAddress(address: string) {
-    try {
-      // Single address.
-      if (typeof address === 'string') {
-        const path = `${this.restURL}slp/balancesForAddress/${address}`;
-
-        const response = await _this.axios.get(path, _this.axiosOptions);
-        return response.data;
-
-        // Array of addresses.
-      } else if (Array.isArray(address)) {
-        const path = `${this.restURL}slp/balancesForAddress`;
-
-        // Dev note: must use axios.post for unit test stubbing.
-        const response = await _this.axios.post(
-          path,
-          {
-            addresses: address
-          },
-          _this.axiosOptions
-        );
-
-        return response.data;
-      }
-
-      throw new Error('Input address must be a string or array of strings.');
-    } catch (error) {
-      if (error.response && error.response.data) throw error.response.data;
-      throw error;
-    }
-  }
-
-  // Retrieve token balances for a given tokenId.
-  async balancesForToken(tokenId: string) {
-    try {
-      const path = `${this.restURL}slp/balancesForToken/${tokenId}`;
-
-      const response = await _this.axios.get(path, _this.axiosOptions);
-      return response.data;
-    } catch (error) {
-      if (error.response && error.response.data) throw error.response.data;
-      throw error;
-    }
-  }
-
-  // This function has two responses. If SLPDB is working correctly, the output
-  // will be like the examples above. If SLPDB has fallen behind real-time
-  // processing, it will return this output:
-  // [ null ]
-  async validateTxid(txid: string, usrObj = null) {
-    const path = `${this.restURL}slp/validateTxid`;
-
-    // console.log(`txid: ${JSON.stringify(txid, null, 2)}`)
-    // console.log(`validateTxid usrObj: ${JSON.stringify(usrObj, null, 2)}`)
-
-    // Handle a single TXID or an array of TXIDs.
-    let txids;
-    if (typeof txid === 'string') txids = [txid];
-    else txids = txid;
-
-    try {
-      const response = await _this.axios.post(
-        path,
-        {
-          txids,
-          usrObj // pass user data when making an internal call.
-        },
-        _this.axiosOptions
-      );
-      // console.log(
-      //   `validateTxid response.data: ${JSON.stringify(response.data, null, 2)}`
-      // )
-
-      const validatedTxids = response.data;
-
-      return validatedTxids;
-    } catch (error) {
-      if (error.response && error.response.data) throw error.response.data;
-      throw error;
-    }
-  }
-
-  async validateTxid2(txid: string) {
-    try {
-      // console.log(`txid: ${JSON.stringify(txid, null, 2)}`)
-
-      if (!txid || txid === '' || typeof txid !== 'string' || txid.length !== 64) {
-        throw new Error('txid must be 64 character string.');
-      }
-
-      const path = `${this.restURL}slp/validateTxid2/${txid}`;
-
-      const response = await _this.axios.get(path, _this.axiosOptions);
-      return response.data;
-    } catch (error) {
-      if (error.response && error.response.data) throw error.response.data;
-
-      if (error.error && error.error.indexOf('Network error') > -1) {
-        throw new Error('slp-validate timed out');
-      }
-
-      throw error;
-    }
-  }
-
-  async getWhitelist() {
-    try {
-      const path = `${this.restURL}slp/whitelist`;
-
-      // Retrieve the whitelist from the REST API if we haven't gotten it yet.
-      if (this.whitelist.length === 0) {
-        const response = await _this.axios.get(path, _this.axiosOptions);
-        // console.log(`response.data: ${JSON.stringify(response.data, null, 2)}`)
-
-        this.whitelist = response.data;
-      }
-
-      return this.whitelist;
-    } catch (error) {
-      if (error.response && error.response.data) throw error.response.data;
-      throw error;
-    }
-  }
-
-  async validateTxid3(txid: string, usrObj = null) {
-    const path = `${this.restURL}slp/validateTxid3`;
-
-    // console.log(`txid: ${JSON.stringify(txid, null, 2)}`)
-    // console.log(`path: ${JSON.stringify(path, null, 2)}`)
-    // console.log('validateTxid3 usrObj: ', usrObj)
-
-    // Handle a single TXID or an array of TXIDs.
-    let txids;
-    if (typeof txid === 'string') txids = [txid];
-    else txids = txid;
-
-    try {
-      const response = await _this.axios.post(
-        path,
-        {
-          txids,
-          usrObj // pass user data when making an internal call.
-        },
-        _this.axiosOptions
-      );
-      // console.log(`response.data: ${JSON.stringify(response.data, null, 2)}`)
-
-      const validatedTxids = response.data;
-
-      return validatedTxids;
-    } catch (error) {
-      if (error.response && error.response.data) throw error.response.data;
-      throw error;
-    }
-  }
-
-  async tokenStats(tokenId: string) {
-    try {
-      const path = `${this.restURL}slp/tokenStats/${tokenId}`;
-
-      const response = await _this.axios.get(path, _this.axiosOptions);
-
-      return response.data;
-    } catch (error) {
-      if (error.response && error.response.data) throw error.response.data;
-      throw error;
-    }
-  }
-
-  // Retrieve token transactions for a given tokenId and address.
-  async transactions(tokenId: string, address: string) {
-    try {
-      const path = `${this.restURL}slp/transactions/${tokenId}/${address}`;
-
-      const response = await _this.axios.get(path, _this.axiosOptions);
-
-      return response.data;
-    } catch (error) {
-      if (error.response && error.response.data) throw error.response.data;
-      throw error;
-    }
-  }
-
-  async burnTotal(transactionId: string) {
-    try {
-      const path = `${this.restURL}slp/burnTotal/${transactionId}`;
-
-      const response = await _this.axios.get(path, _this.axiosOptions);
-
-      return response.data;
-    } catch (error) {
-      if (error.response && error.response.data) throw error.response.data;
-      throw error;
-    }
-  }
-
-  async txDetails(txid: string) {
-    try {
-      if (!txid || txid === '' || typeof txid !== 'string' || txid.length !== 64) {
-        throw new Error('txid string must be included.');
-      }
-
-      // console.log(`this.restURL: ${this.restURL}`)
-      const path = `${this.restURL}slp/txDetails/${txid}`;
-
-      const response = await _this.axios.get(path, _this.axiosOptions);
-      return response.data;
-    } catch (error) {
-      if (error.response && error.response.data) throw error.response.data;
-      throw error;
-    }
-  }
-	*/
-
   // Reimplementation of decodeOpReturn() using slp-parser.
   async decodeOpReturn(txid: string, cache: any = null): Promise<SlpTokenData> {
     // The cache object is an in-memory cache (JS Object) that can be passed
@@ -317,10 +66,10 @@ export class Utils {
       }
 
       // const txDetails = await _this.explorer.txData(txid);
-      const txDetails = await this.electrumx.getTransaction(txid);
+      const txDetails = await _this.electrumx.getTransaction(txid);
       // console.log(`txDetails: ${JSON.stringify(txDetails, null, 2)}`)
 
-      const tokenData = this.decodeTxData(txDetails);
+      const tokenData = _this.decodeTxData(txDetails);
 
       if (cache) cache[txid] = tokenData;
 
@@ -423,22 +172,26 @@ export class Utils {
       // console.log(`outAry: ${JSON.stringify(outAry, null, 2)}`)
 
       // *After* each UTXO has been hydrated with SLP data,
-      // validate the TXID with SLPDB.
       for (let i = 0; i < outAry.length; i++) {
         const utxo = outAry[i];
 
         // *After* the UTXO has been hydrated with SLP data,
-        // validate the TXID with SLPDB.
         if (utxo.tokenType) {
           // Only execute this code-path if the current UTXO has a 'tokenType'
           // property. i.e. it has been successfully hydrated with SLP
           // information.
-          // Validate using a 'waterfall' of validators.
-          // utxo.isValid = await this.waterfallValidateTxid(utxo.txid, usrObj);
 
-          // PIN: set to valid
-          utxo.isValid = true;
-          // console.log(`isValid: ${JSON.stringify(utxo.isValid, null, 2)}`)
+          // validate using slp-validate
+          const { txid } = utxo;
+          const validator = new slpValidator.ValidatorType1({
+            getRawTransaction: async (txid) => await _this.electrumx.getTransaction(txid, false)
+          });
+          // console.log('Validating:', txid);
+          // console.log('This may take a several seconds...');
+          const isValid = await validator.isValidSlpTxid({ txid });
+          // console.log('Final Result:', isValid);
+
+          utxo.isValid = isValid;
         }
       }
 
@@ -449,81 +202,6 @@ export class Utils {
       throw error;
     }
   }
-
-  /*
-  async tokenUtxoDetailsWL(utxos: UTXOInfo[], usrObj = null): Promise<TokenUTXOInfo[]> {
-    try {
-      // Throw error if input is not an array.
-      if (!Array.isArray(utxos)) throw new Error('Input must be an array.');
-
-      // Loop through each element in the array and validate the input before
-      // further processing.
-      for (let i = 0; i < utxos.length; i++) {
-        const utxo = utxos[i] as TokenUTXOInfo;
-
-        // Ensure the UTXO has a txid or tx_hash property.
-        if (!utxo.txid) {
-          // If Electrumx, convert the tx_hash property to txid.
-          if (utxo.tx_hash) {
-            utxo.txid = utxo.tx_hash;
-          } else {
-            // If there is neither a txid or tx_hash property, throw an error.
-            throw new Error(`utxo ${i} does not have a txid or tx_hash property.`);
-          }
-        }
-
-        // Ensure the UTXO has a vout or tx_pos property.
-        if (!Number.isInteger(utxo.vout)) {
-          if (Number.isInteger(utxo.tx_pos)) {
-            utxo.vout = utxo.tx_pos;
-          } else {
-            throw new Error(`utxo ${i} does not have a vout or tx_pos property.`);
-          }
-        }
-      }
-
-      // Hydrate each UTXO with data from SLP OP_REUTRNs.
-      const outAry = await this._hydrateUtxo(utxos, usrObj);
-      // console.log(`outAry: ${JSON.stringify(outAry, null, 2)}`)
-
-      // *After* each UTXO has been hydrated with SLP data,
-      // validate the TXID with SLPDB.
-      for (let i = 0; i < outAry.length; i++) {
-        const utxo = outAry[i];
-
-        // *After* the UTXO has been hydrated with SLP data,
-        // validate the TXID with SLPDB.
-        if (utxo.tokenType) {
-          // Only execute this block if the current UTXO has a 'tokenType'
-          // property. i.e. it has been successfully hydrated with SLP
-          // information.
-
-          // Validate against the whitelist SLPDB.
-          const whitelistResult = await this.validateTxid3(utxo.txid, usrObj);
-          // console.log(
-          //   `whitelist-SLPDB for ${txid}: ${JSON.stringify(
-          //     whitelistResult,
-          //     null,
-          //     2
-          //   )}`
-          // )
-
-          let isValid = null;
-
-          // Safely retrieve the returned value.
-          if (whitelistResult[0] !== null) isValid = whitelistResult[0].valid;
-
-          utxo.isValid = isValid;
-        }
-      }
-
-      return outAry;
-    } catch (error) {
-      if (error.response && error.response.data) throw error.response.data;
-      throw error;
-    }
-  }
-	*/
 
   // delay in ms
   // use like this await delayMs(1000); //for 1 sec delay
@@ -752,169 +430,4 @@ export class Utils {
       throw error;
     }
   }
-
-  /*
-  async waterfallValidateTxid(txid: string, usrObj = null) {
-    try {
-      // console.log('txid: ', txid)
-
-      const cachedTxValidation: any = {};
-
-      // If the value has been cached, use the cached version first.
-      let isValid = cachedTxValidation[txid];
-      if (!isValid && isValid !== false) {
-        isValid = null;
-      } else {
-        return isValid;
-      }
-
-      // There are two possible responses from SLPDB. If SLPDB is functioning
-      // correctly, then validateTxid() will return this:
-      // isValid: [
-      //   {
-      //  "txid": "ff0c0354f8d3ddb34fa36f73494eb58ea24f8b8da6904aa8ed43b7a74886c583",
-      //  "valid": true
-      //   }
-      // ]
-      //
-      // If SLPDB has fallen behind real-time processing, it will return this:
-      // isValid: [
-      //   null
-      // ]
-      //
-      // Note: validateTxid3() has the same output as validateTxid().
-      // validateTxid2() uses slp-validate, which has a different output format.
-
-      // Validate against the whitelist SLPDB first.
-      const whitelistResult = await this.validateTxid3(txid, usrObj);
-      // console.log(
-      //   `whitelist-SLPDB for ${txid}: ${JSON.stringify(
-      //     whitelistResult,
-      //     null,
-      //     2
-      //   )}`
-      // )
-
-      // Safely retrieve the returned value.
-      if (whitelistResult[0] !== null) isValid = whitelistResult[0].valid;
-
-      // Exit if isValid is not null.
-      if (isValid !== null) {
-        // Save to the cache.
-        cachedTxValidation[txid] = isValid;
-
-        return isValid;
-      }
-
-      // Try the general SLPDB, if the whitelist returned null.
-      const generalResult = await this.validateTxid(txid, usrObj);
-      // console.log(
-      //   `validateTxid() isValid: ${JSON.stringify(generalResult, null, 2)}`
-      // )
-
-      // Safely retrieve the returned value.
-      if (generalResult[0] !== null) isValid = generalResult[0].valid;
-
-      // Exit if isValid is not null.
-      if (isValid !== null) {
-        // Save to the cache.
-        cachedTxValidation[txid] = isValid;
-
-        return isValid;
-      }
-
-      // If still null, as a last resort, check it against slp-validate
-      let slpValidateResult = null;
-      try {
-        slpValidateResult = await this.validateTxid2(txid);
-      } catch (err) {
-        // exit quietly
-      }
-      // console.log(
-      //   `slpValidateResult: ${JSON.stringify(slpValidateResult, null, 2)}`
-      // )
-
-      // Exit if isValid is not null.
-      if (slpValidateResult !== null) {
-        isValid = slpValidateResult.isValid;
-
-        // Save to the cache.
-        cachedTxValidation[txid] = isValid;
-
-        return isValid;
-      }
-
-      // If isValid is still null, return that value, signaling that the txid
-      // could not be validated.
-      return isValid;
-    } catch (error) {
-      // console.log('Error in waterfallValidateTxid()')
-      if (error.response && error.response.data) throw error.response.data;
-      throw error;
-    }
-  }
-
-  // Same as tokenUtxoDetails(), but reduces API calls by having bch-api server
-  // do the heavy lifting.
-  async hydrateUtxos(utxos: UTXOInfo[], usrObj: any) {
-    try {
-      // Throw error if input is not an array.
-      if (!Array.isArray(utxos)) throw new Error('Input must be an array.');
-
-      const response = await _this.axios.post(
-        `${this.restURL}slp/hydrateUtxos`,
-        {
-          utxos,
-          usrObj
-        },
-        _this.axiosOptions
-      );
-
-      return response.data;
-    } catch (error) {
-      if (error.response && error.response.data) {
-        throw new Error(JSON.stringify(error.response.data, null, 2));
-      }
-      throw error;
-    }
-  }
-
-  // Same as tokenUtxoDetailsWL(), but reduces API calls by having bch-api server
-  // do the heavy lifting.
-  async hydrateUtxosWL(utxos: TokenUTXOInfo[]) {
-    try {
-      // Throw error if input is not an array.
-      if (!Array.isArray(utxos)) throw new Error('Input must be an array.');
-
-      const response = await _this.axios.post(
-        `${this.restURL}slp/hydrateUtxosWL`,
-        {
-          utxos
-        },
-        _this.axiosOptions
-      );
-
-      return response.data;
-    } catch (error) {
-      if (error.response && error.response.data) throw error.response.data;
-      else throw error;
-    }
-  }
-
-  async getStatus(txid: string) {
-    const path = `${this.restURL}slp/status`;
-
-    try {
-      const response = await _this.axios.get(path, _this.axiosOptions);
-      // console.log(
-      //   `getStatus response.data: ${JSON.stringify(response.data, null, 2)}`
-      // )
-
-      return response.data;
-    } catch (error) {
-      if (error.response && error.response.data) throw error.response.data;
-      throw error;
-    }
-  }
-	*/
 }

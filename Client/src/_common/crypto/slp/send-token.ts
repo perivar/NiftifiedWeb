@@ -1,5 +1,5 @@
 /*
-  Send tokens of type TOKENID to user with SLPADDR address.
+  Send tokens of type tokenId to user with SLPADDR address.
 */
 
 import * as bitcoin from 'bitcoinjs-lib';
@@ -10,14 +10,10 @@ export async function sendToken(
   walletInfo: WalletInfo,
   tokenId: string,
   tokenQty: number,
-  toAddr = '',
+  toAddress = '',
   NETWORK = 'mainnet'
 ) {
   try {
-    const TOKENQTY = tokenQty;
-    const TOKENID = tokenId;
-    let TO_ADDR = toAddr;
-
     const { mnemonic } = walletInfo;
 
     // network
@@ -59,7 +55,7 @@ export async function sendToken(
     tokenUtxos = tokenUtxos.filter((utxo: any) => {
       if (
         utxo && // UTXO is associated with a token.
-        utxo.tokenId === TOKENID && // UTXO matches the token ID.
+        utxo.tokenId === tokenId && // UTXO matches the token ID.
         utxo.utxoType === 'token' // UTXO is not a minting baton.
       ) {
         return true;
@@ -77,7 +73,7 @@ export async function sendToken(
     // console.log(`nfyUtxo: ${JSON.stringify(nfyUtxo, null, 2)}`);
 
     // Generate the OP_RETURN code.
-    const slpSendObj = slp.TokenType1.generateSendOpReturn(tokenUtxos, TOKENQTY);
+    const slpSendObj = slp.TokenType1.generateSendOpReturn(tokenUtxos, tokenQty);
     const slpData = slpSendObj.script;
     // console.log(`slpOutputs: ${slpSendObj.outputs}`);
 
@@ -105,7 +101,7 @@ export async function sendToken(
     // const niftoshisPerByte = 1.1
     // const txFee = Math.floor(niftoshisPerByte * byteCount)
     // console.log(`txFee: ${txFee} niftoshis\n`)
-    const txFee = 250;
+    const txFee = 550;
 
     // amount to send back to the sending address. It's the original amount - 1 sat/byte for tx size
     const remainder = originalAmount - txFee - 546 * 2;
@@ -119,10 +115,10 @@ export async function sendToken(
 
     // Send the token back to the same wallet if the user hasn't specified a
     // different address.
-    if (TO_ADDR === '') TO_ADDR = walletInfo.legacyAddress;
+    if (toAddress === '') toAddress = walletInfo.legacyAddress;
 
     // Send dust transaction representing tokens being sent.
-    transactionBuilder.addOutput(TO_ADDR, 546);
+    transactionBuilder.addOutput(toAddress, 546);
 
     // Return any token change back to the sender.
     if (slpSendObj.outputs > 1) {
