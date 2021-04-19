@@ -21,7 +21,7 @@ export async function getBalance(walletInfo: WalletInfo, NETWORK = 'mainnet') {
 
     // get the segwit address
     // const segwitAddress = CryptoUtil.toSegWitAddress(change, network);
-    const slpAddress = CryptoUtil.toSLPAddress(change, network);
+    // const slpAddress = CryptoUtil.toSLPAddress(change, network);
     const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
 
     // first get NFY balance
@@ -33,9 +33,10 @@ export async function getBalance(walletInfo: WalletInfo, NETWORK = 'mainnet') {
 
     // get token balances
     try {
-      const tokens = await slp.Utils.balancesForAddress(slpAddress);
-
-      console.log(JSON.stringify(tokens, null, 2));
+      // PIN: TODO - implement this?
+      // const tokens = await slp.Utils.balancesForAddress(slpAddress);
+      const tokens = null;
+      // console.log(JSON.stringify(tokens, null, 2));
     } catch (error) {
       if (error.message === 'Address not found') console.log('No tokens found.');
       else console.log('Error: ', error);

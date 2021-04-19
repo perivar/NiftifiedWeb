@@ -235,6 +235,7 @@ export class TokenType1 {
     }
   }
 
+  /*
   async getHexOpReturn(tokenUtxos: any, sendQty: number) {
     try {
       // TODO: Add input filtering.
@@ -259,4 +260,5 @@ export class TokenType1 {
       throw err;
     }
   }
+	*/
 }

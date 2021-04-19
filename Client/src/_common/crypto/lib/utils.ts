@@ -34,6 +34,7 @@ export class Utils {
     this.whitelist = [];
   }
 
+  /*
   async list(id: string) {
     let path;
     let method;
@@ -284,6 +285,7 @@ export class Utils {
       throw error;
     }
   }
+	*/
 
   // Reimplementation of decodeOpReturn() using slp-parser.
   async decodeOpReturn(txid: string, cache: any = null, usrObj = null): Promise<SlpTokenData> {
@@ -456,6 +458,7 @@ export class Utils {
     }
   }
 
+  /*
   async tokenUtxoDetailsWL(utxos: UTXOInfo[], usrObj = null): Promise<TokenUTXOInfo[]> {
     try {
       // Throw error if input is not an array.
@@ -528,6 +531,7 @@ export class Utils {
       throw error;
     }
   }
+	*/
 
   // delay in ms
   // use like this await delayMs(1000); //for 1 sec delay
@@ -754,13 +758,11 @@ export class Utils {
             utxo.isValid = null;
 
             // Calculate the real token quantity.
-
             const tokenQtyBig = new BigNumber(tokenQty).div(Math.pow(10, genesisData.decimals));
             // console.log(`tokenQtyBig`, tokenQtyBig.toString())
             utxo.tokenQty = tokenQtyBig.toString();
 
             // console.log(`utxo: ${JSON.stringify(utxo, null, 2)}`)
-
             outAry[i] = utxo;
           }
         }
@@ -773,6 +775,7 @@ export class Utils {
     }
   }
 
+  /*
   async waterfallValidateTxid(txid: string, usrObj = null) {
     try {
       // console.log('txid: ', txid)
@@ -847,7 +850,7 @@ export class Utils {
       try {
         slpValidateResult = await this.validateTxid2(txid);
       } catch (err) {
-        /* exit quietly */
+        // exit quietly
       }
       // console.log(
       //   `slpValidateResult: ${JSON.stringify(slpValidateResult, null, 2)}`
@@ -935,4 +938,5 @@ export class Utils {
       throw error;
     }
   }
+	*/
 }

@@ -1,17 +1,15 @@
-import CryptoUtil, { UTXOInfo } from '../../util';
+import CryptoUtil from '../../util';
 
 export async function getNFT(tokenId: string, NETWORK = 'mainnet') {
   try {
-    const utxos: UTXOInfo[] = [{ value: 0, tx_pos: 2, tx_hash: tokenId }];
-
     // network
     const slp = CryptoUtil.getSLP(NETWORK);
 
-    // Identify the SLP token UTXOs.
-    const tokenUtxos = await slp.Utils.tokenUtxoDetails(utxos);
-    // console.log(`tokenUtxos: ${JSON.stringify(tokenUtxos, null, 2)}`);
+    // decode the OP RETURN information
+    const slpData = await slp.Utils.decodeOpReturn(tokenId);
+    // console.log(`tokenUtxos: ${JSON.stringify(slpData, null, 2)}`);
 
-    return tokenUtxos[0];
+    return slpData;
   } catch (err) {
     console.error('Error in getNFT: ', err);
   }

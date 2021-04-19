@@ -91,14 +91,14 @@ export async function createNFTChild(walletInfo: WalletInfo, tokenId: string, NE
     const txFee = 550;
 
     // amount to send back to the sending address.
-    // Subtract two dust transactions for minting baton and tokens.
-    const remainder = originalAmount - txFee;
+    // Subtract one dust transactions for tokens.
+    const remainder = originalAmount - 546 * 1 - txFee;
 
     // Generate SLP config object
     const configObj: NFTChildGenesisOpReturnConfig = {
-      name: 'NFT Child',
-      ticker: 'NFT004',
-      documentUrl: 'https://FullStack.cash'
+      name: 'NFT Test Token Child',
+      ticker: 'NFTY0001',
+      documentUrl: 'https://www.niftycoin.org'
     };
 
     // Generate the OP_RETURN entry for an SLP GENESIS transaction.
@@ -109,12 +109,6 @@ export async function createNFTChild(walletInfo: WalletInfo, tokenId: string, NE
 
     // Send dust transaction representing the tokens.
     transactionBuilder.addOutput(legacyAddress, 546);
-
-    // Send dust transaction representing minting baton.
-    // transactionBuilder.addOutput(
-    //   CryptoUtil.toLegacyAddressFromSegWit(segwitAddress),
-    //   546
-    // );
 
     // add output to send NFY remainder of UTXO.
     transactionBuilder.addOutput(legacyAddress, remainder);

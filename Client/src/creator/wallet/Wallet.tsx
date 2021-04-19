@@ -39,9 +39,9 @@ export const Wallet = ({ match }: { match: any }) => {
       segwitAddress: 'MWT7nzgsR57kWS88XRWVu9JBaCbQW313eP'
     };
 
-    CryptoWallet.sendNFY(wallet, 'NUcBvW67GEqi8CXYPcL4Y5qzw7Vf9rp7wg', 3000).then((res: any) => {
-      console.log(res);
-    });
+    // CryptoWallet.sendNFY(wallet, 'NUcBvW67GEqi8CXYPcL4Y5qzw7Vf9rp7wg', 3000).then((res: any) => {
+    //   console.log(res);
+    // });
 
     // CryptoWallet.sendWIF(wallet, 'NUcBvW67GEqi8CXYPcL4Y5qzw7Vf9rp7wg', 2000).then((res: any) => {
     //   console.log(res);
@@ -62,13 +62,21 @@ export const Wallet = ({ match }: { match: any }) => {
     //   // console.log(tokenData);
     // });
 
+    // Group NFT
     // CryptoNFT.getNFT('3d815beb4639e446aff5e0dd60a9a800e7349dc3c390c6375c063faddd7c2618').then((res: any) => {
     //   console.log(res);
     // });
 
-    // CryptoNFT.createNFTChild(wallet, '').then((res: any) => {
-    //   console.log(res);
-    // });
+    // CryptoNFT.createNFTChild(wallet, '3d815beb4639e446aff5e0dd60a9a800e7349dc3c390c6375c063faddd7c2618').then(
+    //   (res: any) => {
+    //     console.log(res);
+    //   }
+    // );
+
+    // child NFT
+    CryptoNFT.getNFT('c0c754f9b9ffcb4b678dcaef550f811d90c4534724be9ca760c8cf209e27e6bb').then((res: any) => {
+      console.log(res);
+    });
 
     // CryptoNFT.mintNFTGroup(wallet).then((res: any) => {
     //   console.log(res);

@@ -11,8 +11,10 @@ export async function lookupToken(tokenId: string, NETWORK = 'mainnet') {
     // network
     const slp = CryptoUtil.getSLP(NETWORK);
 
-    const properties = await slp.Utils.list(TOKENID);
-    console.log(properties);
+    // const properties = await slp.Utils.list(TOKENID);
+    // console.log(properties);
+    // PIN: TODO - implement this?
+    const properties = null;
     return properties;
   } catch (err) {
     console.error('Error in getTokenInfo: ', err);
