@@ -7,23 +7,17 @@ import * as bitcoin from 'bitcoinjs-lib';
 import { Transaction } from 'bitcoinjs-lib';
 import CryptoUtil, { WalletInfo } from '../util';
 
-export async function sendDust(walletInfo: WalletInfo, NETWORK = 'mainnet') {
+export async function sendDust(walletInfo: WalletInfo, numOutputs: number, receiverAddress = '', NETWORK = 'mainnet') {
   try {
-    // Set the number of dust outputs to send.
-    const NUM_OUTPUTS = 5;
-
-    // The address to send the outputs to.
-    let RECV_ADDR = '';
-
-    const SEND_ADDR = walletInfo.legacyAddress;
-    const SEND_MNEMONIC = walletInfo.mnemonic;
+    const sendAddress = walletInfo.legacyAddress;
+    const { mnemonic } = walletInfo;
 
     // network
     const electrumx = CryptoUtil.getElectrumX(NETWORK);
     const { network } = electrumx;
 
     // Get the balance of the sending address.
-    const balance = await electrumx.getBalance(SEND_ADDR);
+    const balance = await electrumx.getBalance(sendAddress);
 
     // Exit if the balance is zero.
     if (balance <= 0.0) {
@@ -31,15 +25,15 @@ export async function sendDust(walletInfo: WalletInfo, NETWORK = 'mainnet') {
     }
 
     // Send the NFY back to the same wallet address.
-    if (RECV_ADDR === '') RECV_ADDR = SEND_ADDR;
+    if (receiverAddress === '') receiverAddress = sendAddress;
 
     // Convert to a legacy address (needed to build transactions).
-    // const SEND_ADDR_LEGACY = CryptoUtil.toLegacyAddress(SEND_ADDR)
-    // const RECV_ADDR_LEGACY = CryptoUtil.toLegacyAddress(RECV_ADDR)
+    // const sendAddress = CryptoUtil.toLegacyAddress(sendAddress)
+    // const receiverAddress = CryptoUtil.toLegacyAddress(receiverAddress)
 
     // Get UTXOs held by the address.
     // https://developer.bitcoin.com/mastering-bitcoin-cash/4-transactions/
-    const utxos = await electrumx.getUtxos(SEND_ADDR);
+    const utxos = await electrumx.getUtxos(sendAddress);
     // console.log(`utxos: ${JSON.stringify(utxos, null, 2)}`)
 
     if (utxos.length === 0) throw new Error('No UTXOs found.');
@@ -49,7 +43,7 @@ export async function sendDust(walletInfo: WalletInfo, NETWORK = 'mainnet') {
     console.log(`utxo: ${JSON.stringify(utxo, null, 2)}`);
 
     // Ensure there is enough NFY to generate the desired number of dust.
-    const outNFY = 546 * NUM_OUTPUTS + 500;
+    const outNFY = 546 * numOutputs + 500;
     if (utxo.value < outNFY) {
       throw new Error('Not enough niftoshis to send desired number of dust outputs.');
     }
@@ -66,36 +60,33 @@ export async function sendDust(walletInfo: WalletInfo, NETWORK = 'mainnet') {
     transactionBuilder.addInput(txid, vout);
 
     // get byte count to calculate fee. paying 1.2 sat/byte
-    const byteCount = CryptoUtil.getByteCount({ P2PKH: 1 }, { P2PKH: NUM_OUTPUTS + 1 });
+    const byteCount = CryptoUtil.getByteCount({ P2PKH: 1 }, { P2PKH: numOutputs + 1 });
     console.log(`Transaction byte count: ${byteCount}`);
     const niftoshisPerByte = 1.2;
     const txFee = Math.floor(niftoshisPerByte * byteCount);
     console.log(`Transaction fee: ${txFee}`);
 
     // Calculate the amount to put into each new UTXO.
-    const changeBch = originalAmount - txFee - NUM_OUTPUTS * 546;
+    const changeBch = originalAmount - txFee - numOutputs * 546;
 
     if (changeBch < 546) {
       throw new Error('Not enough NFY to complete transaction!');
     }
 
     // add outputs w/ address and amount to send
-    for (let i = 0; i < NUM_OUTPUTS; i++) {
-      transactionBuilder.addOutput(RECV_ADDR, 546);
+    for (let i = 0; i < numOutputs; i++) {
+      transactionBuilder.addOutput(receiverAddress, 546);
     }
 
     // Add change
-    transactionBuilder.addOutput(SEND_ADDR, changeBch);
+    transactionBuilder.addOutput(sendAddress, changeBch);
 
     // Generate a change address from a Mnemonic of a private key.
-    const change = await CryptoUtil.changeAddrFromMnemonic(SEND_MNEMONIC, network);
+    const changeKeyPair = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
 
-    // Generate a keypair from the change address.
-    const keyPair = change; // not sure if this is the correct to get keypair
-
-    // Sign the transaction with the HD node.
+    // Sign the transaction with the changeKeyPair HD node.
     const redeemScript = undefined;
-    transactionBuilder.sign(0, keyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
+    transactionBuilder.sign(0, changeKeyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
 
     // build tx
     const tx = transactionBuilder.build();
@@ -109,7 +100,9 @@ export async function sendDust(walletInfo: WalletInfo, NETWORK = 'mainnet') {
     console.log(`Transaction ID: ${txidStr}`);
     console.log('Check the status of your transaction on this block explorer:');
     CryptoUtil.transactionStatus(txidStr, NETWORK);
+    return txidStr;
   } catch (err) {
     console.log('error: ', err);
+    throw err;
   }
 }

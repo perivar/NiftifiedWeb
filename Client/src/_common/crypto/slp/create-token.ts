@@ -16,11 +16,11 @@ export async function createToken(walletInfo: WalletInfo, NETWORK = 'mainnet') {
     const { network } = electrumx;
     const slp = CryptoUtil.getSLP(NETWORK);
 
-    const change = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
+    // Generate an EC key pair for signing the transaction.
+    const changeKeyPair = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
 
-    // get the segwit address
-    // const segwitAddress = CryptoUtil.toSegWitAddress(change, network);
-    const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
+    // get the legacy address
+    const legacyAddress = CryptoUtil.toLegacyAddress(changeKeyPair, network);
 
     // Get a UTXO to pay for the transaction.
     const utxos = await electrumx.getUtxos(legacyAddress);
@@ -77,12 +77,9 @@ export async function createToken(walletInfo: WalletInfo, NETWORK = 'mainnet') {
     // add output to send NFY remainder of UTXO.
     transactionBuilder.addOutput(legacyAddress, remainder);
 
-    // Generate a keypair from the change address.
-    const keyPair = change; // not sure if this is the correct to get keypair
-
-    // Sign the transaction with the HD node.
+    // Sign the transaction with the changeKeyPair HD node.
     const redeemScript = undefined;
-    transactionBuilder.sign(0, keyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
+    transactionBuilder.sign(0, changeKeyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
 
     // build tx
     const tx = transactionBuilder.build();

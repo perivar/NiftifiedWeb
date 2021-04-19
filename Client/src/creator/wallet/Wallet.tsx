@@ -63,7 +63,16 @@ export const Wallet = ({ match }: { match: any }) => {
     // });
 
     // Group NFT
-    CryptoNFT.getNFT('3d815beb4639e446aff5e0dd60a9a800e7349dc3c390c6375c063faddd7c2618').then((res: any) => {
+    const groupNFTId = '3d815beb4639e446aff5e0dd60a9a800e7349dc3c390c6375c063faddd7c2618';
+    CryptoNFT.getNFT(groupNFTId).then((res: any) => {
+      console.log(res);
+    });
+
+    CryptoNFT.sendGroupToken(wallet, groupNFTId, 1).then((res: any) => {
+      console.log(res);
+    });
+
+    CryptoNFT.mintNFTGroup(wallet, groupNFTId, 1).then((res: any) => {
       console.log(res);
     });
 
@@ -74,21 +83,14 @@ export const Wallet = ({ match }: { match: any }) => {
     // );
 
     // child NFT
-    CryptoNFT.getNFT('c0c754f9b9ffcb4b678dcaef550f811d90c4534724be9ca760c8cf209e27e6bb').then((res: any) => {
+    const childNFTId = 'c0c754f9b9ffcb4b678dcaef550f811d90c4534724be9ca760c8cf209e27e6bb';
+    CryptoNFT.getNFT(childNFTId).then((res: any) => {
       console.log(res);
     });
 
-    // CryptoNFT.mintNFTGroup(wallet).then((res: any) => {
-    //   console.log(res);
-    // });
-
-    // CryptoNFT.sendGroupToken(wallet).then((res: any) => {
-    //   console.log(res);
-    // });
-
-    // CryptoNFT.sendChildToken(wallet).then((res: any) => {
-    //   console.log(res);
-    // });
+    CryptoNFT.sendChildToken(wallet, childNFTId, 1).then((res: any) => {
+      console.log(res);
+    });
   };
 
   return (

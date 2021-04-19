@@ -10,7 +10,7 @@ export async function sendToken(
   walletInfo: WalletInfo,
   tokenId: string,
   tokenQty: number,
-  toAddr: string,
+  toAddr = '',
   NETWORK = 'mainnet'
 ) {
   try {
@@ -25,14 +25,11 @@ export async function sendToken(
     const { network } = electrumx;
     const slp = CryptoUtil.getSLP(NETWORK);
 
-    const change = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
-
     // Generate an EC key pair for signing the transaction.
-    const keyPair = change; // not sure if this is the correct to get keypair
+    const changeKeyPair = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
 
-    // get the segwit address
-    // const segwitAddress = CryptoUtil.toSegWitAddress(change, network);
-    const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
+    // get the legacy address
+    const legacyAddress = CryptoUtil.toLegacyAddress(changeKeyPair, network);
 
     // Get UTXOs held by this address.
     const utxos = await electrumx.getUtxos(legacyAddress);
@@ -100,7 +97,7 @@ export async function sendToken(
 
     // get byte count to calculate fee. paying 1 sat
     // Note: This may not be totally accurate. Just guessing on the byteCount size.
-    // const byteCount = this.BITBOX.BitcoinCash.getByteCount(
+    // const byteCount = CryptoUtil.getByteCount
     //   { P2PKH: 3 },
     //   { P2PKH: 5 }
     // )
@@ -137,12 +134,12 @@ export async function sendToken(
 
     // Sign the transaction with the private key for the NFY UTXO paying the fees.
     const redeemScript = undefined;
-    transactionBuilder.sign(0, keyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
+    transactionBuilder.sign(0, changeKeyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
 
     // Sign each token UTXO being consumed.
     for (let i = 0; i < tokenUtxos.length; i++) {
       const thisUtxo = tokenUtxos[i];
-      transactionBuilder.sign(1 + i, keyPair, redeemScript, Transaction.SIGHASH_ALL, thisUtxo.value);
+      transactionBuilder.sign(1 + i, changeKeyPair, redeemScript, Transaction.SIGHASH_ALL, thisUtxo.value);
     }
 
     // build tx

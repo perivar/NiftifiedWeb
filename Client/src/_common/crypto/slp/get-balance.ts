@@ -17,11 +17,11 @@ export async function getBalance(walletInfo: WalletInfo, NETWORK = 'mainnet') {
     const { network } = electrumx;
     const slp = CryptoUtil.getSLP(NETWORK);
 
-    const change = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
+    // Generate an EC key pair for signing the transaction.
+    const changeKeyPair = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
 
-    // get the segwit address
-    // const segwitAddress = CryptoUtil.toSegWitAddress(change, network);
-    const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
+    // get the legacy address
+    const legacyAddress = CryptoUtil.toLegacyAddress(changeKeyPair, network);
 
     // first get NFY balance
     const balance = await electrumx.getBalance(legacyAddress);

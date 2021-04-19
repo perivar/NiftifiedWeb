@@ -9,8 +9,8 @@ import CryptoUtil, { WalletInfo } from '../util';
 
 export async function consolidateDust(walletInfo: WalletInfo, NETWORK = 'mainnet') {
   try {
-    const SEND_ADDR = walletInfo.legacyAddress;
-    const SEND_MNEMONIC = walletInfo.mnemonic;
+    const sendAddress = walletInfo.legacyAddress;
+    const { mnemonic } = walletInfo;
 
     // network
     const electrumx = CryptoUtil.getElectrumX(NETWORK);
@@ -23,7 +23,7 @@ export async function consolidateDust(walletInfo: WalletInfo, NETWORK = 'mainnet
     let sendAmount = 0;
     const inputs = [];
 
-    const utxos = await electrumx.getUtxos(SEND_ADDR);
+    const utxos = await electrumx.getUtxos(sendAddress);
 
     if (utxos.length === 0) throw new Error('No UTXOs found.');
 
@@ -62,18 +62,15 @@ export async function consolidateDust(walletInfo: WalletInfo, NETWORK = 'mainnet
     }
 
     // add output w/ address and amount to send
-    transactionBuilder.addOutput(SEND_ADDR, sendAmount - txFee);
+    transactionBuilder.addOutput(sendAddress, sendAmount - txFee);
 
     // Generate a change address from a Mnemonic of a private key.
-    const change = await CryptoUtil.changeAddrFromMnemonic(SEND_MNEMONIC, network);
+    const changeKeyPair = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
 
-    // Generate a keypair from the change address.
-    const keyPair = change; // not sure if this is the correct to get keypair
-
-    // sign w/ HDNode
+    // Sign the transaction with the changeKeyPair HD node.
     const redeemScript = undefined;
     inputs.forEach((input, index) => {
-      transactionBuilder.sign(index, keyPair, redeemScript, Transaction.SIGHASH_ALL, input.value);
+      transactionBuilder.sign(index, changeKeyPair, redeemScript, Transaction.SIGHASH_ALL, input.value);
     });
 
     // build tx
@@ -89,5 +86,6 @@ export async function consolidateDust(walletInfo: WalletInfo, NETWORK = 'mainnet
     CryptoUtil.transactionStatus(sendRawTransaction, NETWORK);
   } catch (err) {
     console.log('error: ', err);
+    throw err;
   }
 }

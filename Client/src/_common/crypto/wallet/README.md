@@ -81,11 +81,11 @@ BEING SENT FROM (which will perform a similar action to the
 [consolidate-utxos](consolidate-utxos) example.
 To change the send-all address, change the .js file line from:
 
-`const RECV_ADDR = walletInfo.segwitAddress`
+`const receiverAddress = walletInfo.segwitAddress`
 
 to
 
-`const RECV_ADDR = "YourNFYwalletHereInQuotes"`
+`const receiverAddress = "YourNFYwalletHereInQuotes"`
 
 
 ## SEND NFY
@@ -95,9 +95,9 @@ wallet/send-nfy to send a specific amount of NFY from your "wallet.json" address
 to any address of your choosing.
 NOTE: the .js file has to be opened, and your receiving address has to be
 changed from:
-const RECV_ADDR = ``
+const receiverAddress = ``
 to
-const RECV_ADDR = 'YourNFYwalletHereInQuotes'
+const receiverAddress = 'YourNFYwalletHereInQuotes'
 #NOTE:
 the .js file is defaulted to sending 1000 niftoshis. Edit this line:
 const NIFTOSHIS_TO_SEND = 1000
@@ -113,9 +113,9 @@ file to send the NFY. This is just another way of signing the transaction
 as proof of ownership of the wallet and containing addresses.
 NOTE: the .js file has to be opened, and your receiving address has to be
 changed from:
-const RECV_ADDR = ``
+const receiverAddress = ``
 to
-const RECV_ADDR = 'YourNFYwalletHereInQuotes'
+const receiverAddress = 'YourNFYwalletHereInQuotes'
 NOTE: the .js file is defaulted to sending 1000 niftoshis. Edit this line:
 const NIFTOSHIS_TO_SEND = 1000
 to any number you wish, above 546 niftoshis, to send that amount of niftoshis

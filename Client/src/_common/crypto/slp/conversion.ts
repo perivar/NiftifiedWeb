@@ -11,11 +11,12 @@ export async function conversion(walletInfo: WalletInfo, NETWORK = 'mainnet') {
     // network
     const network = CryptoUtil.getNetwork(NETWORK);
 
-    const change = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
+    // Generate an EC key pair for signing the transaction.
+    const changeKeyPair = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
 
-    // get the segwit address
-    const segwitAddress = CryptoUtil.toSegWitAddress(change, network);
-    const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
+    // get the legacy address
+    const segwitAddress = CryptoUtil.toSegWitAddress(changeKeyPair, network);
+    const legacyAddress = CryptoUtil.toLegacyAddress(changeKeyPair, network);
 
     console.log(`SegWit Address: ${segwitAddress}:`);
     console.log(`Legacy Address: ${legacyAddress}:`);

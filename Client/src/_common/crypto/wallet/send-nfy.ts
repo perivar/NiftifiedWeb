@@ -1,5 +1,5 @@
 /*
-  Send 1000 niftoshis to RECV_ADDR_LEGACY.
+  Send 1000 niftoshis to receiverAddress.
 */
 
 import * as bitcoin from 'bitcoinjs-lib';
@@ -8,24 +8,22 @@ import CryptoUtil, { WalletInfo } from '../util';
 
 export async function sendNFY(
   walletInfo: WalletInfo,
-  recvAddrLegacy: string,
+  receiverAddress: string,
   niftoshisToSend: number,
   NETWORK = 'mainnet'
 ) {
   try {
-    const SEND_ADDR_LEGACY = walletInfo.legacyAddress;
-    let RECV_ADDR_LEGACY = recvAddrLegacy;
-
-    const SEND_MNEMONIC = walletInfo.mnemonic;
+    const sendAddress = walletInfo.legacyAddress;
+    const { mnemonic } = walletInfo;
 
     // network
     const electrumx = CryptoUtil.getElectrumX(NETWORK);
     const { network } = electrumx;
 
     // Get the balance of the sending address.
-    const balance = await electrumx.getBalance(SEND_ADDR_LEGACY);
+    const balance = await electrumx.getBalance(sendAddress);
     console.log(`balance: ${JSON.stringify(balance, null, 2)}`);
-    console.log(`Balance of sending address ${SEND_ADDR_LEGACY} is ${balance} NFY.`);
+    console.log(`Balance of sending address ${sendAddress} is ${balance} NFY.`);
 
     // Exit if the balance is zero.
     if (balance <= 0.0) {
@@ -34,14 +32,14 @@ export async function sendNFY(
 
     // If the user fails to specify a reciever address, just send the NFY back
     // to the origination address, so the example doesn't fail.
-    if (RECV_ADDR_LEGACY === '') RECV_ADDR_LEGACY = SEND_ADDR_LEGACY;
+    if (receiverAddress === '') receiverAddress = sendAddress;
 
-    console.log(`Sender Legacy Address: ${SEND_ADDR_LEGACY}`);
-    console.log(`Receiver Legacy Address: ${RECV_ADDR_LEGACY}`);
+    console.log(`Sender Legacy Address: ${sendAddress}`);
+    console.log(`Receiver Legacy Address: ${receiverAddress}`);
 
     // Get UTXOs held by the address.
     // https://developer.bitcoin.com/mastering-bitcoin-cash/4-transactions/
-    const utxos = await electrumx.getUtxos(SEND_ADDR_LEGACY);
+    const utxos = await electrumx.getUtxos(sendAddress);
     // console.log(`utxos: ${JSON.stringify(utxos, null, 2)}`);
 
     if (utxos.length === 0) throw new Error('No UTXOs found.');
@@ -77,18 +75,15 @@ export async function sendNFY(
     }
 
     // add output w/ address and amount to send
-    transactionBuilder.addOutput(RECV_ADDR_LEGACY, niftoshisToSend);
-    transactionBuilder.addOutput(SEND_ADDR_LEGACY, remainder);
+    transactionBuilder.addOutput(receiverAddress, niftoshisToSend);
+    transactionBuilder.addOutput(sendAddress, remainder);
 
     // Generate a change address from a Mnemonic of a private key.
-    const change = await CryptoUtil.changeAddrFromMnemonic(SEND_MNEMONIC, network);
+    const changeKeyPair = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
 
-    // Generate a keypair from the change address.
-    const keyPair = change; // not sure if this is the correct to get keypair
-
-    // Sign the transaction with the HD node.
+    // Sign the transaction with the changeKeyPair HD node.
     const redeemScript = undefined;
-    transactionBuilder.sign(0, keyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
+    transactionBuilder.sign(0, changeKeyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
 
     // build tx
     const tx = transactionBuilder.build();

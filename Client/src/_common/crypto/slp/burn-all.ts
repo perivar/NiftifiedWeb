@@ -7,15 +7,15 @@ import * as bitcoin from 'bitcoinjs-lib';
 import { Transaction } from 'bitcoinjs-lib';
 import CryptoUtil, { WalletInfo } from '../util';
 
-export async function burnAll(walletInfo: WalletInfo, recvAddr = '', NETWORK = 'mainnet') {
+export async function burnAll(walletInfo: WalletInfo, receiverAddress = '', NETWORK = 'mainnet') {
   try {
-    const SEND_ADDR = walletInfo.legacyAddress;
-    const SEND_MNEMONIC = walletInfo.mnemonic;
-    let RECV_ADDR = recvAddr;
+    const sendAddress = walletInfo.legacyAddress;
+
+    const { mnemonic } = walletInfo;
 
     // Send the money back to the same address. Edit this if you want to send it
     // somewhere else.
-    if (RECV_ADDR === '') RECV_ADDR = walletInfo.legacyAddress;
+    if (receiverAddress === '') receiverAddress = walletInfo.legacyAddress;
 
     // network
     const electrumx = CryptoUtil.getElectrumX(NETWORK);
@@ -27,7 +27,7 @@ export async function burnAll(walletInfo: WalletInfo, recvAddr = '', NETWORK = '
     let sendAmount = 0;
     const inputs = [];
 
-    const utxos = await electrumx.getUtxos(SEND_ADDR);
+    const utxos = await electrumx.getUtxos(sendAddress);
 
     if (utxos.length === 0) throw new Error('No UTXOs found.');
 
@@ -58,18 +58,15 @@ export async function burnAll(walletInfo: WalletInfo, recvAddr = '', NETWORK = '
     }
 
     // add output w/ address and amount to send
-    transactionBuilder.addOutput(RECV_ADDR, sendAmount - txFee);
+    transactionBuilder.addOutput(receiverAddress, sendAmount - txFee);
 
     // Generate a change address from a Mnemonic of a private key.
-    const change = await CryptoUtil.changeAddrFromMnemonic(SEND_MNEMONIC, network);
+    const changeKeyPair = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
 
-    // Generate a keypair from the change address.
-    const keyPair = change; // not sure if this is the correct to get keypair
-
-    // sign w/ HDNode
+    // Sign the transaction with the changeKeyPair HD node.
     const redeemScript = undefined;
     inputs.forEach((input, index) => {
-      transactionBuilder.sign(index, keyPair, redeemScript, Transaction.SIGHASH_ALL, input.value);
+      transactionBuilder.sign(index, changeKeyPair, redeemScript, Transaction.SIGHASH_ALL, input.value);
     });
 
     // build tx

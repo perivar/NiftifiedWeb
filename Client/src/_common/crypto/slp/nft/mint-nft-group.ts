@@ -18,11 +18,11 @@ export async function mintNFTGroup(walletInfo: WalletInfo, tokenId: string, toke
     const { network } = electrumx;
     const slp = CryptoUtil.getSLP(NETWORK);
 
-    const change = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
+    // Generate an EC key pair for signing the transaction.
+    const changeKeyPair = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
 
-    // get the segwit address
-    // const segwitAddress = CryptoUtil.toSegWitAddress(change, network);
-    const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
+    // get the legacy address
+    const legacyAddress = CryptoUtil.toLegacyAddress(changeKeyPair, network);
 
     // Get a UTXO to pay for the transaction.
     const utxos = await electrumx.getUtxos(legacyAddress);
@@ -108,15 +108,12 @@ export async function mintNFTGroup(walletInfo: WalletInfo, tokenId: string, toke
     // add output to send NFY remainder of UTXO.
     transactionBuilder.addOutput(legacyAddress, remainder);
 
-    // Generate a keypair from the change address.
-    const keyPair = change; // not sure if this is the correct to get keypair
-
     // Sign the transaction for the UTXO input that pays for the transaction..
     const redeemScript = undefined;
-    transactionBuilder.sign(0, keyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
+    transactionBuilder.sign(0, changeKeyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
 
     // Sign the Token UTXO minting baton input
-    transactionBuilder.sign(1, keyPair, redeemScript, Transaction.SIGHASH_ALL, 546);
+    transactionBuilder.sign(1, changeKeyPair, redeemScript, Transaction.SIGHASH_ALL, 546);
 
     // build tx
     const tx = transactionBuilder.build();

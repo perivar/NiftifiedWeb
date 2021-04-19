@@ -632,7 +632,6 @@ export class Utils {
               utxo.utxoType = 'minting-baton';
             } else {
               // Tokens
-
               utxo.utxoType = 'token';
               utxo.tokenQty = new BigNumber(slpData.qty).div(Math.pow(10, slpData.decimals)).toString();
             }
@@ -674,7 +673,6 @@ export class Utils {
               utxo.utxoType = 'minting-baton';
             } else {
               // Tokens
-
               utxo.utxoType = 'token';
               utxo.tokenQty = new BigNumber(slpData.qty).div(Math.pow(10, genesisData.decimals)).toString();
             }

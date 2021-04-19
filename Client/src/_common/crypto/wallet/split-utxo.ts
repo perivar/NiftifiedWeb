@@ -9,15 +9,15 @@ import CryptoUtil, { WalletInfo } from '../util';
 
 export async function splitUtxo(walletInfo: WalletInfo, NETWORK = 'mainnet') {
   try {
-    const SEND_ADDR = walletInfo.legacyAddress;
-    const SEND_MNEMONIC = walletInfo.mnemonic;
+    const sendAddress = walletInfo.legacyAddress;
+    const { mnemonic } = walletInfo;
 
     // network
     const electrumx = CryptoUtil.getElectrumX(NETWORK);
     const { network } = electrumx;
 
     // Get the balance of the sending address.
-    const balance = await electrumx.getBalance(SEND_ADDR);
+    const balance = await electrumx.getBalance(sendAddress);
 
     // Exit if the balance is zero.
     if (balance <= 0.0) {
@@ -25,15 +25,15 @@ export async function splitUtxo(walletInfo: WalletInfo, NETWORK = 'mainnet') {
     }
 
     // Send the NFY back to the same wallet address.
-    const RECV_ADDR = SEND_ADDR;
+    const receiverAddress = sendAddress;
 
     // Convert to a legacy address (needed to build transactions).
-    // const SEND_ADDR_LEGACY = CryptoUtil.toLegacyAddress(SEND_ADDR)
-    // const RECV_ADDR_LEGACY = CryptoUtil.toLegacyAddress(RECV_ADDR)
+    // const sendAddress = CryptoUtil.toLegacyAddress(sendAddress)
+    // const receiverAddress = CryptoUtil.toLegacyAddress(receiverAddress)
 
     // Get UTXOs held by the address.
     // https://developer.bitcoin.com/mastering-bitcoin-cash/4-transactions/
-    const utxos = await electrumx.getUtxos(SEND_ADDR);
+    const utxos = await electrumx.getUtxos(sendAddress);
     // console.log(`utxos: ${JSON.stringify(utxos, null, 2)}`)
 
     if (utxos.length === 0) throw new Error('No UTXOs found.');
@@ -69,18 +69,15 @@ export async function splitUtxo(walletInfo: WalletInfo, NETWORK = 'mainnet') {
 
     // add outputs w/ address and amount to send
     for (let i = 0; i < 5; i++) {
-      transactionBuilder.addOutput(RECV_ADDR, niftoshisToSend);
+      transactionBuilder.addOutput(receiverAddress, niftoshisToSend);
     }
 
     // Generate a change address from a Mnemonic of a private key.
-    const change = await CryptoUtil.changeAddrFromMnemonic(SEND_MNEMONIC, network);
+    const changeKeyPair = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
 
-    // Generate a keypair from the change address.
-    const keyPair = change; // not sure if this is the correct to get keypair
-
-    // Sign the transaction with the HD node.
+    // Sign the transaction with the changeKeyPair HD node.
     const redeemScript = undefined;
-    transactionBuilder.sign(0, keyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
+    transactionBuilder.sign(0, changeKeyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
 
     // build tx
     const tx = transactionBuilder.build();
@@ -94,7 +91,9 @@ export async function splitUtxo(walletInfo: WalletInfo, NETWORK = 'mainnet') {
     console.log(`Transaction ID: ${txidStr}`);
     console.log('Check the status of your transaction on this block explorer:');
     CryptoUtil.transactionStatus(txidStr, NETWORK);
+    return txidStr;
   } catch (err) {
     console.log('error: ', err);
+    throw err;
   }
 }

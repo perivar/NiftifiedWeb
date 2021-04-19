@@ -22,11 +22,11 @@ export async function createNFTChild(walletInfo: WalletInfo, tokenId: string, NE
     const { network } = electrumx;
     const slp = CryptoUtil.getSLP(NETWORK);
 
-    const change = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
+    // Generate an EC key pair for signing the transaction.
+    const changeKeyPair = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
 
     // get the cash address
-    // const segwitAddress = CryptoUtil.toSegWitAddress(change, network);
-    const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
+    const legacyAddress = CryptoUtil.toLegacyAddress(changeKeyPair, network);
 
     // Get a UTXO to pay for the transaction.
     const utxos = await electrumx.getUtxos(legacyAddress);
@@ -113,23 +113,19 @@ export async function createNFTChild(walletInfo: WalletInfo, tokenId: string, NE
     // Send dust transaction representing the tokens.
     transactionBuilder.addOutput(legacyAddress, 546);
 
-    // A NFT Child Token (the actual token) does not include a minting baton
+    // Note! A NFT Child Token (i.e. the actual token) does not include a minting baton
     // transactionBuilder.addOutput(legacyAddress, 546);
 
     // add output to send NFY remainder of UTXO.
     transactionBuilder.addOutput(legacyAddress, remainder);
 
-    // Generate a keypair from the change address.
-    const keyPair = change; // not sure if this is the correct to get keypair
-
-    const redeemScript = undefined;
-
     // Sign the Token UTXO for the NFT Group token that will be burned in this
     // transaction.
-    transactionBuilder.sign(0, keyPair, redeemScript, Transaction.SIGHASH_ALL, 546);
+    const redeemScript = undefined;
+    transactionBuilder.sign(0, changeKeyPair, redeemScript, Transaction.SIGHASH_ALL, 546);
 
     // Sign the input for the UTXO paying for the TX.
-    transactionBuilder.sign(1, keyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
+    transactionBuilder.sign(1, changeKeyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
 
     // build tx
     const tx = transactionBuilder.build();
