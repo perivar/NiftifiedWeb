@@ -134,11 +134,6 @@ function toLegacyAddress(keyPair: any, network: any): string {
   return address ? address : '';
 }
 
-function toSLPAddress(keyPair: any, network: any): string {
-  // TODO - doesn't do anything yet
-  return 'simpleledger:....';
-}
-
 function toKeyPairFromWIF(privateKeyWIF: string, network: any): any {
   const keyPair = bitcoin.ECPair.fromWIF(privateKeyWIF, network);
   return keyPair;
@@ -389,10 +384,12 @@ function getSLP(NETWORK = 'mainnet') {
   const NFY_TESTNET = 'https://testexplorer.niftycoin.org/';
 
   const explorer = getExplorer(NETWORK);
+  const electrumx = getElectrumX(NETWORK);
 
   const config: CryptoLibConfig = {
     restURL: NETWORK === 'mainnet' ? NFY_MAINNET : NFY_TESTNET,
-    explorer
+    explorer,
+    electrumx
   };
   const slp = new SLP(config);
 
@@ -403,7 +400,6 @@ const CryptoUtil = {
   transactionStatus,
   toSegWitAddress,
   toLegacyAddress,
-  toSLPAddress,
   getByteCount,
   changeAddrFromMnemonic,
   findBiggestUtxo,

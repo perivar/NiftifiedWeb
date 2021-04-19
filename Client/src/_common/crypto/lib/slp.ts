@@ -9,12 +9,14 @@ import { TokenType1 } from './tokentype1';
 import { NFT1 } from './nft1';
 import { Utils } from './utils';
 import { NiftyCoinExplorer } from '../NiftyCoinExplorer';
+import { NiftyCoinElectrumX } from '../NiftyCoinElectrumX';
 
 export interface CryptoLibConfig {
   restURL: string;
   apiToken?: string;
   authToken?: string;
   explorer: NiftyCoinExplorer;
+  electrumx: NiftyCoinElectrumX;
 }
 
 // SLP is a superset of BITBOX

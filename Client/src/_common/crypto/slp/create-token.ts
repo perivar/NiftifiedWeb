@@ -55,7 +55,7 @@ export async function createToken(walletInfo: WalletInfo, NETWORK = 'mainnet') {
     const configObj: SLPGenesisOpReturnConfig = {
       name: 'SLP Test Token',
       ticker: 'SLPTEST',
-      documentUrl: 'https://FullStack.cash',
+      documentUrl: 'https://niftycoin.org',
       decimals: 8,
       initialQty: 100,
       documentHash: '',

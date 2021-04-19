@@ -9,8 +9,11 @@ export async function getNFT(tokenId: string, NETWORK = 'mainnet') {
     const slpData = await slp.Utils.decodeOpReturn(tokenId);
     // console.log(`tokenUtxos: ${JSON.stringify(slpData, null, 2)}`);
 
+    console.log('Check the status of your transaction on this block explorer:');
+    CryptoUtil.transactionStatus(tokenId, NETWORK);
     return slpData;
   } catch (err) {
     console.error('Error in getNFT: ', err);
+    throw err;
   }
 }

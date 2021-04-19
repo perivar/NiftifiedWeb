@@ -26,7 +26,6 @@ export async function createNFTChild(walletInfo: WalletInfo, tokenId: string, NE
 
     // get the cash address
     // const segwitAddress = CryptoUtil.toSegWitAddress(change, network);
-    // const slpAddress = CryptoUtil.toSLPAddress(segwitAddress)
     const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
 
     // Get a UTXO to pay for the transaction.
@@ -44,7 +43,10 @@ export async function createNFTChild(walletInfo: WalletInfo, tokenId: string, NE
     // Filter out the non-SLP token UTXOs.
     const nfyUtxos = utxos.filter((utxo: any, index: number) => {
       const tokenUtxo = tokenUtxos[index];
-      if (!tokenUtxo.isValid) return true;
+      if (!tokenUtxo.isValid) {
+        return true;
+      }
+      return false;
     });
     // console.log(`nfyUTXOs: ${JSON.stringify(nfyUtxos, null, 2)}`);
 
@@ -62,6 +64,7 @@ export async function createNFTChild(walletInfo: WalletInfo, tokenId: string, NE
       ) {
         return true;
       }
+      return false;
     });
     // console.log(`tokenUtxos: ${JSON.stringify(tokenUtxos, null, 2)}`);
 
@@ -91,7 +94,7 @@ export async function createNFTChild(walletInfo: WalletInfo, tokenId: string, NE
     const txFee = 550;
 
     // amount to send back to the sending address.
-    // Subtract one dust transactions for tokens.
+    // subtract one dust transactions for tokens. (not a baton)
     const remainder = originalAmount - 546 * 1 - txFee;
 
     // Generate SLP config object
@@ -109,6 +112,9 @@ export async function createNFTChild(walletInfo: WalletInfo, tokenId: string, NE
 
     // Send dust transaction representing the tokens.
     transactionBuilder.addOutput(legacyAddress, 546);
+
+    // A NFT Child Token (the actual token) does not include a minting baton
+    // transactionBuilder.addOutput(legacyAddress, 546);
 
     // add output to send NFY remainder of UTXO.
     transactionBuilder.addOutput(legacyAddress, remainder);
@@ -139,5 +145,6 @@ export async function createNFTChild(walletInfo: WalletInfo, tokenId: string, NE
     return txidStr;
   } catch (err) {
     console.error('Error in createNFTChild: ', err);
+    throw err;
   }
 }

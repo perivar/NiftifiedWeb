@@ -47,42 +47,42 @@ export class NFT1 {
 
   // Mint additional NFT Group 'Parent' tokens.
   mintNFTGroupOpReturn(tokenUtxos: TokenUTXOInfo[], mintQty: number, destroyBaton = false) {
-    // try {
-    // Throw error if input is not an array.
-    if (!Array.isArray(tokenUtxos)) {
-      throw new Error('tokenUtxos must be an array.');
-    }
-
-    // Loop through the tokenUtxos array and find the minting baton.
-    let mintBatonUtxo;
-    for (let i = 0; i < tokenUtxos.length; i++) {
-      if (tokenUtxos[i].utxoType === 'minting-baton') {
-        mintBatonUtxo = tokenUtxos[i];
+    try {
+      // Throw error if input is not an array.
+      if (!Array.isArray(tokenUtxos)) {
+        throw new Error('tokenUtxos must be an array.');
       }
+
+      // Loop through the tokenUtxos array and find the minting baton.
+      let mintBatonUtxo;
+      for (let i = 0; i < tokenUtxos.length; i++) {
+        if (tokenUtxos[i].utxoType === 'minting-baton') {
+          mintBatonUtxo = tokenUtxos[i];
+        }
+      }
+
+      // Throw an error if the minting baton could not be found.
+      if (!mintBatonUtxo) {
+        throw new Error('Minting baton could not be found in tokenUtxos array.');
+      }
+
+      const { tokenId } = mintBatonUtxo;
+
+      if (!tokenId) {
+        throw new Error('tokenId property not found in mint-baton UTXO.');
+      }
+
+      // Signal that the baton should be passed or detroyed.
+      let batonVout: number | null = 2;
+      if (destroyBaton) batonVout = null;
+
+      const script = slpMdm.NFT1.Group.mint(tokenId, batonVout, new slpMdm.BN(mintQty));
+
+      return script;
+    } catch (err) {
+      console.log(`Error in generateMintOpReturn()`);
+      throw err;
     }
-
-    // Throw an error if the minting baton could not be found.
-    if (!mintBatonUtxo) {
-      throw new Error('Minting baton could not be found in tokenUtxos array.');
-    }
-
-    const { tokenId } = mintBatonUtxo;
-
-    if (!tokenId) {
-      throw new Error('tokenId property not found in mint-baton UTXO.');
-    }
-
-    // Signal that the baton should be passed or detroyed.
-    let batonVout: number | null = 2;
-    if (destroyBaton) batonVout = null;
-
-    const script = slpMdm.NFT1.Group.mint(tokenId, batonVout, new slpMdm.BN(mintQty));
-
-    return script;
-    // } catch (err) {
-    //   // console.log(`Error in generateMintOpReturn()`)
-    //   throw err
-    // }
   }
 
   generateNFTChildGenesisOpReturn(configObj: NFTChildGenesisOpReturnConfig) {

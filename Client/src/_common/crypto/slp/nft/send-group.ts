@@ -11,7 +11,7 @@ export async function sendGroupToken(
   tokenQty: number,
   tokenId: string,
   toAddr: string,
-  NETWORK: string
+  NETWORK = 'mainnet'
 ) {
   try {
     const TOKENQTY = tokenQty;
@@ -32,7 +32,7 @@ export async function sendGroupToken(
 
     // get the segwit address
     // const segwitAddress = CryptoUtil.toSegWitAddress(change, network);
-    // const slpAddress = CryptoUtil.toSLPAddress(change, network);
+
     const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
 
     // Get UTXOs held by this address.
@@ -48,7 +48,10 @@ export async function sendGroupToken(
     // Filter out the non-SLP token UTXOs.
     const nfyUtxos = utxos.filter((utxo: any, index: number) => {
       const tokenUtxo = tokenUtxos[index];
-      if (!tokenUtxo.isValid) return true;
+      if (!tokenUtxo.isValid) {
+        return true;
+      }
+      return false;
     });
     // console.log(`nfyUTXOs: ${JSON.stringify(nfyUtxos, null, 2)}`);
 
@@ -57,7 +60,7 @@ export async function sendGroupToken(
     }
 
     // Filter out the token UTXOs that match the user-provided token ID.
-    tokenUtxos = tokenUtxos.filter((utxo: any, index: number) => {
+    tokenUtxos = tokenUtxos.filter((utxo: any) => {
       if (
         utxo && // UTXO is associated with a token.
         utxo.tokenId === TOKENID && // UTXO matches the token ID.
@@ -66,6 +69,7 @@ export async function sendGroupToken(
       ) {
         return true;
       }
+      return false;
     });
     // console.log(`tokenUtxos: ${JSON.stringify(tokenUtxos, null, 2)}`);
 
@@ -125,10 +129,9 @@ export async function sendGroupToken(
     transactionBuilder.addOutput(TO_ADDR, 546);
 
     // Return any token change back to the sender.
-    // TODO fix PIN
-    // if (slpSendObj.outputs > 1) {
-    //   transactionBuilder.addOutput(CryptoUtil.toLegacyAddress(slpAddress), 546);
-    // }
+    if (slpSendObj.outputs > 1) {
+      transactionBuilder.addOutput(legacyAddress, 546);
+    }
 
     // Last output: send the NFY change back to the wallet.
     transactionBuilder.addOutput(legacyAddress, remainder);
@@ -140,7 +143,6 @@ export async function sendGroupToken(
     // Sign each token UTXO being consumed.
     for (let i = 0; i < tokenUtxos.length; i++) {
       const thisUtxo = tokenUtxos[i];
-
       transactionBuilder.sign(1 + i, keyPair, redeemScript, Transaction.SIGHASH_ALL, thisUtxo.value);
     }
 
@@ -163,5 +165,6 @@ export async function sendGroupToken(
   } catch (err) {
     console.error('Error in sendGroupToken: ', err);
     console.log(`Error message: ${err.message}`);
+    throw err;
   }
 }

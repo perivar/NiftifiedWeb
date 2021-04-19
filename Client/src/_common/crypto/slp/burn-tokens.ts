@@ -6,11 +6,10 @@ import * as bitcoin from 'bitcoinjs-lib';
 import { Transaction } from 'bitcoinjs-lib';
 import CryptoUtil, { WalletInfo } from '../util';
 
-export async function burnTokens(walletInfo: WalletInfo, NETWORK = 'mainnet') {
+export async function burnTokens(walletInfo: WalletInfo, tokenId: string, tokenQty: number, NETWORK = 'mainnet') {
   try {
-    // CUSTOMIZE THESE VALUES FOR YOUR USE
-    const TOKENQTY = 1;
-    const TOKENID = '8de4984472af772f144a74de473d6c21505a6d89686b57445c3e4fc7db3773b6';
+    const TOKENQTY = tokenQty;
+    const TOKENID = tokenId;
 
     const { mnemonic } = walletInfo;
 
@@ -41,7 +40,10 @@ export async function burnTokens(walletInfo: WalletInfo, NETWORK = 'mainnet') {
     // Filter out the non-SLP token UTXOs.
     const nfyUtxos = utxos.filter((utxo: any, index: number) => {
       const tokenUtxo = tokenUtxos[index];
-      if (!tokenUtxo.isValid) return true;
+      if (!tokenUtxo.isValid) {
+        return true;
+      }
+      return false;
     });
     console.log(`nfyUTXOs: ${JSON.stringify(nfyUtxos, null, 2)}`);
 
@@ -50,7 +52,7 @@ export async function burnTokens(walletInfo: WalletInfo, NETWORK = 'mainnet') {
     }
 
     // Filter out the token UTXOs that match the user-provided token ID.
-    tokenUtxos = tokenUtxos.filter((utxo: any, index: number) => {
+    tokenUtxos = tokenUtxos.filter((utxo: any) => {
       if (
         utxo && // UTXO is associated with a token.
         utxo.tokenId === TOKENID && // UTXO matches the token ID.
@@ -58,6 +60,7 @@ export async function burnTokens(walletInfo: WalletInfo, NETWORK = 'mainnet') {
       ) {
         return true;
       }
+      return false;
     });
     // console.log(`tokenUtxos: ${JSON.stringify(tokenUtxos, null, 2)}`);
 
@@ -108,15 +111,11 @@ export async function burnTokens(walletInfo: WalletInfo, NETWORK = 'mainnet') {
     // Add OP_RETURN as first output.
     transactionBuilder.addOutput(slpData, 0);
 
-    // Send the token back to the same wallet if the user hasn't specified a
-    // different address.
-    // if (TO_SLPADDR === "") TO_SLPADDR = walletInfo.slpAddress;
-
     // Send dust transaction representing tokens being sent.
     transactionBuilder.addOutput(walletInfo.legacyAddress, 546);
 
     // Last output: send the NFY change back to the wallet.
-    transactionBuilder.addOutput(CryptoUtil.toLegacyAddress(change, network), remainder);
+    transactionBuilder.addOutput(walletInfo.legacyAddress, remainder);
 
     // Sign the transaction with the private key for the NFY UTXO paying the fees.
     const redeemScript = undefined;

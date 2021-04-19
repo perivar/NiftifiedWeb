@@ -8,6 +8,7 @@ import { CryptoLibConfig } from './slp';
 
 import axios from 'axios'; // delete when everything is moved to explorer
 import { NiftyCoinExplorer } from '../NiftyCoinExplorer';
+import { NiftyCoinElectrumX } from '../NiftyCoinElectrumX';
 
 let _this: any;
 
@@ -18,6 +19,7 @@ export class Utils {
 
   slpParser: any;
   explorer: NiftyCoinExplorer;
+  electrumx: NiftyCoinElectrumX;
   axios: any;
   whitelist: any;
 
@@ -26,6 +28,7 @@ export class Utils {
     this.apiToken = config.apiToken;
     this.authToken = config.authToken;
     this.explorer = config.explorer;
+    this.electrumx = config.electrumx;
 
     this.slpParser = slpParser;
     this.axios = axios;
@@ -288,7 +291,7 @@ export class Utils {
 	*/
 
   // Reimplementation of decodeOpReturn() using slp-parser.
-  async decodeOpReturn(txid: string, cache: any = null, usrObj = null): Promise<SlpTokenData> {
+  async decodeOpReturn(txid: string, cache: any = null): Promise<SlpTokenData> {
     // The cache object is an in-memory cache (JS Object) that can be passed
     // into this function. It helps if multiple vouts from the same TXID are
     // being evaluated. In that case, it can significantly reduce the number
@@ -313,19 +316,8 @@ export class Utils {
         throw new Error('txid string must be included.');
       }
 
-      // CT: 2/24/21 Deprected GET in favor of POST, to pass IP address.
-      // Retrieve the transaction object from the full node.
-      // const path = `${this.restURL}rawtransactions/getRawTransaction`;
-      // const response = await _this.axios.post(
-      //   path,
-      //   {
-      //     verbose: true,
-      //     txids: [txid],
-      //     usrObj // pass user data when making an internal call.
-      //   },
-      //   _this.axiosOptions
-      // );
-      const txDetails = await _this.explorer.txData(txid);
+      // const txDetails = await _this.explorer.txData(txid);
+      const txDetails = await this.electrumx.getTransaction(txid);
       // console.log(`txDetails: ${JSON.stringify(txDetails, null, 2)}`)
 
       const tokenData = this.decodeTxData(txDetails);
@@ -580,11 +572,7 @@ export class Utils {
         // If there is no OP_RETURN, mark the UTXO as false.
         let slpData: any = false;
         try {
-          slpData = (await this.decodeOpReturn(
-            utxo.txid,
-            decodeOpReturnCache,
-            usrObj // pass user data when making an internal call.
-          )) as SlpTokenData;
+          slpData = (await this.decodeOpReturn(utxo.txid, decodeOpReturnCache)) as SlpTokenData;
           // console.log(`slpData: ${JSON.stringify(slpData, null, 2)}`)
         } catch (err) {
           // console.log(
@@ -678,11 +666,7 @@ export class Utils {
           } else {
             // If UTXO passes validation, then return formatted token data.
 
-            const genesisData = (await this.decodeOpReturn(
-              slpData.tokenId,
-              decodeOpReturnCache,
-              usrObj // pass user data when making an internal call.
-            )) as SlpTokenGenesis;
+            const genesisData = (await this.decodeOpReturn(slpData.tokenId, decodeOpReturnCache)) as SlpTokenGenesis;
             // console.log(`genesisData: ${JSON.stringify(genesisData, null, 2)}`)
 
             // Minting Baton
@@ -733,11 +717,7 @@ export class Utils {
           } else {
             // If UTXO passes validation, then return formatted token data.
 
-            const genesisData = (await this.decodeOpReturn(
-              slpData.tokenId,
-              decodeOpReturnCache,
-              usrObj // pass user data when making an internal call.
-            )) as SlpTokenGenesis;
+            const genesisData = (await this.decodeOpReturn(slpData.tokenId, decodeOpReturnCache)) as SlpTokenGenesis;
             // console.log(`genesisData: ${JSON.stringify(genesisData, null, 2)}`)
 
             // console.log(`utxo: ${JSON.stringify(utxo, null, 2)}`)

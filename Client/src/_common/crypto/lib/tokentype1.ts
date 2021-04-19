@@ -87,7 +87,6 @@ export class TokenType1 {
 
         // Generate the OP_RETURN as a Buffer.
         script = slpMdm.TokenType1.send(tokenId, [new slpMdm.BN(baseQty), new slpMdm.BN(baseChange)]);
-        //
 
         // Corner case, when there is no token change to send back.
       } else {
@@ -185,7 +184,6 @@ export class TokenType1 {
   // mintQty is the number of new coins to mint.
   // destroyBaton is an option Boolean. If true, will destroy the baton. By
   // default it is false and will pass the baton.
-
   generateMintOpReturn(tokenUtxos: TokenUTXOInfo[], mintQty: number, destroyBaton = false) {
     try {
       // Throw error if input is not an array.

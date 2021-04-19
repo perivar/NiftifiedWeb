@@ -6,7 +6,7 @@ import * as bitcoin from 'bitcoinjs-lib';
 import { Transaction } from 'bitcoinjs-lib';
 import CryptoUtil, { WalletInfo } from '../../util';
 
-export async function mintNFTGroup(walletInfo: WalletInfo, tokenId: string, tokenQty = 10, NETWORK = 'mainnet') {
+export async function mintNFTGroup(walletInfo: WalletInfo, tokenId: string, tokenQty: number, NETWORK = 'mainnet') {
   try {
     const TOKENQTY = tokenQty;
     const TOKENID = tokenId;
@@ -22,7 +22,6 @@ export async function mintNFTGroup(walletInfo: WalletInfo, tokenId: string, toke
 
     // get the segwit address
     // const segwitAddress = CryptoUtil.toSegWitAddress(change, network);
-    // const slpAddress = CryptoUtil.toSLPAddress(segwitAddress)
     const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
 
     // Get a UTXO to pay for the transaction.
@@ -40,7 +39,10 @@ export async function mintNFTGroup(walletInfo: WalletInfo, tokenId: string, toke
     // Filter out the non-SLP token UTXOs.
     const nfyUtxos = utxos.filter((utxo: any, index: number) => {
       const tokenUtxo = tokenUtxos[index];
-      if (!tokenUtxo.isValid) return true;
+      if (!tokenUtxo.isValid) {
+        return true;
+      }
+      return false;
     });
     // console.log(`nfyUTXOs: ${JSON.stringify(nfyUtxos, null, 2)}`);
 
@@ -50,7 +52,7 @@ export async function mintNFTGroup(walletInfo: WalletInfo, tokenId: string, toke
 
     // Filter out the token UTXOs that match the user-provided token ID
     // and contain the minting baton.
-    tokenUtxos = tokenUtxos.filter((utxo: any, index: number) => {
+    tokenUtxos = tokenUtxos.filter((utxo: any) => {
       if (
         utxo && // UTXO is associated with a token.
         utxo.tokenId === TOKENID && // UTXO matches the token ID.
@@ -59,6 +61,7 @@ export async function mintNFTGroup(walletInfo: WalletInfo, tokenId: string, toke
       ) {
         return true;
       }
+      return false;
     });
     // console.log(`tokenUtxos: ${JSON.stringify(tokenUtxos, null, 2)}`);
 
@@ -88,7 +91,7 @@ export async function mintNFTGroup(walletInfo: WalletInfo, tokenId: string, toke
 
     // amount to send back to the sending address.
     // Subtract two dust transactions for minting baton and tokens.
-    const remainder = originalAmount - 546 - txFee;
+    const remainder = originalAmount - 546 * 2 - txFee;
 
     // Generate the SLP OP_RETURN.
     const script = slp.NFT1.mintNFTGroupOpReturn(tokenUtxos, TOKENQTY);
@@ -129,5 +132,6 @@ export async function mintNFTGroup(walletInfo: WalletInfo, tokenId: string, toke
     return txidStr;
   } catch (err) {
     console.error('Error in mintNFTGroup: ', err);
+    throw err;
   }
 }

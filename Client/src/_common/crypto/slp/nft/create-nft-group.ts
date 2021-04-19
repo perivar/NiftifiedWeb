@@ -20,7 +20,6 @@ export async function createNFTGroup(walletInfo: WalletInfo, NETWORK = 'mainnet'
 
     // get the segwit address
     // const segwitAddress = CryptoUtil.toSegWitAddress(change, network);
-    // const slpAddress = CryptoUtil.toSLPAddress(segwitAddress)
     const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
 
     // Get a UTXO to pay for the transaction.
@@ -97,5 +96,6 @@ export async function createNFTGroup(walletInfo: WalletInfo, NETWORK = 'mainnet'
     return txidStr;
   } catch (err) {
     console.error('Error in createToken: ', err);
+    throw err;
   }
 }

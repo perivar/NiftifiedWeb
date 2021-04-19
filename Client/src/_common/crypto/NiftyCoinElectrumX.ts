@@ -45,9 +45,15 @@ export class NiftyCoinElectrumX {
     _this = this;
   }
 
-  async electrumxRequest(method: string, param: string) {
+  async electrumxRequest(method: string, ...params: any[]) {
     try {
-      const url = `${_this.restURL}?method=${method}&params[]=${param}`;
+      const paramQuery = params
+        .map((param: string) => {
+          return `&params[]=${param}`;
+        })
+        .join('');
+
+      const url = `${_this.restURL}?method=${method}${paramQuery}`;
       const response = await axios.get(url, _this.axiosOptions);
       return response.data;
     } catch (error) {
@@ -173,9 +179,7 @@ export class NiftyCoinElectrumX {
 
       // Query the address balance from the ElectrumX server.
       const electrumResponse = await _this.electrumxRequest('blockchain.scripthash.get_balance', scripthash);
-      // console.log(
-      //   `electrumResponse: ${JSON.stringify(electrumResponse, null, 2)}`
-      // )
+      // console.log(`electrumResponse: ${JSON.stringify(electrumResponse, null, 2)}`);
 
       return electrumResponse;
     } catch (err) {
@@ -475,6 +479,22 @@ export class NiftyCoinElectrumX {
       console.log('Error in electrumx.js/mempoolBulk().', err);
 
       throw new Error(_this.errorHandler(err));
+    }
+  }
+
+  async getTransaction(txid: string, verbose = true) {
+    try {
+      if (typeof txid === 'string') {
+        const electrumResponse = await _this.electrumxRequest('blockchain.transaction.get', txid, verbose);
+        // console.log(`electrumResponse: ${JSON.stringify(electrumResponse, null, 2)}`);
+
+        return electrumResponse.result;
+      }
+
+      throw new Error('Input tx must be a string.');
+    } catch (error) {
+      if (error.response && error.response.data) throw error.response.data;
+      else throw error;
     }
   }
 

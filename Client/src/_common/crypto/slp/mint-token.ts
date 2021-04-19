@@ -6,12 +6,20 @@ import * as bitcoin from 'bitcoinjs-lib';
 import { Transaction } from 'bitcoinjs-lib';
 import CryptoUtil, { WalletInfo } from '../util';
 
-export async function mintToken(walletInfo: WalletInfo, NETWORK = 'mainnet') {
+export async function mintToken(
+  walletInfo: WalletInfo,
+  tokenId: string,
+  tokenQty: number,
+  toAddr: string,
+  NETWORK = 'mainnet'
+) {
   try {
-    // EDIT THESE VALUES FOR YOUR USE.
-    const TOKENID = '8de4984472af772f144a74de473d6c21505a6d89686b57445c3e4fc7db3773b6';
-    const TOKENQTY = 100; // The quantity of new tokens to mint.
-    let TO_ADDR = ''; // The address to send the new tokens.
+    const TOKENID = tokenId;
+    const TOKENQTY = tokenQty; // The quantity of new tokens to mint.
+
+    // Defaults to sending the token back to the same wallet if the user hasn't specified a
+    // different address.
+    let TO_ADDR = toAddr; // The address to send the new tokens.
 
     const { mnemonic } = walletInfo;
 
@@ -27,7 +35,6 @@ export async function mintToken(walletInfo: WalletInfo, NETWORK = 'mainnet') {
 
     // get the segwit address
     // const segwitAddress = CryptoUtil.toSegWitAddress(change, network);
-    // const slpAddress = CryptoUtil.toSLPAddress(segwitAddress)
     const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
 
     // Get UTXOs held by this address.
@@ -43,7 +50,10 @@ export async function mintToken(walletInfo: WalletInfo, NETWORK = 'mainnet') {
     // Filter out the non-SLP token UTXOs.
     const nfyUtxos = utxos.filter((utxo: any, index: number) => {
       const tokenUtxo = tokenUtxos[index];
-      if (!tokenUtxo.isValid) return true;
+      if (!tokenUtxo.isValid) {
+        return true;
+      }
+      return false;
     });
     // console.log(`nfyUTXOs: ${JSON.stringify(nfyUtxos, null, 2)}`);
 
@@ -53,7 +63,7 @@ export async function mintToken(walletInfo: WalletInfo, NETWORK = 'mainnet') {
 
     // Filter out the token UTXOs that match the user-provided token ID
     // and contain the minting baton.
-    tokenUtxos = tokenUtxos.filter((utxo: any, index: number) => {
+    tokenUtxos = tokenUtxos.filter((utxo: any) => {
       if (
         utxo && // UTXO is associated with a token.
         utxo.tokenId === TOKENID && // UTXO matches the token ID.
@@ -61,6 +71,7 @@ export async function mintToken(walletInfo: WalletInfo, NETWORK = 'mainnet') {
       ) {
         return true;
       }
+      return false;
     });
     // console.log(`tokenUtxos: ${JSON.stringify(tokenUtxos, null, 2)}`);
 

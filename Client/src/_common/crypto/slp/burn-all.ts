@@ -7,18 +7,15 @@ import * as bitcoin from 'bitcoinjs-lib';
 import { Transaction } from 'bitcoinjs-lib';
 import CryptoUtil, { WalletInfo } from '../util';
 
-export async function burnAll(walletInfo: WalletInfo, NETWORK = 'mainnet') {
+export async function burnAll(walletInfo: WalletInfo, recvAddr = '', NETWORK = 'mainnet') {
   try {
-    // Edit this variable to direct where the NFY should be sent. By default, it
-    // will be sent to the address in the wallet.
-    let RECV_ADDR = '';
-
     const SEND_ADDR = walletInfo.legacyAddress;
     const SEND_MNEMONIC = walletInfo.mnemonic;
+    let RECV_ADDR = recvAddr;
 
     // Send the money back to the same address. Edit this if you want to send it
     // somewhere else.
-    if (RECV_ADDR === '') RECV_ADDR = walletInfo.segwitAddress;
+    if (RECV_ADDR === '') RECV_ADDR = walletInfo.legacyAddress;
 
     // network
     const electrumx = CryptoUtil.getElectrumX(NETWORK);

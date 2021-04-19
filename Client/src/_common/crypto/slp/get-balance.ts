@@ -21,7 +21,6 @@ export async function getBalance(walletInfo: WalletInfo, NETWORK = 'mainnet') {
 
     // get the segwit address
     // const segwitAddress = CryptoUtil.toSegWitAddress(change, network);
-    // const slpAddress = CryptoUtil.toSLPAddress(change, network);
     const legacyAddress = CryptoUtil.toLegacyAddress(change, network);
 
     // first get NFY balance
