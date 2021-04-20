@@ -505,8 +505,8 @@ export class NiftyCoinElectrumX {
         // const electrumResponse = await _this.electrumxRequest('blockchain.transaction.broadcast', txHex);
         // console.log(`electrumResponse: ${JSON.stringify(electrumResponse, null, 2)}`);
 
-        // return electrumResponse.result;
         return 'testing - not sent!';
+        // return electrumResponse.result;
       }
 
       throw new Error('Input txHex must be a string.');

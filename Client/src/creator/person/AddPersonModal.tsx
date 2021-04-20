@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unused-prop-types */
 /* eslint-disable jsx-a11y/no-autofocus */
 import React, { memo } from 'react';
 import { Modal } from 'react-bootstrap';

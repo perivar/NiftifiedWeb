@@ -9,9 +9,9 @@ export const WalletTransactions = ({ match }: { match: any }) => {
   return (
     <div className="card bg-light px-md-4 pb-md-2 p-2">
       <nav className="navbar navbar-expand-lg navbar-light bg-light d-lg-flex align-items-lg-start">
-        <a className="navbar-brand" href="#">
+        <div className="navbar-brand">
           Transactions <h5 className="text-muted pl-1">Welcome to your transactions</h5>
-        </a>
+        </div>
         <button
           className="navbar-toggler"
           type="button"
@@ -25,16 +25,16 @@ export const WalletTransactions = ({ match }: { match: any }) => {
         <div className="collapse navbar-collapse" id="navbarTransactions">
           <ul className="navbar-nav ml-lg-auto">
             <li className="nav-item">
-              <a className="nav-link" href="#">
+              <div className="nav-link">
                 <i className="far fa-bell fa-2x"></i>
                 <div className="badge badge-pill badge-primary align-top">1</div>
-              </a>
+              </div>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="#">
+              <div className="nav-link">
                 <i className="fa fa-search mr-1"></i>
                 <input type="search" className="bg-light text-muted border-0 p-2" placeholder="Search" />
-              </a>
+              </div>
             </li>
           </ul>
         </div>
@@ -64,9 +64,7 @@ export const WalletTransactions = ({ match }: { match: any }) => {
             </a>
           </li>
           <li className="nav-item">
-            <a className="nav-link" href="#">
-              Reports
-            </a>
+            <div className="nav-link">Reports</div>
           </li>
         </ul>
         <button className="btn btn-primary">New Transaction</button>
@@ -167,14 +165,14 @@ export const WalletTransactions = ({ match }: { match: any }) => {
           <nav aria-label="transaction navigation">
             <ul className="pagination">
               <li className="page-item disabled">
-                <a className="page-link" href="#" aria-label="Previous">
+                <div className="page-link" aria-label="Previous">
                   <span aria-hidden="true">&lt;</span>
-                </a>
+                </div>
               </li>
               <li className="page-item">
-                <a className="page-link" href="#" aria-label="Next">
+                <div className="page-link" aria-label="Next">
                   <span aria-hidden="true">&gt;</span>
-                </a>
+                </div>
               </li>
             </ul>
           </nav>

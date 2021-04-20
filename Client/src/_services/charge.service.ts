@@ -43,7 +43,7 @@ const createPaymentIntent = (options: any) => {
     });
 };
 
-const getProductDetails = (options: any) => {
+const getProductDetails = () => {
   return window
     .fetch(`${baseUrl}/charges/product-details`, {
       method: 'GET',
@@ -67,7 +67,7 @@ const getProductDetails = (options: any) => {
     });
 };
 
-const getPublicStripeKey = (options: any) => {
+const getPublicStripeKey = () => {
   return window
     .fetch(`${baseUrl}/charges/public-key`, {
       method: 'GET',

@@ -55,16 +55,20 @@ export const Wallet = ({ match }: { match: any }) => {
     // Group NFT
     const groupNFTId = '3d815beb4639e446aff5e0dd60a9a800e7349dc3c390c6375c063faddd7c2618';
 
-    // // SLP NFT config object for the child (the actual token)
-    // const configObjChild: NFTChildGenesisOpReturnConfig = {
-    //   name: 'NFT Test Token Child',
-    //   ticker: 'NFTY0001',
-    //   documentUrl: 'https://www.niftycoin.org'
-    // };
+    // SLP NFT config object for the child (the actual token)
+    const configObjChild: NFTChildGenesisOpReturnConfig = {
+      name: 'NFT Test Token Child',
+      ticker: 'NFTY0001',
+      documentUrl: 'https://www.niftycoin.org'
+    };
 
-    // CryptoNFT.createNFTChild(wallet, groupNFTId, configObjChild).then((res: any) => {
-    //   console.log(res);
-    // });
+    // CryptoNFT.createNFTChild(wallet, groupNFTId, configObjChild)
+    //   .then((res: any) => {
+    //     console.log(res);
+    //   })
+    //   .catch((error: any) => {
+    //     console.log(error);
+    //   });
 
     // CryptoWallet.sendNFY(wallet, 'NUcBvW67GEqi8CXYPcL4Y5qzw7Vf9rp7wg', 3000).then((res: any) => {
     //   console.log(res);
@@ -90,9 +94,13 @@ export const Wallet = ({ match }: { match: any }) => {
     //   console.log(res);
     // });
 
-    // CryptoNFT.mintNFTGroup(wallet, groupNFTId, 1).then((res: any) => {
-    //   console.log(res);
-    // });
+    // CryptoNFT.mintNFTGroup(wallet, groupNFTId, 10)
+    //   .then((res: any) => {
+    //     console.log(res);
+    //   })
+    //   .catch((error: any) => {
+    //     console.log(error);
+    //   });
 
     // // child NFT
     // const childNFTId = 'c0c754f9b9ffcb4b678dcaef550f811d90c4534724be9ca760c8cf209e27e6bb';
@@ -103,6 +111,12 @@ export const Wallet = ({ match }: { match: any }) => {
     // CryptoNFT.sendChildToken(wallet, childNFTId, 1).then((res: any) => {
     //   console.log(res);
     // });
+
+    // Group NFT Minted 10 more
+    const groupNFTMintedId = 'dc64afee6d8f794c6cf83b10510ef637de504e3c51951ed045528b351e0e7e59';
+    CryptoNFT.getNFT(groupNFTMintedId).then((res: any) => {
+      console.log(res);
+    });
   };
 
   return (

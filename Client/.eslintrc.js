@@ -121,7 +121,7 @@ module.exports = {
     'no-shadow': 'off',
     'lines-between-class-members': 'off',
     'prefer-const': 'warn',
-    'prefer-destructuring': 'warn',
+    'prefer-destructuring': ['warn', { object: true, array: false }],
     'no-dupe-class-members': 'warn',
     'no-else-return': 'warn',
     'no-unneeded-ternary': 'warn',
