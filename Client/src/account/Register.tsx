@@ -53,7 +53,7 @@ function Register({ history }: { history: any }) {
           <h3 className="card-header">Register</h3>
           <div className="card-body">
             <div className="form-row">
-              <div className="form-group col">
+              <div className="form-group col-lg">
                 <label htmlFor="firstName">First Name</label>
                 <Field
                   id="firstName"
@@ -63,7 +63,7 @@ function Register({ history }: { history: any }) {
                 />
                 <ErrorMessage name="firstName" component="div" className="invalid-feedback" />
               </div>
-              <div className="form-group col">
+              <div className="form-group col-lg">
                 <label htmlFor="lastName">Last Name</label>
                 <Field
                   id="lastName"
@@ -86,7 +86,7 @@ function Register({ history }: { history: any }) {
             </div>
 
             <div className="form-row">
-              <div className="form-group col">
+              <div className="form-group col-lg">
                 <label htmlFor="password">Password</label>
                 <Field
                   id="password"
@@ -96,7 +96,7 @@ function Register({ history }: { history: any }) {
                 />
                 <ErrorMessage name="password" component="div" className="invalid-feedback" />
               </div>
-              <div className="form-group col">
+              <div className="form-group col-lg">
                 <label htmlFor="confirmPassword">Confirm Password</label>
                 <Field
                   id="confirmPassword"

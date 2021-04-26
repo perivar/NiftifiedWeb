@@ -63,7 +63,7 @@ export const Header = () => {
                 <>
                   <NavLink
                     to="/account/register"
-                    className="nav-item btn btn-secondary mr-2"
+                    className="nav-item btn btn-secondary mr-1 mb-1"
                     onClick={() =>
                       setTimeout(() => {
                         setExpanded(false);
@@ -73,7 +73,7 @@ export const Header = () => {
                   </NavLink>
                   <NavLink
                     to="/account/login"
-                    className="nav-item btn btn-warning mr-2"
+                    className="nav-item btn btn-warning mr-1 mb-1"
                     onClick={() =>
                       setTimeout(() => {
                         setExpanded(false);
@@ -85,7 +85,7 @@ export const Header = () => {
               )}
               <NavLink
                 to="/creator"
-                className="btn btn-primary"
+                className="btn btn-primary mr-1 mb-1"
                 onClick={() =>
                   setTimeout(() => {
                     setExpanded(false);
