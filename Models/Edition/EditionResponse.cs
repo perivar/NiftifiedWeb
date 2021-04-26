@@ -40,7 +40,6 @@ namespace Niftified.Models.Editions
 
 		public List<Tag> Tags { get; set; } // relevant tags for grouping
 
-		public string DataSourcePath { get; set; } // copy of the source when the data is stored in the blockchain
 		public string DataSourceFileType { get; set; }
 		public string DataSourceFileName { get; set; }
 		public long DataSourceFileSize { get; set; }

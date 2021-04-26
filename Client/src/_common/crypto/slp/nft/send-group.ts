@@ -22,7 +22,7 @@ export async function sendGroupToken(
     const slp = CryptoUtil.getSLP(NETWORK);
 
     // Generate an EC key pair for signing the transaction.
-    const changeKeyPair = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
+    const changeKeyPair = await CryptoUtil.changeAddressFromMnemonic(mnemonic, network);
 
     // get the legacy address
     const legacyAddress = CryptoUtil.toLegacyAddress(changeKeyPair, network);
@@ -126,13 +126,12 @@ export async function sendGroupToken(
     transactionBuilder.addOutput(legacyAddress, remainder);
 
     // Sign the transaction with the private key for the NFY UTXO paying the fees.
-    const redeemScript = undefined;
-    transactionBuilder.sign(0, changeKeyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
+    transactionBuilder.sign(0, changeKeyPair, undefined, Transaction.SIGHASH_ALL, originalAmount);
 
     // Sign each token UTXO being consumed.
     for (let i = 0; i < tokenUtxos.length; i++) {
       const thisUtxo = tokenUtxos[i];
-      transactionBuilder.sign(1 + i, changeKeyPair, redeemScript, Transaction.SIGHASH_ALL, thisUtxo.value);
+      transactionBuilder.sign(1 + i, changeKeyPair, undefined, Transaction.SIGHASH_ALL, thisUtxo.value);
     }
 
     // build tx

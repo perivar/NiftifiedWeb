@@ -16,7 +16,7 @@ export async function mintNFTGroup(walletInfo: WalletInfo, tokenId: string, toke
     const slp = CryptoUtil.getSLP(NETWORK);
 
     // Generate an EC key pair for signing the transaction.
-    const changeKeyPair = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
+    const changeKeyPair = await CryptoUtil.changeAddressFromMnemonic(mnemonic, network);
 
     // get the legacy address
     const legacyAddress = CryptoUtil.toLegacyAddress(changeKeyPair, network);
@@ -106,11 +106,10 @@ export async function mintNFTGroup(walletInfo: WalletInfo, tokenId: string, toke
     transactionBuilder.addOutput(legacyAddress, remainder);
 
     // Sign the transaction for the UTXO input that pays for the transaction..
-    const redeemScript = undefined;
-    transactionBuilder.sign(0, changeKeyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
+    transactionBuilder.sign(0, changeKeyPair, undefined, Transaction.SIGHASH_ALL, originalAmount);
 
     // Sign the Token UTXO minting baton input
-    transactionBuilder.sign(1, changeKeyPair, redeemScript, Transaction.SIGHASH_ALL, 546);
+    transactionBuilder.sign(1, changeKeyPair, undefined, Transaction.SIGHASH_ALL, 546);
 
     // build tx
     const tx = transactionBuilder.build();

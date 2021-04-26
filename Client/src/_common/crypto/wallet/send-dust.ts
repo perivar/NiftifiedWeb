@@ -32,7 +32,7 @@ export async function sendDust(walletInfo: WalletInfo, numOutputs: number, recei
     // const receiverAddress = CryptoUtil.toLegacyAddress(receiverAddress)
 
     // Get UTXOs held by the address.
-    // https://developer.bitcoin.com/mastering-bitcoin-cash/4-transactions/
+    // https://developer.niftycoin.org/mastering-bitcoin-cash/4-transactions/
     const utxos = await electrumx.getUtxos(sendAddress);
     // console.log(`utxos: ${JSON.stringify(utxos, null, 2)}`)
 
@@ -63,9 +63,9 @@ export async function sendDust(walletInfo: WalletInfo, numOutputs: number, recei
     const txFee = CryptoUtil.estimateFee({ P2PKH: 1 }, { P2PKH: numOutputs + 1 });
 
     // Calculate the amount to put into each new UTXO.
-    const changeBch = originalAmount - txFee - numOutputs * 546;
+    const changeNfy = originalAmount - txFee - numOutputs * 546;
 
-    if (changeBch < 546) {
+    if (changeNfy < 546) {
       throw new Error('Not enough NFY to complete transaction!');
     }
 
@@ -75,14 +75,13 @@ export async function sendDust(walletInfo: WalletInfo, numOutputs: number, recei
     }
 
     // Add change
-    transactionBuilder.addOutput(sendAddress, changeBch);
+    transactionBuilder.addOutput(sendAddress, changeNfy);
 
     // Generate a change address from a Mnemonic of a private key.
-    const changeKeyPair = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
+    const changeKeyPair = await CryptoUtil.changeAddressFromMnemonic(mnemonic, network);
 
     // Sign the transaction with the changeKeyPair HD node.
-    const redeemScript = undefined;
-    transactionBuilder.sign(0, changeKeyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
+    transactionBuilder.sign(0, changeKeyPair, undefined, Transaction.SIGHASH_ALL, originalAmount);
 
     // build tx
     const tx = transactionBuilder.build();

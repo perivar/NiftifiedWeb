@@ -8,9 +8,10 @@ import * as bip32 from 'bip32';
 
 import CryptoUtil, { WalletInfo } from '../util';
 
-export const createWallet = async (NETWORK: string): Promise<WalletInfo | undefined> => {
+export const createWallet = async (NETWORK: string, importMnemonic?: string): Promise<WalletInfo | undefined> => {
   try {
-    const lang = 'english'; // Set the language of the wallet.
+    const NUM_SEED_ADDRESSES = 1;
+    const lang = 'english'; // default language used for mnemonic
 
     // network
     const network = CryptoUtil.getNetwork(NETWORK);
@@ -19,8 +20,8 @@ export const createWallet = async (NETWORK: string): Promise<WalletInfo | undefi
     // let outStr = '';
     const outObj: WalletInfo = {} as WalletInfo;
 
-    // create 256 bit BIP39 mnemonic
-    const mnemonic = bip39.generateMnemonic();
+    // create 128 bit BIP39 mnemonic
+    const mnemonic = importMnemonic ? importMnemonic : bip39.generateMnemonic();
     console.log('BIP44 NFY Wallet');
     // outStr += 'BIP44 NFY Wallet\n';
     console.log(`128 bit ${lang} BIP39 Mnemonic: `, mnemonic);
@@ -34,13 +35,18 @@ export const createWallet = async (NETWORK: string): Promise<WalletInfo | undefi
     const masterHDNode = bip32.fromSeed(rootSeed, network);
 
     // HDNode of BIP44 account
-    console.log("BIP44 Account: \"m/44'/145'/0'\"");
+    // console.log("BIP44 Account: \"m/44'/145'/0'\"");
     // outStr += "BIP44 Account: \"m/44'/145'/0'\"\n";
 
-    // Generate the first 10 seed addresses.
-    for (let i = 0; i < 10; i++) {
+    // Generate the first seed addresses.
+    for (let i = 0; i < NUM_SEED_ADDRESSES; i++) {
+      // derive a Bitcoin Cash address
+      // Master List BIP 44 Coin Type: https://github.com/satoshilabs/slips/blob/master/slip-0044.md
+      // 2	0x80000002	LTC	Litecoin
+      // 145	0x80000091	BCH	Bitcoin Cash
+      // 245	0x800000f5	SLP	Simple Ledger Protocol
       const childNode = masterHDNode.derivePath(`m/44'/145'/0'/0/${i}`);
-      console.log(`m/44'/145'/0'/0/${i}: ${CryptoUtil.toSegWitAddress(childNode, network)}`);
+      // console.log(`m/44'/145'/0'/0/${i}: ${CryptoUtil.toSegWitAddress(childNode, network)}`);
       // outStr += `m/44'/145'/0'/0/${i}: ${CryptoUtil.toCashAddress(childNode, network)}\n`;
 
       // Save the first seed address for use in the .json output file.

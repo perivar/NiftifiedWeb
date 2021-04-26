@@ -10,7 +10,7 @@ export async function sendToken(
   walletInfo: WalletInfo,
   tokenId: string,
   tokenQty: number,
-  toAddress = '',
+  tokenReceiverAddress: string,
   NETWORK = 'mainnet'
 ) {
   try {
@@ -22,7 +22,7 @@ export async function sendToken(
     const slp = CryptoUtil.getSLP(NETWORK);
 
     // Generate an EC key pair for signing the transaction.
-    const changeKeyPair = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
+    const changeKeyPair = await CryptoUtil.changeAddressFromMnemonic(mnemonic, network);
 
     // get the legacy address
     const legacyAddress = CryptoUtil.toLegacyAddress(changeKeyPair, network);
@@ -45,7 +45,7 @@ export async function sendToken(
       }
       return false;
     });
-    console.log(`nfyUTXOs: ${JSON.stringify(nfyUtxos, null, 2)}`);
+    // console.log(`nfyUTXOs: ${JSON.stringify(nfyUtxos, null, 2)}`);
 
     if (nfyUtxos.length === 0) {
       throw new Error('Wallet does not have a NFY UTXO to pay miner fees.');
@@ -112,10 +112,10 @@ export async function sendToken(
 
     // Send the token back to the same wallet if the user hasn't specified a
     // different address.
-    if (toAddress === '') toAddress = walletInfo.legacyAddress;
+    if (tokenReceiverAddress === '') tokenReceiverAddress = walletInfo.legacyAddress;
 
     // Send dust transaction representing tokens being sent.
-    transactionBuilder.addOutput(toAddress, 546);
+    transactionBuilder.addOutput(tokenReceiverAddress, 546);
 
     // Return any token change back to the sender.
     if (slpSendObj.outputs > 1) {
@@ -126,13 +126,12 @@ export async function sendToken(
     transactionBuilder.addOutput(legacyAddress, remainder);
 
     // Sign the transaction with the private key for the NFY UTXO paying the fees.
-    const redeemScript = undefined;
-    transactionBuilder.sign(0, changeKeyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
+    transactionBuilder.sign(0, changeKeyPair, undefined, Transaction.SIGHASH_ALL, originalAmount);
 
     // Sign each token UTXO being consumed.
     for (let i = 0; i < tokenUtxos.length; i++) {
       const thisUtxo = tokenUtxos[i];
-      transactionBuilder.sign(1 + i, changeKeyPair, redeemScript, Transaction.SIGHASH_ALL, thisUtxo.value);
+      transactionBuilder.sign(1 + i, changeKeyPair, undefined, Transaction.SIGHASH_ALL, thisUtxo.value);
     }
 
     // build tx
@@ -149,6 +148,7 @@ export async function sendToken(
     console.log(`Transaction ID: ${txidStr}`);
     console.log('Check the status of your transaction on this block explorer:');
     CryptoUtil.transactionStatus(txidStr, NETWORK);
+    return txidStr;
   } catch (err) {
     console.error('Error in sendToken: ', err);
     console.log(`Error message: ${err.message}`);

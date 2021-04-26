@@ -47,7 +47,6 @@ namespace Niftified.Entities
 
 		public List<Tag> Tags { get; set; } // relevant tags for grouping
 
-		public string DataSourcePath { get; set; } // copy of the source when the dat
 		public string DataSourceFileType { get; set; }
 		public string DataSourceFileName { get; set; }
 		public long DataSourceFileSize { get; set; }

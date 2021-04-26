@@ -32,7 +32,7 @@ export async function splitUtxo(walletInfo: WalletInfo, splitCount = 5, NETWORK 
     // const receiverAddress = CryptoUtil.toLegacyAddress(receiverAddress)
 
     // Get UTXOs held by the address.
-    // https://developer.bitcoin.com/mastering-bitcoin-cash/4-transactions/
+    // https://developer.niftycoin.org/mastering-bitcoin-cash/4-transactions/
     const utxos = await electrumx.getUtxos(sendAddress);
     // console.log(`utxos: ${JSON.stringify(utxos, null, 2)}`)
 
@@ -69,11 +69,10 @@ export async function splitUtxo(walletInfo: WalletInfo, splitCount = 5, NETWORK 
     }
 
     // Generate a change address from a Mnemonic of a private key.
-    const changeKeyPair = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
+    const changeKeyPair = await CryptoUtil.changeAddressFromMnemonic(mnemonic, network);
 
     // Sign the transaction with the changeKeyPair HD node.
-    const redeemScript = undefined;
-    transactionBuilder.sign(0, changeKeyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
+    transactionBuilder.sign(0, changeKeyPair, undefined, Transaction.SIGHASH_ALL, originalAmount);
 
     // build tx
     const tx = transactionBuilder.build();

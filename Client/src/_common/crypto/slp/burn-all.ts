@@ -56,12 +56,11 @@ export async function burnAll(walletInfo: WalletInfo, receiverAddress = '', NETW
     transactionBuilder.addOutput(receiverAddress, sendAmount - txFee);
 
     // Generate a change address from a Mnemonic of a private key.
-    const changeKeyPair = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
+    const changeKeyPair = await CryptoUtil.changeAddressFromMnemonic(mnemonic, network);
 
     // Sign the transaction with the changeKeyPair HD node.
-    const redeemScript = undefined;
     inputs.forEach((input, index) => {
-      transactionBuilder.sign(index, changeKeyPair, redeemScript, Transaction.SIGHASH_ALL, input.value);
+      transactionBuilder.sign(index, changeKeyPair, undefined, Transaction.SIGHASH_ALL, input.value);
     });
 
     // build tx

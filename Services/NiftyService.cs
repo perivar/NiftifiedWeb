@@ -75,6 +75,9 @@ namespace Niftified.Services
 		IEnumerable<WalletResponse> GetWallets();
 		IEnumerable<WalletResponse> GetWalletsByPersonId(int personId);
 		void DeleteWallet(int id);
+
+		// file
+		FileResponse CreateFile(CreateFileRequest model);
 	}
 
 	public class NiftyService : INiftyService
@@ -219,8 +222,6 @@ namespace Niftified.Services
 				}
 
 				edition.DataSourceFileName = fileName;
-				// TODO: why would we store the full path?
-				// edition.DataSourcePath = filePath;
 			}
 
 			// add missing lists that the auto mapper didn't fix
@@ -782,6 +783,39 @@ namespace Niftified.Services
 			if (wallet == null) throw new KeyNotFoundException("Wallet not found");
 			_context.Wallets.Remove(wallet);
 			_context.SaveChanges();
+		}
+
+		public FileResponse CreateFile(CreateFileRequest model)
+		{
+			// store file
+			var file = new FileResponse();
+			if (model.File != null && model.File.Length > 0)
+			{
+				file.DataSourceFileType = model.File.ContentType;
+				file.DataSourceFileSize = model.File.Length;
+
+				// get extensions
+				var extension = Path.GetExtension(model.File.FileName);
+
+				// random filename with extension
+				var fileName = string.Format("{0}{1}", Path.GetRandomFileName().Replace(".", string.Empty), extension);
+				var filePath = Path.Combine(_appSettings.StoredFilesPath, fileName);
+
+				// create the StoredFilesPath directory, if it doesn't already exist
+				string storedFilesDir = Path.GetDirectoryName(filePath);
+				if (!Directory.Exists(storedFilesDir))
+				{
+					Directory.CreateDirectory(storedFilesDir);
+				}
+
+				using (var stream = System.IO.File.Create(filePath))
+				{
+					model.File.CopyTo(stream);
+				}
+
+				file.DataSourceFileName = fileName;
+			}
+			return file;
 		}
 	}
 }

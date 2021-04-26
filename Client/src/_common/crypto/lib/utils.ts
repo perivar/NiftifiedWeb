@@ -5,7 +5,7 @@
 import * as slpParser from 'slp-parser';
 import * as slpValidator from 'slp-validate';
 import BigNumber from 'bignumber.js';
-import { UTXOInfo, TokenUTXOInfo, SlpTokenData, SlpTokenGenesis } from '../util';
+import CryptoUtil, { UTXOInfo, TokenUTXOInfo, SlpTokenData, SlpTokenGenesis } from '../util';
 import { CryptoLibConfig } from './slp';
 
 import axios from 'axios'; // delete when everything is moved to explorer
@@ -37,6 +37,90 @@ export class Utils {
 
     _this = this;
     this.whitelist = [];
+  }
+
+  setQuantityIfSend(slpData: any, tx: any, legacyAddress: string) {
+    const { vout } = tx;
+
+    const transactionType = slpData.transactionType.toLowerCase();
+
+    // Handle Send SLP transactions.
+    if (transactionType === 'send') {
+      // figure out the vout that matches our address
+
+      // get the slp vouts
+      if (vout.length > 1) {
+        const slpVouts = vout.filter((v: any) => {
+          if (v.value === CryptoUtil.toNiftyCoin(546)) return true;
+          return false;
+        });
+
+        // find the index that doesn't match our address (i.e. send to)
+        const slpVoutIndex = slpVouts.findIndex((element: any) => legacyAddress !== element.scriptPubKey.addresses[0]);
+
+        const tokenQty = slpData.amounts[slpVoutIndex];
+        // console.log('tokenQty: ', tokenQty);
+        const decimals = slpData.decimals ? slpData.decimals : 0;
+        slpData.qty = new BigNumber(-tokenQty).div(Math.pow(10, decimals));
+      }
+    }
+  }
+
+  // hydrate tx with not validation,
+  // like decodeOpReturn, except that the tx is hydrated with the slp data
+  async hydrateTxNoValidation(txid: string, legacyAddress: string): Promise<any> {
+    let tx: any;
+    try {
+      // Validate the txid input.
+      if (!txid || txid === '' || typeof txid !== 'string') {
+        throw new Error('txid string must be included.');
+      }
+
+      tx = await _this.electrumx.getTransaction(txid);
+      // console.log(`txDetails: ${JSON.stringify(tx, null, 2)}`)
+
+      if (!tx) {
+        throw new Error(`no transactions with the id ${txid} found.`);
+      }
+
+      const slpData = _this.decodeTxData(tx);
+
+      _this.setQuantityIfSend(slpData, tx, legacyAddress);
+
+      tx.isValid = true;
+
+      return {
+        ...tx,
+        balance: slpData.qty ? slpData.qty : 0,
+        hasBaton: !!slpData.mintBatonVout,
+        detail: {
+          ...slpData,
+          transactionType: slpData.transactionType,
+          symbol: slpData.ticker ? slpData.ticker : 'Tokens'
+        }
+      };
+    } catch (err) {
+      // An error will be thrown if the txid is not SLP.
+      // If error is for some other reason, like a 429 error, mark utxo as 'null'
+      // to display the unknown state.
+      if (
+        !err.message ||
+        (err.message.indexOf('scriptpubkey not op_return') === -1 &&
+          err.message.indexOf('lokad id') === -1 &&
+          err.message.indexOf('trailing data') === -1)
+      ) {
+        console.log("unknown error from decodeOpReturn(). Marking as 'null'", err);
+        if (tx) {
+          tx.isValid = null;
+          return tx;
+        }
+        return null;
+      }
+
+      // this is normal
+      tx.isValid = false;
+      return tx;
+    }
   }
 
   // Reimplementation of decodeOpReturn() using slp-parser.
@@ -104,14 +188,14 @@ export class Utils {
     if (parsedData.transactionType === 'SEND') {
       tokenData = {
         tokenType: parsedData.tokenType,
-        txType: parsedData.transactionType,
+        transactionType: parsedData.transactionType,
         tokenId: parsedData.data.tokenId.toString('hex'),
         amounts: parsedData.data.amounts
       };
     } else if (parsedData.transactionType === 'GENESIS') {
       tokenData = {
         tokenType: parsedData.tokenType,
-        txType: parsedData.transactionType,
+        transactionType: parsedData.transactionType,
         ticker: parsedData.data.ticker.toString(),
         name: parsedData.data.name.toString(),
         tokenId: txid,
@@ -124,7 +208,7 @@ export class Utils {
     } else if (parsedData.transactionType === 'MINT') {
       tokenData = {
         tokenType: parsedData.tokenType,
-        txType: parsedData.transactionType,
+        transactionType: parsedData.transactionType,
         tokenId: parsedData.data.tokenId.toString('hex'),
         mintBatonVout: parsedData.data.mintBatonVout,
         qty: parsedData.data.qty
@@ -134,7 +218,7 @@ export class Utils {
     return tokenData;
   };
 
-  async tokenUtxoDetails(utxos: UTXOInfo[], usrObj = null): Promise<TokenUTXOInfo[]> {
+  async tokenUtxoDetails(utxos: UTXOInfo[], usrObj = null, disableValidation = true): Promise<TokenUTXOInfo[]> {
     try {
       // Throw error if input is not an array.
       if (!Array.isArray(utxos)) throw new Error('Input must be an array.');
@@ -181,17 +265,21 @@ export class Utils {
           // property. i.e. it has been successfully hydrated with SLP
           // information.
 
-          // validate using slp-validate
-          const { txid } = utxo;
-          const validator = new slpValidator.ValidatorType1({
-            getRawTransaction: async (txid) => await _this.electrumx.getTransaction(txid, false)
-          });
-          // console.log('Validating:', txid);
-          // console.log('This may take a several seconds...');
-          const isValid = await validator.isValidSlpTxid({ txid });
-          // console.log('Final Result:', isValid);
+          if (disableValidation) {
+            utxo.isValid = true;
+          } else {
+            // validate using slp-validate
+            const { txid } = utxo;
+            const validator = new slpValidator.ValidatorType1({
+              getRawTransaction: async (txid) => await _this.electrumx.getTransaction(txid, false)
+            });
+            // console.log('Validating:', txid);
+            // console.log('This may take a several seconds...');
+            const isValid = await validator.isValidSlpTxid({ txid });
+            // console.log('Final Result:', isValid);
 
-          utxo.isValid = isValid;
+            utxo.isValid = isValid;
+          }
         }
       }
 
@@ -289,13 +377,13 @@ export class Utils {
         }
         // console.log(`slpData: ${JSON.stringify(slpData, null, 2)}`)
 
-        const txType = slpData.txType.toLowerCase();
+        const transactionType = slpData.transactionType.toLowerCase();
 
         // console.log(`utxo: ${JSON.stringify(utxo, null, 2)}`)
 
         // If there is an OP_RETURN, attempt to decode it.
         // Handle Genesis SLP transactions.
-        if (txType === 'genesis') {
+        if (transactionType === 'genesis') {
           if (
             utxo.vout !== slpData.mintBatonVout && // UTXO is not a mint baton output.
             utxo.vout !== 1 // UTXO is not the reciever of the genesis or mint tokens.
@@ -331,7 +419,7 @@ export class Utils {
         }
 
         // Handle Mint SLP transactions.
-        if (txType === 'mint') {
+        if (transactionType === 'mint') {
           if (
             utxo.vout !== slpData.mintBatonVout && // UTXO is not a mint baton output.
             utxo.vout !== 1 // UTXO is not the reciever of the genesis or mint tokens.
@@ -377,7 +465,7 @@ export class Utils {
         }
 
         // Handle Send SLP transactions.
-        if (txType === 'send') {
+        if (transactionType === 'send') {
           // Filter out any vouts that match.
           // const voutMatch = slpData.spendData.filter(x => utxo.vout === x.vout)
           // console.log(`voutMatch: ${JSON.stringify(voutMatch, null, 2)}`)

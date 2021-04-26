@@ -172,6 +172,22 @@ namespace Niftified.Controllers
 			return Ok(true);
 		}
 
+		[HttpPost("/api/file/")]
+		public ActionResult<FileResponse> CreateFile([FromForm] CreateFileRequest model)
+		{
+			// check raw parameters
+			// var form = Request.Form;
+
+			// Check if the request contains multipart / form - data.
+			if (model.File == null)
+			{
+				return new UnsupportedMediaTypeResult();
+			}
+
+			var file = _niftyService.CreateFile(model);
+			return Ok(file);
+		}
+
 		[HttpGet("/api/volumes/{editionId:int}")]
 		public ActionResult<IEnumerable<VolumeResponse>> GetVolumesByEditionId(int editionId,
 			int? pageNumber, int? pageSize)

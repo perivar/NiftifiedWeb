@@ -50,7 +50,7 @@ export interface TokenUTXOInfo extends UTXOInfo {
 
 export interface SlpToken {
   tokenType: string;
-  txType: string;
+  transactionType: string;
   tokenId: string;
 }
 
@@ -105,14 +105,15 @@ export interface NFTChildGenesisOpReturnConfig {
 // see slp types here from https://github.com/simpleledger/slpjs/blob/master/lib/slp.ts
 
 // displays link to either the nfy mainnet or tnfy testnet for transactions
-function transactionStatus(transactionInput: string, network: string) {
-  if (network === 'mainnet') {
-    // console.log(`https://explorer.niftycoin.org/api/getrawtransaction?txid=${transactionInput}&decrypt=1`);
-    console.log(`https://explorer.niftycoin.org/tx/${transactionInput}`);
+function transactionStatus(txidStr: string, NETWORK = 'mainnet'): string {
+  let link;
+  if (NETWORK === `mainnet`) {
+    link = `https://explorer.niftycoin.org/tx/${txidStr}`;
   } else {
-    // console.log(`https://testexplorer.niftycoin.org/api/getrawtransaction?txid=${transactionInput}&decrypt=1`);
-    console.log(`https://testexplorer.niftycoin.org/tx/${transactionInput}`);
+    link = `https://testexplorer.niftycoin.org/tx/${txidStr}`;
   }
+  console.log(link);
+  return link;
 }
 
 // bchaddrjs-slp
@@ -233,8 +234,10 @@ function estimateFee(inputs: any, outputs: any): number {
   return txFee;
 }
 
-// Generate a change address from a Mnemonic of a private key.
-async function changeAddrFromMnemonic(mnemonic: string, network: Network) {
+// Generate an external change address from a Mnemonic of a private key.
+async function changeAddressFromMnemonic(mnemonic: string, network: Network) {
+  const USE_BTC_ADDRESS_PATH = process.env.REACT_APP_USE_BTC_ADDRESS_PATH === 'true';
+
   // root seed buffer
   const rootSeed = await bip39.mnemonicToSeed(mnemonic); // creates seed buffer
 
@@ -242,12 +245,26 @@ async function changeAddrFromMnemonic(mnemonic: string, network: Network) {
   const masterHDNode = bip32.fromSeed(rootSeed, network);
 
   // HDNode of BIP44 account
-  const account = masterHDNode.derivePath("m/44'/145'/0'");
+  // Master List BIP 44 Coin Type: https://github.com/satoshilabs/slips/blob/master/slip-0044.md
+  // 2	0x80000002	LTC	Litecoin
+  // 145	0x80000091	BCH	Bitcoin Cash
+  // 245	0x800000f5	SLP	Simple Ledger Protocol
 
-  // derive the first external change address HDNode which is going to spend utxo
-  const change = account.derivePath('0/0');
+  // BIP44 - Multi-account hierarchy for deterministic wallets
+  // BIP44,  is based on BIP32. BIP44 dictates the derivation path:
+  // m / purpose' / coin_type' / account' / change / address_index
 
-  return change;
+  let account: any;
+  if (USE_BTC_ADDRESS_PATH) {
+    // the first wallet used for testing used a HD node path for BCH Bitcoin Cash
+    account = masterHDNode.derivePath("m/44'/145'/0'");
+  } else {
+    account = masterHDNode.derivePath("m/44'/2'/0'");
+  }
+
+  // derive the first external HDNode address which is going to spend utxo
+  const changeAddress = account.derivePath('0/0');
+  return changeAddress;
 }
 
 // Returns the utxo with the biggest balance from an array of utxos.
@@ -275,8 +292,8 @@ function findBiggestUtxo(utxos: UTXOInfo[]): UTXOInfo {
 // Returns true if user-provided cash address matches the correct network,
 // mainnet or testnet. If NETWORK env var is not defined, it returns false.
 // This prevent a common user-error issue that is easy to make: passing a
-// testnet address into rest.bitcoin.com or passing a mainnet address into
-// trest.bitcoin.com.
+// testnet address into rest.niftycoin.org or passing a mainnet address into
+// trest.niftycoin.org.
 function validateNetwork(addr: string) {
   try {
     // const network = process.env.NETWORK;
@@ -439,13 +456,27 @@ function getSLP(NETWORK = 'mainnet') {
   return slp;
 }
 
+function toNiftoshi(value: number): number {
+  // needs to multiply with 100000000 to get niftoshis
+  const niftoshis = Math.floor(value * 100000000);
+  return niftoshis;
+}
+
+function toNiftyCoin(value: number): number {
+  // needs to divide with 100000000 to get niftycoins
+  const niftyCoins = value / 100000000;
+  return niftyCoins;
+}
+
 const CryptoUtil = {
   transactionStatus,
   toSegWitAddress,
   toLegacyAddress,
   getByteCount,
   estimateFee,
-  changeAddrFromMnemonic,
+  toNiftoshi,
+  toNiftyCoin,
+  changeAddressFromMnemonic,
   findBiggestUtxo,
   toPublicKey,
   toPrivateKeyFromWIF,

@@ -17,7 +17,7 @@ export async function createNFTGroup(walletInfo: WalletInfo, configObj: NFTGroup
     const slp = CryptoUtil.getSLP(NETWORK);
 
     // Generate an EC key pair for signing the transaction.
-    const changeKeyPair = await CryptoUtil.changeAddrFromMnemonic(mnemonic, network);
+    const changeKeyPair = await CryptoUtil.changeAddressFromMnemonic(mnemonic, network);
 
     // get the legacy address
     const legacyAddress = CryptoUtil.toLegacyAddress(changeKeyPair, network);
@@ -67,8 +67,7 @@ export async function createNFTGroup(walletInfo: WalletInfo, configObj: NFTGroup
     transactionBuilder.addOutput(legacyAddress, remainder);
 
     // Sign the transaction with the changeKeyPair HD node.
-    const redeemScript = undefined;
-    transactionBuilder.sign(0, changeKeyPair, redeemScript, Transaction.SIGHASH_ALL, originalAmount);
+    transactionBuilder.sign(0, changeKeyPair, undefined, Transaction.SIGHASH_ALL, originalAmount);
 
     // build tx
     const tx = transactionBuilder.build();
