@@ -5,7 +5,7 @@ import { niftyService, alertService } from '../../_services';
 import FormikCreatableSelect from '../../_common/select/FormikCreatableSelect';
 import FocusError from '../../_common/FocusError';
 import * as Scroll from 'react-scroll';
-import { Creator, AddCreatorsField } from '../person/AddCreatorsField';
+import { Creator, AddCreatorsField } from '../wallet/AddCreatorsField';
 import { Link } from 'react-router-dom';
 
 // read from .env files

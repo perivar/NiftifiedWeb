@@ -5,7 +5,7 @@ namespace Niftified.Entities
 {
 	public enum WalletType
 	{
-		Nifty,
+		NiftyCoin,
 		Other
 	}
 }

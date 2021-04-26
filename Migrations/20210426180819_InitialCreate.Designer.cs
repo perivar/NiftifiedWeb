@@ -9,7 +9,7 @@ using Niftified.Helpers;
 namespace Niftified.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20210331115807_InitialCreate")]
+    [Migration("20210426180819_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -151,7 +151,7 @@ namespace Niftified.Migrations
                     b.Property<int>("EditionId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("PersonId")
+                    b.Property<int>("WalletId")
                         .HasColumnType("INTEGER");
 
                     b.Property<decimal>("SalesCommissionShare")
@@ -160,9 +160,9 @@ namespace Niftified.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("EditionId", "PersonId");
+                    b.HasKey("EditionId", "WalletId");
 
-                    b.HasIndex("PersonId");
+                    b.HasIndex("WalletId");
 
                     b.ToTable("Creator");
                 });
@@ -192,9 +192,6 @@ namespace Niftified.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("DataSourceFileType")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DataSourcePath")
                         .HasColumnType("TEXT");
 
                     b.Property<byte[]>("DataSourceRawData")
@@ -269,10 +266,10 @@ namespace Niftified.Migrations
                     b.Property<string>("LikedEditionIds")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("LikedPersonIds")
+                    b.Property<string>("LikedVolumeIds")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("LikedVolumeIds")
+                    b.Property<string>("LikedWalletIds")
                         .HasColumnType("TEXT");
 
                     b.HasKey("AccountId");
@@ -304,15 +301,6 @@ namespace Niftified.Migrations
                     b.Property<string>("LanguageCode")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("PersonAlias")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("PersonHashId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("PersonId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<decimal>("ServiceFeeAmount")
                         .HasColumnType("TEXT");
 
@@ -325,45 +313,20 @@ namespace Niftified.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("WalletAlias")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("WalletHashId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("WalletId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("PersonId");
+                    b.HasIndex("WalletId");
 
                     b.ToTable("Offers");
-                });
-
-            modelBuilder.Entity("Niftified.Entities.Person", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("AccountId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Alias")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsAnonymous")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsConfirmed")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime?>("Updated")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
-
-                    b.ToTable("Persons");
                 });
 
             modelBuilder.Entity("Niftified.Entities.Tag", b =>
@@ -450,7 +413,7 @@ namespace Niftified.Migrations
                     b.Property<string>("HashId")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("OwnerId")
+                    b.Property<int?>("OwnerWalletId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Status")
@@ -466,7 +429,7 @@ namespace Niftified.Migrations
 
                     b.HasIndex("EditionId");
 
-                    b.HasIndex("OwnerId");
+                    b.HasIndex("OwnerWalletId");
 
                     b.ToTable("Volumes");
                 });
@@ -477,19 +440,28 @@ namespace Niftified.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("AccountId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Alias")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("TEXT");
+                    b.Property<bool>("IsAnonymous")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<int>("PersonId")
+                    b.Property<bool>("IsConfirmed")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("PrivateKeyEncrypted")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PrivateKeyWIFEncrypted")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PrivateMnemonicEncrypted")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PublicAddress")
@@ -501,6 +473,9 @@ namespace Niftified.Migrations
                     b.Property<string>("PublicKeyHash")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Type")
                         .HasColumnType("INTEGER");
 
@@ -509,7 +484,7 @@ namespace Niftified.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PersonId");
+                    b.HasIndex("AccountId");
 
                     b.ToTable("Wallets");
                 });
@@ -565,9 +540,9 @@ namespace Niftified.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Niftified.Entities.Person", "Person")
+                    b.HasOne("Niftified.Entities.Wallet", "Wallet")
                         .WithMany()
-                        .HasForeignKey("PersonId")
+                        .HasForeignKey("WalletId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -587,18 +562,9 @@ namespace Niftified.Migrations
 
             modelBuilder.Entity("Niftified.Entities.Offer", b =>
                 {
-                    b.HasOne("Niftified.Entities.Person", "Person")
+                    b.HasOne("Niftified.Entities.Wallet", "Wallet")
                         .WithMany()
-                        .HasForeignKey("PersonId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Niftified.Entities.Person", b =>
-                {
-                    b.HasOne("Niftified.Entities.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
+                        .HasForeignKey("WalletId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -618,16 +584,16 @@ namespace Niftified.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Niftified.Entities.Person", "Owner")
+                    b.HasOne("Niftified.Entities.Wallet", "OwnerWallet")
                         .WithMany()
-                        .HasForeignKey("OwnerId");
+                        .HasForeignKey("OwnerWalletId");
                 });
 
             modelBuilder.Entity("Niftified.Entities.Wallet", b =>
                 {
-                    b.HasOne("Niftified.Entities.Person", null)
-                        .WithMany("Wallets")
-                        .HasForeignKey("PersonId")
+                    b.HasOne("Niftified.Entities.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

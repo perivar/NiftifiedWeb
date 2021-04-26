@@ -6,23 +6,23 @@ import FormikSelect from '../../_common/select/FormikSelect';
 import FocusError from '../../_common/FocusError';
 import * as Scroll from 'react-scroll';
 import { Link } from 'react-router-dom';
-import { FormValues } from './NewPerson';
+import { FormValues } from './NewWallet';
 import { statusOptions } from '../../_common/enums';
 
 const scroll = Scroll.animateScroll;
 
-export const EditPersonForm = ({ history, match }: { history: any; match: any }) => {
+export const EditWalletForm = ({ history, match }: { history: any; match: any }) => {
   // const { path } = match;
   const { id } = match.params;
 
   const [isLoading, setLoading] = useState<boolean>(false);
-  const [person, setPerson] = useState<any>([]);
+  const [wallet, setWallet] = useState<any>([]);
 
-  // load person by id async
+  // load wallet by id async
   React.useEffect(() => {
     setLoading(true);
     niftyService
-      .getPersonById(id)
+      .getWalletById(id)
       .then((res) => {
         const values: FormValues = {
           alias: res.alias,
@@ -37,11 +37,12 @@ export const EditPersonForm = ({ history, match }: { history: any; match: any })
           walletType: res.walletType,
           privateKeyEncrypted: res.privateKeyEncrypted,
           privateKeyWIFEncrypted: res.privateKeyWIFEncrypted,
+          privateMnemonicEncrypted: res.privateMnemonicEncrypted,
           publicAddress: res.publicAddress,
           publicKey: res.publicKey,
           publicKeyHash: res.publicKeyHash
         };
-        setPerson(values);
+        setWallet(values);
         setLoading(false);
       })
       .catch((error) => {
@@ -51,21 +52,22 @@ export const EditPersonForm = ({ history, match }: { history: any; match: any })
   }, [id]);
 
   const initialValues: FormValues = {
-    alias: person.alias,
-    isAnonymous: person.isAnonymous,
-    accountId: person.accountId,
-    status: person.status,
-    // type: person.type,
-    isConfirmed: person.isConfirmed,
+    alias: wallet.alias,
+    isAnonymous: wallet.isAnonymous,
+    accountId: wallet.accountId,
+    status: wallet.status,
+    // type: wallet.type,
+    isConfirmed: wallet.isConfirmed,
 
     // wallet info
-    name: person.name,
-    walletType: person.walletType,
-    privateKeyEncrypted: person.privateKeyEncrypted,
-    privateKeyWIFEncrypted: person.privateKeyWIFEncrypted,
-    publicAddress: person.publicAddress,
-    publicKey: person.publicKey,
-    publicKeyHash: person.publicKeyHash
+    name: wallet.name,
+    walletType: wallet.walletType,
+    privateKeyEncrypted: wallet.privateKeyEncrypted,
+    privateKeyWIFEncrypted: wallet.privateKeyWIFEncrypted,
+    privateMnemonicEncrypted: wallet.privateMnemonicEncrypted,
+    publicAddress: wallet.publicAddress,
+    publicKey: wallet.publicKey,
+    publicKeyHash: wallet.publicKeyHash
   };
 
   const validationSchema = Yup.object().shape({
@@ -79,10 +81,10 @@ export const EditPersonForm = ({ history, match }: { history: any; match: any })
 
     try {
       niftyService
-        .updatePerson(id, values)
+        .updateWallet(id, values)
         .then(() => {
           formikHelpers.setSubmitting(false);
-          alertService.success('Successfully updated a new person!', {
+          alertService.success('Successfully updated a new wallet!', {
             keepAfterRouteChange: true
           });
           history.push('/creator/profile');
@@ -173,7 +175,7 @@ export const EditPersonForm = ({ history, match }: { history: any; match: any })
                 <div className="form-group">
                   <button type="submit" disabled={isSubmitting} className="btn btn-primary">
                     {isSubmitting && <span className="spinner-border spinner-border-sm mr-1"></span>}
-                    Save Person
+                    Save Wallet
                   </button>
                   <Link to={`/creator/profile`} className="ml-2 btn btn-secondary">
                     Cancel

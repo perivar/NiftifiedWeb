@@ -22,14 +22,10 @@ export const niftyService = {
   deleteEdition,
   getVolumeById,
   getVolumesByEditionId,
-  getPersonsByAccountId,
-  getPersonById,
-  createPerson,
-  updatePerson,
-  deletePerson,
-  getWalletsByPersonId,
+  getWalletsByAccountId,
   getWalletById,
   createWallet,
+  updateWallet,
   deleteWallet
 };
 
@@ -104,11 +100,11 @@ function createEdition(params: any) {
     currencyUniqueId: params.currencyUniqueId ? params.currencyUniqueId : 'NFY',
     tagIds: params.tags ? params.tags.map((a: any) => a.value) : [],
     collectionId: params.collection ? params.collection.value : '',
-    ownerPersonId: params.owner ? params.owner.id : 0,
-    creatorPersonIds: params.creators ? params.creators.map((a: any) => a.personId) : [],
+    ownerWalletId: params.owner ? params.owner.id : 0,
+    creatorWalletIds: params.creators ? params.creators.map((a: any) => a.walletId) : [],
     creatorCommissionShares: params.creators ? params.creators.map((a: any) => a.salesCommissionShare) : [],
-    creatorPersonAliases: params.creators ? params.creators.map((a: any) => a.alias) : [],
-    creatorPersonTypes: params.creators ? params.creators.map((a: any) => a.type) : []
+    creatorWalletAliases: params.creators ? params.creators.map((a: any) => a.alias) : [],
+    creatorWalletTypes: params.creators ? params.creators.map((a: any) => a.type) : []
   };
 
   // delete params that should not be included in the post
@@ -132,11 +128,11 @@ function updateEdition(id: string, params: any) {
     currencyUniqueId: params.currencyUniqueId ? params.currencyUniqueId : 'NFY',
     tagIds: params.tags ? params.tags.map((a: any) => a.value) : [],
     collectionId: params.collection ? params.collection.value : '',
-    ownerPersonId: params.owner ? params.owner.id : 0,
-    creatorPersonIds: params.creators ? params.creators.map((a: any) => a.personId) : [],
+    ownerWalletId: params.owner ? params.owner.id : 0,
+    creatorWalletIds: params.creators ? params.creators.map((a: any) => a.walletId) : [],
     creatorCommissionShares: params.creators ? params.creators.map((a: any) => a.salesCommissionShare) : [],
-    creatorPersonAliases: params.creators ? params.creators.map((a: any) => a.alias) : [],
-    creatorPersonTypes: params.creators ? params.creators.map((a: any) => a.type) : []
+    creatorWalletAliases: params.creators ? params.creators.map((a: any) => a.alias) : [],
+    creatorWalletTypes: params.creators ? params.creators.map((a: any) => a.type) : []
   };
 
   // delete params that should not be included in the post
@@ -173,29 +169,14 @@ function getVolumeById(id: number) {
   return fetchWrapper.get(`${baseUrl}/volume/${id}`);
 }
 
-function getPersonsByAccountId() {
+function getWalletsByAccountId() {
   const user = accountService.userValue;
   const accountId = user && user.id ? user.id : 1;
 
-  return fetchWrapper.get(`${baseUrl}/persons/${accountId}`);
+  return fetchWrapper.get(`${baseUrl}/wallets/${accountId}`);
 }
 
-function getPersonById(id: number) {
-  return fetchWrapper.get(`${baseUrl}/person/${id}`);
-}
-
-function createPerson(params: any) {
-  const user = accountService.userValue;
-
-  const body = {
-    accountId: user.id
-  };
-  // merge params
-  const allParams = { ...params, ...body };
-  return fetchWrapper.post(`${baseUrl}/person`, allParams);
-}
-
-function updatePerson(id: string, params: any) {
+function updateWallet(id: string, params: any) {
   const user = accountService.userValue;
   const accountId = user && user.id ? user.id : 1;
 
@@ -206,21 +187,9 @@ function updatePerson(id: string, params: any) {
   // merge params
   const allParams = { ...params, ...body };
 
-  return fetchWrapper.put(`${baseUrl}/person/${id}`, allParams).then((edition) => {
+  return fetchWrapper.put(`${baseUrl}/wallet/${id}`, allParams).then((edition) => {
     return edition;
   });
-}
-
-function deletePerson(id: number) {
-  const user = accountService.userValue;
-  if (user && user.id) {
-    return fetchWrapper.delete(`${baseUrl}/person/${id}`);
-  }
-  return Promise.reject('not logged in');
-}
-
-function getWalletsByPersonId(personId: number) {
-  return fetchWrapper.get(`${baseUrl}/wallets/${personId}`);
 }
 
 function getWalletById(id: number) {

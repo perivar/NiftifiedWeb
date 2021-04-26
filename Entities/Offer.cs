@@ -9,10 +9,10 @@ namespace Niftified.Entities
 		public string LanguageCode { get; set; }
 		public OfferType Type { get; set; } // for sale, or bid
 		public Status Status { get; set; }
-		public int PersonId { get; set; }
-		public Person Person { get; set; }
-		public string PersonAlias { get; set; }
-		public string PersonHashId { get; set; }
+		public int WalletId { get; set; }
+		public Wallet Wallet { get; set; }
+		public string WalletAlias { get; set; }
+		public string WalletHashId { get; set; }
 
 		public DateTime Created { get; set; }
 		public string Description { get; set; }

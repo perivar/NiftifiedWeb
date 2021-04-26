@@ -91,7 +91,7 @@ namespace Niftified.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     LikedEditionIds = table.Column<string>(nullable: true),
                     LikedVolumeIds = table.Column<string>(nullable: true),
-                    LikedPersonIds = table.Column<string>(nullable: true)
+                    LikedWalletIds = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -115,31 +115,6 @@ namespace Niftified.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Txs", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Persons",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Created = table.Column<DateTime>(nullable: false),
-                    Updated = table.Column<DateTime>(nullable: true),
-                    AccountId = table.Column<int>(nullable: false),
-                    Alias = table.Column<string>(nullable: true),
-                    IsAnonymous = table.Column<bool>(nullable: false),
-                    Status = table.Column<int>(nullable: false),
-                    IsConfirmed = table.Column<bool>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Persons", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Persons_Accounts_AccountId",
-                        column: x => x.AccountId,
-                        principalTable: "Accounts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -169,6 +144,38 @@ namespace Niftified.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Wallets",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Created = table.Column<DateTime>(nullable: false),
+                    Updated = table.Column<DateTime>(nullable: true),
+                    AccountId = table.Column<int>(nullable: false),
+                    Alias = table.Column<string>(nullable: true),
+                    IsAnonymous = table.Column<bool>(nullable: false),
+                    Status = table.Column<int>(nullable: false),
+                    IsConfirmed = table.Column<bool>(nullable: false),
+                    Type = table.Column<int>(nullable: false),
+                    PrivateKeyEncrypted = table.Column<string>(nullable: true),
+                    PrivateKeyWIFEncrypted = table.Column<string>(nullable: true),
+                    PrivateMnemonicEncrypted = table.Column<string>(nullable: true),
+                    PublicAddress = table.Column<string>(nullable: true),
+                    PublicKey = table.Column<string>(nullable: true),
+                    PublicKeyHash = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Wallets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Wallets_Accounts_AccountId",
+                        column: x => x.AccountId,
+                        principalTable: "Accounts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Editions",
                 columns: table => new
                 {
@@ -191,7 +198,6 @@ namespace Niftified.Migrations
                     BoxName = table.Column<string>(nullable: true),
                     Theme = table.Column<string>(nullable: true),
                     CollectionId = table.Column<int>(nullable: true),
-                    DataSourcePath = table.Column<string>(nullable: true),
                     DataSourceFileType = table.Column<string>(nullable: true),
                     DataSourceFileName = table.Column<string>(nullable: true),
                     DataSourceFileSize = table.Column<long>(nullable: false),
@@ -227,9 +233,9 @@ namespace Niftified.Migrations
                     LanguageCode = table.Column<string>(nullable: true),
                     Type = table.Column<int>(nullable: false),
                     Status = table.Column<int>(nullable: false),
-                    PersonId = table.Column<int>(nullable: false),
-                    PersonAlias = table.Column<string>(nullable: true),
-                    PersonHashId = table.Column<string>(nullable: true),
+                    WalletId = table.Column<int>(nullable: false),
+                    WalletAlias = table.Column<string>(nullable: true),
+                    WalletHashId = table.Column<string>(nullable: true),
                     Created = table.Column<DateTime>(nullable: false),
                     Description = table.Column<string>(nullable: true),
                     Amount = table.Column<decimal>(nullable: false),
@@ -242,37 +248,9 @@ namespace Niftified.Migrations
                 {
                     table.PrimaryKey("PK_Offers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Offers_Persons_PersonId",
-                        column: x => x.PersonId,
-                        principalTable: "Persons",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Wallets",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Created = table.Column<DateTime>(nullable: false),
-                    Updated = table.Column<DateTime>(nullable: true),
-                    PersonId = table.Column<int>(nullable: false),
-                    Name = table.Column<string>(nullable: true),
-                    Type = table.Column<int>(nullable: false),
-                    PrivateKeyEncrypted = table.Column<string>(nullable: true),
-                    PrivateKeyWIFEncrypted = table.Column<string>(nullable: true),
-                    PublicAddress = table.Column<string>(nullable: true),
-                    PublicKey = table.Column<string>(nullable: true),
-                    PublicKeyHash = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Wallets", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Wallets_Persons_PersonId",
-                        column: x => x.PersonId,
-                        principalTable: "Persons",
+                        name: "FK_Offers_Wallets_WalletId",
+                        column: x => x.WalletId,
+                        principalTable: "Wallets",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -282,13 +260,13 @@ namespace Niftified.Migrations
                 columns: table => new
                 {
                     EditionId = table.Column<int>(nullable: false),
-                    PersonId = table.Column<int>(nullable: false),
+                    WalletId = table.Column<int>(nullable: false),
                     Type = table.Column<int>(nullable: false),
                     SalesCommissionShare = table.Column<decimal>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Creator", x => new { x.EditionId, x.PersonId });
+                    table.PrimaryKey("PK_Creator", x => new { x.EditionId, x.WalletId });
                     table.ForeignKey(
                         name: "FK_Creator_Editions_EditionId",
                         column: x => x.EditionId,
@@ -296,9 +274,9 @@ namespace Niftified.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Creator_Persons_PersonId",
-                        column: x => x.PersonId,
-                        principalTable: "Persons",
+                        name: "FK_Creator_Wallets_WalletId",
+                        column: x => x.WalletId,
+                        principalTable: "Wallets",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -335,7 +313,7 @@ namespace Niftified.Migrations
                     Updated = table.Column<DateTime>(nullable: true),
                     HashId = table.Column<string>(nullable: true),
                     ExternalHashId = table.Column<string>(nullable: true),
-                    OwnerId = table.Column<int>(nullable: true),
+                    OwnerWalletId = table.Column<int>(nullable: true),
                     Status = table.Column<int>(nullable: false),
                     Type = table.Column<int>(nullable: false),
                     Amount = table.Column<decimal>(nullable: false),
@@ -353,17 +331,17 @@ namespace Niftified.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Volumes_Persons_OwnerId",
-                        column: x => x.OwnerId,
-                        principalTable: "Persons",
+                        name: "FK_Volumes_Wallets_OwnerWalletId",
+                        column: x => x.OwnerWalletId,
+                        principalTable: "Wallets",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Creator_PersonId",
+                name: "IX_Creator_WalletId",
                 table: "Creator",
-                column: "PersonId");
+                column: "WalletId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Editions_AccountId",
@@ -376,14 +354,9 @@ namespace Niftified.Migrations
                 column: "CollectionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Offers_PersonId",
+                name: "IX_Offers_WalletId",
                 table: "Offers",
-                column: "PersonId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Persons_AccountId",
-                table: "Persons",
-                column: "AccountId");
+                column: "WalletId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RefreshToken_AccountId",
@@ -401,14 +374,14 @@ namespace Niftified.Migrations
                 column: "EditionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Volumes_OwnerId",
+                name: "IX_Volumes_OwnerWalletId",
                 table: "Volumes",
-                column: "OwnerId");
+                column: "OwnerWalletId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Wallets_PersonId",
+                name: "IX_Wallets_AccountId",
                 table: "Wallets",
-                column: "PersonId");
+                column: "AccountId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -441,13 +414,10 @@ namespace Niftified.Migrations
                 name: "Volumes");
 
             migrationBuilder.DropTable(
-                name: "Wallets");
-
-            migrationBuilder.DropTable(
                 name: "Editions");
 
             migrationBuilder.DropTable(
-                name: "Persons");
+                name: "Wallets");
 
             migrationBuilder.DropTable(
                 name: "Collections");

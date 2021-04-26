@@ -9,7 +9,6 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
 
-using Niftified.Models.Persons;
 using Niftified.Models.Wallets;
 using Niftified.Models.Editions;
 using Niftified.Models.Volumes;
@@ -53,14 +52,6 @@ namespace Niftified.Services
 		IEnumerable<TagResponse> GetTags();
 		void DeleteTag(int id);
 
-		// person
-		PersonResponse GetPersonById(int id);
-		PersonResponse CreatePerson(CreatePersonRequest model);
-		PersonResponse UpdatePerson(int id, UpdatePersonRequest model);
-		IEnumerable<PersonResponse> GetPersons();
-		IEnumerable<PersonResponse> GetPersonsByAccountId(int accountId);
-		void DeletePerson(int id);
-
 		// likes
 		IEnumerable<LikesResponse> GetLikes();
 		LikesResponse GetLikesByAccountId(int accountId);
@@ -73,7 +64,7 @@ namespace Niftified.Services
 		WalletResponse CreateWallet(CreateWalletRequest model);
 		WalletResponse UpdateWallet(int id, UpdateWalletRequest model);
 		IEnumerable<WalletResponse> GetWallets();
-		IEnumerable<WalletResponse> GetWalletsByPersonId(int personId);
+		IEnumerable<WalletResponse> GetWalletsByAccountId(int accountId);
 		void DeleteWallet(int id);
 
 		// file
@@ -165,10 +156,10 @@ namespace Niftified.Services
 			// Load the * related to a given edition 
 			_context.Entry(edition).Collection(p => p.Tags).Load();
 
-			// load creator with person
+			// load creator with wallet
 			_context.Entry(edition).Collection(p => p.Creators)
 			.Query()
-			.Include(c => c.Person)
+			.Include(c => c.Wallet)
 			.Load();
 
 			// and collection
@@ -238,35 +229,35 @@ namespace Niftified.Services
 			}
 
 			/// OWNER
-			Person owner = null;
-			if (model.OwnerPersonId > 0)
+			Wallet ownerWallet = null;
+			if (model.OwnerWalletId > 0)
 			{
-				owner = _context.Persons.Find(model.OwnerPersonId);
+				ownerWallet = _context.Wallets.Find(model.OwnerWalletId);
 			}
-			if (owner == null)
+			if (ownerWallet == null)
 			{
-				// var owner = _context.Persons.Where(p => p.AccountId == model.AccountId).Include(p => p.Wallets).FirstOrDefault();
+				// var owner = _context.Wallets.Where(p => p.AccountId == model.AccountId).Include(p => p.Wallets).FirstOrDefault();
 				throw new AppException("Owner not found!");
 			}
 
 			// CREATORS
 			var creators = new List<Creator>();
-			if (model.CreatorPersonIds.Any() &&
+			if (model.CreatorWalletIds.Any() &&
 				model.CreatorCommissionShares.Any() &&
-				model.CreatorPersonIds.Count == model.CreatorCommissionShares.Count)
+				model.CreatorWalletIds.Count == model.CreatorCommissionShares.Count)
 			{
-				// we don't need to check if any creators already exist, since the edition and person id is unique
-				for (int i = 0; i < model.CreatorPersonIds.Count; i++)
+				// we don't need to check if any creators already exist, since the edition and wallet id is unique
+				for (int i = 0; i < model.CreatorWalletIds.Count; i++)
 				{
-					var personId = model.CreatorPersonIds[i];
+					var walletId = model.CreatorWalletIds[i];
 					var salesCommissionShare = model.CreatorCommissionShares[i];
-					var creatorType = model.CreatorPersonTypes[i];
+					var creatorType = model.CreatorWalletTypes[i];
 
-					var creatorPerson = _context.Persons.Find(personId);
+					var creatorWallet = _context.Wallets.Find(walletId);
 
 					var creator = new Creator();
 					creator.Edition = edition;
-					creator.PersonId = personId;
+					creator.WalletId = walletId;
 					creator.SalesCommissionShare = salesCommissionShare;
 					creator.Type = (CreatorType)creatorType;
 					creators.Add(creator);
@@ -286,7 +277,7 @@ namespace Niftified.Services
 				volume.Created = DateTime.UtcNow;
 				volume.EditionNumber = i + 1;
 
-				volume.Owner = owner;
+				volume.OwnerWallet = ownerWallet;
 				volume.Status = VolumeStatus.Pending;
 				volume.Type = VolumeType.Auction;
 				volume.CurrencyUniqueId = model.CurrencyUniqueId;
@@ -344,22 +335,22 @@ namespace Niftified.Services
 			}
 
 			var creators = new List<Creator>();
-			if (model.CreatorPersonIds.Any() &&
+			if (model.CreatorWalletIds.Any() &&
 				model.CreatorCommissionShares.Any() &&
-				model.CreatorPersonIds.Count == model.CreatorCommissionShares.Count)
+				model.CreatorWalletIds.Count == model.CreatorCommissionShares.Count)
 			{
-				// we don't need to check if any creators already exist, since the edition and person id is unique
-				for (int i = 0; i < model.CreatorPersonIds.Count; i++)
+				// we don't need to check if any creators already exist, since the edition and wallet id is unique
+				for (int i = 0; i < model.CreatorWalletIds.Count; i++)
 				{
-					var personId = model.CreatorPersonIds[i];
+					var walletId = model.CreatorWalletIds[i];
 					var salesCommissionShare = model.CreatorCommissionShares[i];
-					var creatorType = model.CreatorPersonTypes[i];
+					var creatorType = model.CreatorWalletTypes[i];
 
-					var creatorPerson = _context.Persons.Find(personId);
+					var creatorWallet = _context.Wallets.Find(walletId);
 
 					var creator = new Creator();
 					creator.Edition = edition;
-					creator.PersonId = personId;
+					creator.WalletId = walletId;
 					creator.SalesCommissionShare = salesCommissionShare;
 					creator.Type = (CreatorType)creatorType;
 					creators.Add(creator);
@@ -485,105 +476,6 @@ namespace Niftified.Services
 			_context.SaveChanges();
 		}
 
-		// persons
-		public IEnumerable<PersonResponse> GetPersons()
-		{
-			var persons = _context.Persons
-			.Include(p => p.Wallets);
-			return _mapper.Map<IList<PersonResponse>>(persons);
-		}
-
-		public PersonResponse GetPersonById(int id)
-		{
-			var person = _context.Persons.Find(id);
-			if (person == null) throw new KeyNotFoundException("Person not found");
-
-			// Load the wallets related to a given person 
-			_context.Entry(person).Collection(p => p.Wallets).Load();
-
-			return _mapper.Map<PersonResponse>(person);
-		}
-
-		public IEnumerable<PersonResponse> GetPersonsByAccountId(int accountId)
-		{
-			var persons = _context.Persons.Where(entity => entity.AccountId == accountId)
-			.Include(p => p.Wallets);
-			return _mapper.Map<IList<PersonResponse>>(persons);
-		}
-
-		public PersonResponse CreatePerson(CreatePersonRequest model)
-		{
-			// validate
-			if (_context.Persons.Any(x => x.Alias == model.Alias))
-				throw new AppException($"Alias '{model.Alias}' is already registered");
-
-			// map model to new object
-			var person = _mapper.Map<Person>(model);
-			person.Created = DateTime.UtcNow;
-
-			// create wallet
-			var wallet = new Wallet();
-			wallet.Created = DateTime.UtcNow;
-
-			// check that all the crypto values exist
-			string[] inputs = {
-				model.PrivateKeyEncrypted,
-				model.PrivateKeyWIFEncrypted,
-				model.PublicAddress,
-				model.PublicKey,
-				model.PublicKeyHash};
-
-
-			if (!_appSettings.IgnoreWindowsCryptoHttpsRequirement && inputs.Any(cryptoValue => string.IsNullOrWhiteSpace(cryptoValue)))
-			{
-				throw new AppException($"None of the wallet crypto values can be empty", model);
-			}
-
-			wallet.PrivateKeyEncrypted = model.PrivateKeyEncrypted;
-			wallet.PrivateKeyWIFEncrypted = model.PrivateKeyWIFEncrypted;
-			wallet.PublicAddress = model.PublicAddress;
-			wallet.PublicKey = model.PublicKey;
-			wallet.PublicKeyHash = model.PublicKeyHash;
-
-			var wallets = new List<Wallet>();
-			wallets.Add(wallet);
-
-			// and add to person
-			person.Wallets = wallets;
-
-			// save 
-			_context.Persons.Add(person);
-			_context.SaveChanges();
-
-			return _mapper.Map<PersonResponse>(person);
-		}
-
-		public PersonResponse UpdatePerson(int id, UpdatePersonRequest model)
-		{
-			var person = _context.Persons.Find(id);
-			if (person == null) throw new KeyNotFoundException("Person not found");
-
-			// validate
-			// if (_context.Persons.Any(x => x.Alias == model.Alias))
-			// 	throw new AppException($"Alias '{model.Alias}' is already registered");
-
-			// copy model to edition and save
-			_mapper.Map(model, person);
-			person.Updated = DateTime.UtcNow;
-			_context.Persons.Update(person);
-			_context.SaveChanges();
-
-			return _mapper.Map<PersonResponse>(person);
-		}
-
-		public void DeletePerson(int id)
-		{
-			var person = _context.Persons.Find(id);
-			if (person == null) throw new KeyNotFoundException("Person not found");
-			_context.Persons.Remove(person);
-			_context.SaveChanges();
-		}
-
 		// likes
 		public IEnumerable<LikesResponse> GetLikes()
 		{
@@ -620,7 +512,7 @@ namespace Niftified.Services
 			if (likes == null) throw new KeyNotFoundException("Likes not found");
 
 			// validate
-			if (_context.Persons.Any(x => x.AccountId == model.AccountId))
+			if (_context.Wallets.Any(x => x.AccountId == model.AccountId))
 				throw new AppException($"Likes '{model.AccountId}' is already registered");
 
 			// copy model to edition and save
@@ -684,14 +576,14 @@ namespace Niftified.Services
 
 		public IEnumerable<VolumeResponse> GetVolumes()
 		{
-			var volumes = _context.Volumes.Include(v => v.Owner);
+			var volumes = _context.Volumes.Include(v => v.OwnerWallet);
 			return _mapper.Map<IList<VolumeResponse>>(volumes);
 		}
 
 		public IEnumerable<VolumeResponse> GetVolumesByEditionId(int editionId)
 		{
 			var volumes = _context.Volumes.Where(entity => entity.EditionId == editionId)
-			.Include(v => v.Owner);
+			.Include(v => v.OwnerWallet);
 			return _mapper.Map<IList<VolumeResponse>>(volumes);
 		}
 
@@ -707,7 +599,7 @@ namespace Niftified.Services
 			var page = query.OrderBy(v => v.EditionNumber)
 			.Skip((pageIndex - 1) * pageSize)
 			.Take(pageSize)
-			.Include(v => v.Owner);
+			.Include(v => v.OwnerWallet);
 
 			var volumes = page.Select(p => p);
 
@@ -733,12 +625,27 @@ namespace Niftified.Services
 		public WalletResponse CreateWallet(CreateWalletRequest model)
 		{
 			// validate
-			if (_context.Wallets.Any(x => x.Name == model.Name))
-				throw new AppException($"Wallet '{model.Name}' is already registered");
+			if (_context.Wallets.Any(x => x.PublicAddress == model.PublicAddress))
+				throw new AppException($"Wallet '{model.PublicAddress}' is already registered");
 
 			// map model to new object
 			var wallet = _mapper.Map<Wallet>(model);
 			wallet.Created = DateTime.UtcNow;
+
+			// check that all the crypto values exist
+			string[] inputs = {
+				model.PrivateKeyEncrypted,
+				model.PrivateKeyWIFEncrypted,
+				model.PrivateMnemonicEncrypted,
+				model.PublicAddress,
+				model.PublicKey,
+				model.PublicKeyHash};
+
+
+			if (!_appSettings.IgnoreWindowsCryptoHttpsRequirement && inputs.Any(cryptoValue => string.IsNullOrWhiteSpace(cryptoValue)))
+			{
+				throw new AppException($"None of the wallet crypto values can be empty", model);
+			}
 
 			// save 
 			_context.Wallets.Add(wallet);
@@ -771,9 +678,9 @@ namespace Niftified.Services
 			return _mapper.Map<IList<WalletResponse>>(wallets);
 		}
 
-		public IEnumerable<WalletResponse> GetWalletsByPersonId(int personId)
+		public IEnumerable<WalletResponse> GetWalletsByAccountId(int accountId)
 		{
-			var wallets = _context.Wallets.Where(entity => entity.PersonId == personId);
+			var wallets = _context.Wallets.Where(entity => entity.AccountId == accountId);
 			return _mapper.Map<IList<WalletResponse>>(wallets);
 		}
 

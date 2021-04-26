@@ -1,324 +1,185 @@
-import React, { memo } from 'react';
-import { Form, Field, ErrorMessage, FormikProps, withFormik } from 'formik';
+import React, { useEffect } from 'react';
+import * as bip39 from 'bip39';
+import { Formik, FormikHelpers, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { niftyService, alertService } from '../../_services';
 import FormikSelect from '../../_common/select/FormikSelect';
 import FocusError from '../../_common/FocusError';
 import * as Scroll from 'react-scroll';
-import { Link } from 'react-router-dom';
-import { WalletType, walletTypeOptions } from '../../_common/enums';
-import {
-  IWallet,
-  makeWallet,
-  getPublicKey,
-  HASH160,
-  getPublicAddress,
-  getPrivateKeyWIF,
-  getPrivateKey
-} from './GenerateWallet';
+// import { Link } from 'react-router-dom';
+// import { makeWallet } from '../wallet/GenerateWallet';
+import { encrypt } from '../wallet/webcrypto';
+import { Status, statusOptions, WalletType } from '../../_common/enums';
+import CryptoUtil from '../../_common/crypto/util';
 
 const scroll = Scroll.animateScroll;
 
-interface FormValues {
+export interface FormValues {
+  alias: string;
+  isAnonymous: boolean;
+  accountId: number;
+  status: Status;
+  // type: CreatorType; // creator, co-creator?
+  isConfirmed: boolean;
+
+  // wallet info
   name: string;
-  type: WalletType | null;
-  publicKey: string;
-  publicKeyHash: string;
-  publicAddress: string;
+  walletType: WalletType;
   privateKeyEncrypted: string;
   privateKeyWIFEncrypted: string;
-  personId: any;
+  privateMnemonicEncrypted: string;
+  publicAddress: string;
+  publicKey: string;
+  publicKeyHash: string;
 }
 
-const validationSchema = Yup.object().shape(
-  {
-    name: Yup.string().required('A unique name is required'),
-    type: Yup.mixed().required('Wallet Type is required'),
-    publicKey: Yup.string().required('A public key is required'),
-    publicKeyHash: Yup.string().required('A public key hash is required'),
-    publicAddress: Yup.string().required('A public address is required'),
-    privateKeyEncrypted: Yup.string().when('privateKeyWIFEncrypted', {
-      is: (privateKeyWIFEncrypted: string) => !privateKeyWIFEncrypted || privateKeyWIFEncrypted.length === 0,
-      then: Yup.string().required('One format of a private key is required'),
-      otherwise: Yup.string()
-    }),
-    privateKeyWIFEncrypted: Yup.string().when('privateKeyEncrypted', {
-      is: (privateKeyEncrypted: string) => !privateKeyEncrypted || privateKeyEncrypted.length === 0,
-      then: Yup.string().required('One format of a private key is required'),
-      otherwise: Yup.string()
-    })
-  },
-  // Required when checking more than one field to avoid cyclic errors
-  [['privateKeyEncrypted', 'privateKeyWIFEncrypted']]
-);
+export const NewWalletForm = ({ history }: { history: any }) => {
+  const initialValues: FormValues = {
+    alias: '',
+    isAnonymous: false,
+    accountId: 0,
+    status: Status.Pending,
+    // type: CreatorType.Creator,
+    isConfirmed: false,
 
-// check https://medium.com/fotontech/forms-with-formik-typescript-d8154cc24f8a
-// and https://stackoverflow.com/questions/65001954/formik-form-not-submitting-from-modal-component
-const InnerForm = (props: any & FormikProps<FormValues>) => {
-  const { setFieldTouched, setFieldError, setFieldValue, values, errors, touched, submitForm, isSubmitting } = props;
-  const { match } = props;
-  const { id } = match.params;
-
-  const updateFormikWalletFields = (wallet: IWallet) => {
-    const { privateKey } = wallet;
-    const { publicKey } = wallet;
-    const { publicKeyHash } = wallet;
-    const { privateKeyWIF } = wallet;
-    const { publicAddress } = wallet;
-
-    // set private key WIF
-    setFieldValue('privateKeyWIFEncrypted', privateKeyWIF);
-    setFieldTouched('privateKeyWIFEncrypted', true);
-    setFieldError('privateKeyWIFEncrypted', undefined);
-
-    // set private key hex
-    setFieldValue('privateKeyEncrypted', privateKey);
-    setFieldTouched('privateKeyEncrypted', true);
-    setFieldError('privateKeyEncrypted', undefined);
-
-    // set public key
-    setFieldValue('publicKey', publicKey);
-    setFieldTouched('publicKey', true);
-    setFieldError('publicKey', undefined);
-
-    // set public key hash
-    setFieldValue('publicKeyHash', publicKeyHash);
-    setFieldTouched('publicKeyHash', true);
-    setFieldError('publicKeyHash', undefined);
-
-    // set public address
-    setFieldValue('publicAddress', publicAddress);
-    setFieldTouched('publicAddress', true);
-    setFieldError('publicAddress', undefined);
+    // wallet info
+    name: 'wallet',
+    walletType: WalletType.NiftyCoin,
+    privateKeyEncrypted: '',
+    privateKeyWIFEncrypted: '',
+    privateMnemonicEncrypted: '',
+    publicAddress: '',
+    publicKey: '',
+    publicKeyHash: ''
   };
 
-  const handleOnBlur = () => {
+  const validationSchema = Yup.object().shape({
+    alias: Yup.string().required('Alias is required'),
+    isAnonymous: Yup.boolean().required('Please choose wheter you want to be anonymous')
+  });
+
+  const onSubmit = async (values: FormValues, formikHelpers: FormikHelpers<FormValues>) => {
+    // alert(JSON.stringify(values, null, 2));
+    formikHelpers.setSubmitting(true);
+
     try {
-      let privateKey = '';
-      let privateKeyWIF = '';
-      if (values.privateKeyWIFEncrypted !== '') {
-        privateKeyWIF = values.privateKeyWIFEncrypted;
-        privateKey = getPrivateKey(privateKeyWIF);
-      } else if (values.privateKeyEncrypted !== '') {
-        privateKey = values.privateKeyEncrypted;
-        privateKeyWIF = getPrivateKeyWIF(privateKey);
+      const importMnemonic = ''; // PIN: TODO allow the user to import a mnemonic
+      const NETWORK = process.env.REACT_APP_NETWORK;
+      const network = CryptoUtil.getNetwork(NETWORK);
+
+      // create 128 bit BIP39 mnemonic
+      const mnemonic = importMnemonic ? importMnemonic : bip39.generateMnemonic();
+
+      if (!mnemonic || mnemonic === '') {
+        console.log('Error mnemonic is missing!');
+        return undefined;
       }
 
-      if (privateKey !== '' && privateKeyWIF !== '') {
-        const wallet: IWallet = {} as IWallet;
-        wallet.privateKey = privateKey;
-        wallet.privateKeyWIF = privateKeyWIF;
+      const firstExternalAddress = await CryptoUtil.changeAddressFromMnemonic(mnemonic, network);
 
-        // generate public key from private
-        const publicKey = getPublicKey(privateKey);
+      const segwitAddress = CryptoUtil.toSegWitAddress(firstExternalAddress, network);
+      const legacyAddress = CryptoUtil.toLegacyAddress(firstExternalAddress, network);
+      const privateKeyWIF = firstExternalAddress.toWIF();
+      const publicKey = CryptoUtil.toPublicKey(firstExternalAddress);
+      const privateKey = CryptoUtil.toPrivateKeyFromWIF(privateKeyWIF, network);
 
-        // generate public key hash
-        const publicKeyHashBuffer = HASH160(publicKey);
-        const publicKeyHash = publicKeyHashBuffer.toString('hex');
+      // TODO - do not save the private key in production
+      // only while debugging
+      values.publicKey = publicKey;
+      // values.publicKeyHash = publicKeyHash;
+      values.publicAddress = legacyAddress;
+      values.privateKeyEncrypted = privateKey;
+      values.privateKeyWIFEncrypted = privateKeyWIF;
+      values.privateMnemonicEncrypted = mnemonic;
 
-        // generate public address
-        const publicAddress = getPublicAddress(publicKeyHash);
+      const encryptedData = await encrypt(privateKeyWIF);
+      // values.privateKeyWIFEncrypted = encryptedData;
 
-        wallet.publicKey = publicKey;
-        wallet.publicKeyHash = publicKeyHash;
-        wallet.publicAddress = publicAddress;
-
-        updateFormikWalletFields(wallet);
-      }
+      const response = await niftyService.createWallet(values);
+      formikHelpers.setSubmitting(false);
+      alertService.success('Successfully created a new wallet!', {
+        keepAfterRouteChange: true
+      });
+      history.push('/creator/profile');
     } catch (error) {
-      console.log(`failed: ${error}`);
+      formikHelpers.setSubmitting(false);
+      alertService.error(error, { autoClose: false });
+      scroll.scrollToTop();
     }
-  };
-
-  const handleOnClickGenerateWallet = () => {
-    const wallet = makeWallet();
-    updateFormikWalletFields(wallet);
   };
 
   return (
     <>
-      <Link to={`/creator/wallets/${id}`} className="btn btn-primary">
-        Wallets
-      </Link>
-      <button className="btn btn-secondary ml-2" onClick={handleOnClickGenerateWallet}>
-        Generate Wallet
-      </button>
-      <div className="container mt-4">
-        <Form>
-          <div className="form-row">
-            <div className="col">
-              <h4>
-                <strong>Add new Wallet - please fill inn here</strong>
-              </h4>
-              <div className="form-group">
-                <label htmlFor="name">Name</label>
-                <Field
-                  id="name"
-                  name="name"
-                  type="text"
-                  className={`form-control${errors.name && touched.name ? ' is-invalid' : ''}`}
-                  onBlur={handleOnBlur}
-                />
-                <small id="nameHelpBlock" className="form-text text-muted">
-                  To help you find the right wallet, please choose a unique name
-                </small>
-                <ErrorMessage name="name" component="div" className="invalid-feedback" />
-              </div>
+      <div className="container-fluid">
+        <Formik initialValues={initialValues} onSubmit={onSubmit} validationSchema={validationSchema}>
+          {({ values, errors, touched, isSubmitting }) => (
+            <Form noValidate>
+              <div className="form-row">
+                <div className="col">
+                  <div className="form-group">
+                    <label htmlFor="name">Alias</label>
+                    <Field
+                      id="alias"
+                      name="alias"
+                      type="text"
+                      className={`form-control${errors.alias && touched.alias ? ' is-invalid' : ''}`}
+                    />
+                    <small id="nameHelpBlock" className="form-text text-muted">
+                      Please enter a name or an alias.
+                    </small>
+                    <ErrorMessage name="alias" component="div" className="invalid-feedback" />
+                  </div>
 
-              <div className="form-group">
-                <label htmlFor="type">Wallet Type</label>
-                <Field
-                  id="type"
-                  name="type"
-                  type="text"
-                  options={walletTypeOptions}
-                  component={FormikSelect}
-                  placeholder="Select Type..."
-                  isMulti={false}
-                />
-                <ErrorMessage name="type" component="div" className="invalid-feedback show-block" />
-              </div>
+                  <div className="form-group">
+                    <div className="form-check">
+                      <Field className="form-check-input" type="checkbox" name="isAnonymous" />
+                      <label className="form-check-label" htmlFor="isAnonymous">
+                        Anonymous
+                      </label>
+                      <ErrorMessage name="isAnonymous" component="div" className="invalid-feedback" />
+                    </div>
+                  </div>
 
-              <div className="form-group">
-                <label htmlFor="privateKeyWIFEncrypted">Private Key WIF</label>
-                <Field
-                  id="privateKeyWIFEncrypted"
-                  name="privateKeyWIFEncrypted"
-                  type="text"
-                  className={`form-control${
-                    errors.privateKeyWIFEncrypted && touched.privateKeyWIFEncrypted ? ' is-invalid' : ''
-                  }`}
-                  onBlur={handleOnBlur}
-                />
-                <small id="privateKeyWIFEncryptedHelpBlock" className="form-text text-muted">
-                  Private Key in Wallet Import Format (WIF) which can have 51 or 52 characters in it.
-                </small>
-                <ErrorMessage name="privateKeyWIFEncrypted" component="div" className="invalid-feedback" />
-              </div>
-              <h4> --- OR ---</h4>
-              <div className="form-group">
-                <label htmlFor="privateKeyEncrypted">Private Key in hexadecimal format</label>
-                <Field
-                  id="privateKeyEncrypted"
-                  name="privateKeyEncrypted"
-                  type="text"
-                  className={`form-control${
-                    errors.privateKeyEncrypted && touched.privateKeyEncrypted ? ' is-invalid' : ''
-                  }`}
-                  onBlur={handleOnBlur}
-                />
-                <small id="privateKeyEncryptedHelpBlock" className="form-text text-muted">
-                  Private Key in hexadecimal format: (64 characters [0-9A-F]).
-                </small>
-                <ErrorMessage name="privateKeyEncrypted" component="div" className="invalid-feedback" />
-              </div>
-              <h4>
-                <strong>Calculated values</strong>
-              </h4>
-              <div className="form-group">
-                <label htmlFor="publicAddress">Public Address</label>
-                <Field
-                  id="publicAddress"
-                  name="publicAddress"
-                  type="text"
-                  className={`form-control${errors.publicAddress && touched.publicAddress ? ' is-invalid' : ''}`}
-                  readonly
-                />
-                <small id="publicAddressHelpBlock" className="form-text text-muted">
-                  Public address in XYZ format: (34 characters).
-                </small>
-                <ErrorMessage name="publicAddress" component="div" className="invalid-feedback" />
+                  <div className="form-group">
+                    <label htmlFor="status">Status</label>
+                    <Field
+                      id="status"
+                      name="status"
+                      type="text"
+                      options={statusOptions}
+                      component={FormikSelect}
+                      placeholder="Select Status..."
+                      isMulti={false}
+                    />
+                    <ErrorMessage name="status" component="div" className="invalid-feedback  show-block" />
+                  </div>
+
+                  {/* <div className="form-group">
+                    <label htmlFor="type">Type</label>
+                    <Field
+                      id="type"
+                      name="type"
+                      type="text"
+                      options={typeOptions}
+                      component={CustomSelect}
+                      placeholder="Select Type..."
+                      isMulti={false}
+                    />
+                    <ErrorMessage name="type" component="div" className="invalid-feedback  show-block" />
+                  </div> */}
+                </div>
               </div>
               <div className="form-group">
-                <label htmlFor="publicKeyHash">Public Key Hash</label>
-                <Field
-                  id="publicKeyHash"
-                  name="publicKeyHash"
-                  type="text"
-                  className={`form-control${errors.publicKeyHash && touched.publicKeyHash ? ' is-invalid' : ''}`}
-                  readonly
-                />
-                <small id="publicKeyHashHelpBlock" className="form-text text-muted">
-                  RIPEMD160 ( SHA256(publickey) ) in hexadecimal format: (40 characters [0-9A-F])
-                </small>
-                <ErrorMessage name="publicKeyHash" component="div" className="invalid-feedback" />
-              </div>
-              <div className="form-group">
-                <label htmlFor="publicKey">Public Key</label>
-                <Field
-                  id="publicKey"
-                  name="publicKey"
-                  as="textarea"
-                  type="text"
-                  className={`form-control${errors.publicKey && touched.publicKey ? ' is-invalid' : ''}`}
-                  readonly
-                />
-                <small id="publicKeyHelpBlock" className="form-text text-muted">
-                  Hexadecimal format: (130 characters [0-9A-F])
-                </small>
-                <ErrorMessage name="publicKey" component="div" className="invalid-feedback" />
-              </div>
-              <div className="form-group">
-                <button type="button" disabled={isSubmitting} className="btn btn-primary" onClick={submitForm}>
+                <button type="submit" disabled={isSubmitting} className="btn btn-primary">
                   {isSubmitting && <span className="spinner-border spinner-border-sm mr-1"></span>}
                   Save Wallet
                 </button>
-                <Link to={`/creator/wallets/${id}`} className="ml-2 btn btn-secondary">
-                  Cancel
-                </Link>
               </div>
               <FocusError />
-            </div>
-          </div>
-        </Form>
+            </Form>
+          )}
+        </Formik>
       </div>
     </>
   );
 };
-
-const initialValues: FormValues = {
-  name: '',
-  type: null,
-  publicKey: '',
-  publicKeyHash: '',
-  publicAddress: '',
-  privateKeyEncrypted: '',
-  privateKeyWIFEncrypted: '',
-  personId: 0
-};
-
-const enhanceWithFormik = withFormik<any, FormValues>({
-  mapPropsToValues: () => initialValues,
-  validationSchema,
-  handleSubmit: (values: FormValues, { props, setSubmitting }) => {
-    const { history } = props;
-    const { match } = props;
-    const { id } = match.params;
-
-    // set personId
-    values.personId = id;
-
-    try {
-      niftyService
-        .createWallet(values)
-        .then(() => {
-          setSubmitting(false);
-          alertService.success('Successfully added a new wallet!', {
-            keepAfterRouteChange: true
-          });
-          history.push('/creator/profile');
-        })
-        .catch((error) => {
-          setSubmitting(false);
-          alertService.error(error, { autoClose: false });
-          scroll.scrollToTop();
-        });
-    } catch (error) {
-      setSubmitting(false);
-      alertService.error(error, { autoClose: false });
-      scroll.scrollToTop();
-    }
-  }
-});
-
-export const NewWalletForm = enhanceWithFormik(memo(InnerForm));

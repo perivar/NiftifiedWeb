@@ -1,16 +1,18 @@
 /* eslint-disable react/no-unused-prop-types */
 /* eslint-disable jsx-a11y/no-autofocus */
 import React, { memo } from 'react';
+import * as bip39 from 'bip39';
 import { Modal } from 'react-bootstrap';
 import { niftyService } from '../../_services';
 import { Field, ErrorMessage, withFormik, FormikProps } from 'formik';
 import * as Yup from 'yup';
 import FocusError from '../../_common/FocusError';
 // import CustomSelect from '../../_common/select/CustomSelect';
-import { FormValues } from './NewPerson';
+import { FormValues } from './NewWallet';
 import { Status, WalletType } from '../../_common/enums';
-import { makeWallet } from '../wallet/GenerateWallet';
+// import { makeWallet } from '../wallet/GenerateWallet';
 import { encrypt } from '../wallet/webcrypto';
+import CryptoUtil from '../../_common/crypto/util';
 
 interface OtherProps {
   show: boolean;
@@ -34,12 +36,13 @@ const initialValues: FormValues = {
 
   // wallet info
   name: 'wallet',
-  walletType: WalletType.Nifty,
+  walletType: WalletType.NiftyCoin,
   privateKeyEncrypted: '',
   privateKeyWIFEncrypted: '',
   publicAddress: '',
   publicKey: '',
-  publicKeyHash: ''
+  publicKeyHash: '',
+  privateMnemonicEncrypted: ''
 };
 
 // check https://medium.com/fotontech/forms-with-formik-typescript-d8154cc24f8a
@@ -55,7 +58,7 @@ const InnerForm = (props: OtherProps & FormikProps<FormValues>) => {
   return (
     <Modal show={show} onHide={handleClose} autoFocus={false}>
       <Modal.Header closeButton>
-        <Modal.Title>Add New Person</Modal.Title>
+        <Modal.Title>Add New Wallet</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div className="form-row">
@@ -75,7 +78,7 @@ const InnerForm = (props: OtherProps & FormikProps<FormValues>) => {
               <ErrorMessage name="alias" component="div" className="invalid-feedback" />
             </div>
             <p>
-              <strong>You are about to create a person with a new Crypto Wallet</strong>
+              <strong>You are about to create a wallet with a new Crypto Wallet</strong>
             </p>
             <p>
               To protect the wallet (private keys) you will be asked to provide a pass phrase.
@@ -84,7 +87,7 @@ const InnerForm = (props: OtherProps & FormikProps<FormValues>) => {
             </p>
             <p className="text-danger">
               If you forget this, you will <strong>NEVER</strong> get access to the wallet, and any sales commission
-              income for this person will be lost <strong>FOREVER!</strong>
+              income for this wallet will be lost <strong>FOREVER!</strong>
             </p>
             {/* <div className="form-group">
                 <div className="form-check">
@@ -133,7 +136,7 @@ const InnerForm = (props: OtherProps & FormikProps<FormValues>) => {
         </button>
         <button type="button" disabled={isSubmitting} className="btn btn-primary" onClick={submitForm}>
           {isSubmitting && <span className="spinner-border spinner-border-sm mr-1"></span>}
-          Create New Person
+          Create New Wallet
         </button>
       </Modal.Footer>
     </Modal>
@@ -143,46 +146,47 @@ const InnerForm = (props: OtherProps & FormikProps<FormValues>) => {
 const enhanceWithFormik = withFormik<OtherProps, FormValues>({
   mapPropsToValues: () => initialValues,
   validationSchema,
-  handleSubmit: (values: FormValues, { props, setSubmitting, resetForm }) => {
+  handleSubmit: async (values: FormValues, { props, setSubmitting, resetForm }) => {
     const { setShow, onSuccess, onFailure } = props;
 
     try {
-      const wallet = makeWallet();
-      values.publicKey = wallet.publicKey;
-      values.publicKeyHash = wallet.publicKeyHash;
-      values.publicAddress = wallet.publicAddress;
+      const importMnemonic = ''; // PIN: TODO allow the user to import a mnemonic
+      const NETWORK = process.env.REACT_APP_NETWORK;
+      const network = CryptoUtil.getNetwork(NETWORK);
+
+      // create 128 bit BIP39 mnemonic
+      const mnemonic = importMnemonic ? importMnemonic : bip39.generateMnemonic();
+
+      if (!mnemonic || mnemonic === '') {
+        console.log('Error mnemonic is missing!');
+        return undefined;
+      }
+
+      const firstExternalAddress = await CryptoUtil.changeAddressFromMnemonic(mnemonic, network);
+
+      const segwitAddress = CryptoUtil.toSegWitAddress(firstExternalAddress, network);
+      const legacyAddress = CryptoUtil.toLegacyAddress(firstExternalAddress, network);
+      const privateKeyWIF = firstExternalAddress.toWIF();
+      const publicKey = CryptoUtil.toPublicKey(firstExternalAddress);
+      const privateKey = CryptoUtil.toPrivateKeyFromWIF(privateKeyWIF, network);
 
       // TODO - do not save the private key in production
       // only while debugging
-      // the same for generate wallet - remove the debug lines
-      values.privateKeyEncrypted = wallet.privateKey;
-      values.privateKeyWIFEncrypted = wallet.privateKeyWIF;
-      // but keep both the unencoded and the encoded private key WIF to check
-      // values.privateKeyEncrypted = wallet.privateKeyWIF;
+      values.publicKey = publicKey;
+      // values.publicKeyHash = publicKeyHash;
+      values.publicAddress = legacyAddress;
+      values.privateKeyEncrypted = privateKey;
+      values.privateKeyWIFEncrypted = privateKeyWIF;
+      values.privateMnemonicEncrypted = mnemonic;
 
-      encrypt(wallet.privateKeyWIF)
-        .then((encryptedData) => {
-          // values.privateKeyWIFEncrypted = encryptedData;
+      const encryptedData = await encrypt(privateKeyWIF);
+      // values.privateKeyWIFEncrypted = encryptedData;
 
-          niftyService
-            .createPerson(values)
-            .then((val) => {
-              setSubmitting(false);
-              setShow(false);
-              resetForm();
-              if (onSuccess) onSuccess(val);
-            })
-            .catch((error) => {
-              setSubmitting(false);
-              setShow(false);
-              if (onFailure) onFailure(error);
-            });
-        })
-        .catch((error) => {
-          setSubmitting(false);
-          setShow(false);
-          if (onFailure) onFailure(error);
-        });
+      const response = await niftyService.createWallet(values);
+      setSubmitting(false);
+      setShow(false);
+      resetForm();
+      if (onSuccess) onSuccess(response);
     } catch (error) {
       setSubmitting(false);
       setShow(false);
@@ -191,4 +195,4 @@ const enhanceWithFormik = withFormik<OtherProps, FormValues>({
   }
 });
 
-export const AddPersonModal = enhanceWithFormik(memo(InnerForm));
+export const AddWalletModal = enhanceWithFormik(memo(InnerForm));

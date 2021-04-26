@@ -5,13 +5,13 @@ namespace Niftified.Entities
 {
 	public class Creator
 	{
-		// create a composite key to ensure there is never more than one identical person connected to one edition
+		// create a composite key to ensure there is never more than one identical wallet connected to one edition
 
 		public Edition Edition { get; set; }
 		public int EditionId { get; set; }
 
-		public Person Person { get; set; }
-		public int PersonId { get; set; }
+		public Wallet Wallet { get; set; }
+		public int WalletId { get; set; }
 
 		public CreatorType Type { get; set; }
 

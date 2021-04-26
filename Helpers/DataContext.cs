@@ -23,7 +23,6 @@ namespace Niftified.Helpers
 		public DbSet<Collection> Collections { get; set; }
 		public DbSet<Tag> Tags { get; set; }
 		public DbSet<Offer> Offers { get; set; }
-		public DbSet<Person> Persons { get; set; }
 		public DbSet<Likes> Likes { get; set; }
 		public DbSet<Tx> Txs { get; set; }
 		public DbSet<Address> Addresses { get; set; }
@@ -98,7 +97,7 @@ namespace Niftified.Helpers
 
 			// create composite key for Creator
 			modelBuilder.Entity<Creator>()
-				   .HasKey(c => new { c.EditionId, c.PersonId });
+				   .HasKey(c => new { c.EditionId, c.WalletId });
 
 			// build model
 			modelBuilder.Entity<Likes>()
@@ -108,7 +107,7 @@ namespace Niftified.Helpers
 				.SetValueComparer(intArrayComparer);
 
 			modelBuilder.Entity<Likes>()
-				.Property(e => e.LikedPersonIds)
+				.Property(e => e.LikedWalletIds)
 				.HasConversion(intArrayConverter)
 				.Metadata
 				.SetValueComparer(intArrayComparer);

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ListPersons } from '../person/ListPersons';
+import { ListWallets } from '../wallet/ListWallets';
 
 import { Role } from '../../_helpers';
 import { accountService } from '../../_services';
@@ -24,7 +24,7 @@ export const MyProfile = ({ history, match }: { history: any; match: any }) => {
           Logout
         </a>
       </div>
-      <ListPersons history={history} match={match} />
+      <ListWallets history={history} match={match} />
     </>
   );
 };

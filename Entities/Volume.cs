@@ -13,7 +13,7 @@ namespace Niftified.Entities
 		public string HashId { get; set; } // connection to nifty chain
 		public string ExternalHashId { get; set; } // id on external block chain?
 
-		public Person Owner { get; set; }
+		public Wallet OwnerWallet { get; set; }
 
 		public VolumeStatus Status { get; set; } // for sale, not for sale
 		public VolumeType Type { get; set; } // auction, fixed price

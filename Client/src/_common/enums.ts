@@ -16,7 +16,7 @@ export enum Status {
 }
 
 export enum WalletType {
-  Nifty,
+  NiftyCoin,
   Other
 }
 

@@ -6,10 +6,10 @@ import { ListEditions } from './edition/ListEditions';
 import { ListVolumes } from './volume/ListVolumes';
 import { PublishEdition } from './edition/PublishEdition';
 import { EditionSearchResults } from './edition/EditionSearchResults';
-// import { NewPersonForm } from './person/NewPerson';
-import { EditPersonForm } from './person/EditPerson';
+// import { NewWalletForm } from './wallet/NewWallet';
+import { EditWalletForm } from './wallet/EditWallet';
 import { MyProfile } from './profile/MyProfile';
-import { ListWallets } from './wallet/ListWallets';
+import { ListWalletDetails } from './wallet/ListWalletDetails';
 import { WalletTransactions } from './wallet/WalletTransactions';
 import { NewWalletForm } from './wallet/NewWallet';
 import { Wallet } from './wallet/Wallet';
@@ -29,10 +29,10 @@ function Creator({ match }: { match: any }) {
         <Route path={`${path}/edition/publish/:id`} component={PublishEdition} />
         <Route path={`${path}/editions/:query`} component={EditionSearchResults} />
         <Route path={`${path}/volumes/:id`} component={ListVolumes} />
-        {/* <Route path={`${path}/person/new`} component={NewPersonForm} /> */}
-        <Route path={`${path}/person/edit/:id`} component={EditPersonForm} />
+        {/* <Route path={`${path}/wallet/new`} component={NewWalletForm} /> */}
+        <Route path={`${path}/wallet/edit/:id`} component={EditWalletForm} />
         <Route path={`${path}/profile`} component={MyProfile} />
-        <Route path={`${path}/wallets/:id`} component={ListWallets} />
+        <Route path={`${path}/walletdetails/:id`} component={ListWalletDetails} />
         <Route path={`${path}/wallet/new/:id`} component={NewWalletForm} />
         <Route path={`${path}/transactions`} component={WalletTransactions} />
         <Route path={`${path}/wallet`} component={Wallet} />

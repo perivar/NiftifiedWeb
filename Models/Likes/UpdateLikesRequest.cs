@@ -12,7 +12,7 @@ namespace Niftified.Models.Likes
 
 		public ICollection<int> LikedEditionIds { get; set; } = new List<int>();
 		public ICollection<int> LikedVolumeIds { get; set; } = new List<int>();
-		public ICollection<int> LikedPersonIds { get; set; } = new List<int>();
+		public ICollection<int> LikedWalletIds { get; set; } = new List<int>();
 
 	}
 }

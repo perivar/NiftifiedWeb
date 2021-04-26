@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { FieldProps } from 'formik';
 import { niftyService, alertService } from '../../_services';
-import { AddPersonModal } from './AddPersonModal';
+import { AddWalletModal } from './AddWalletModal';
 import { Status, creatorTypeOptions, CreatorType } from '../../_common/enums';
 import Select from 'react-select';
 import { useCreatorContext } from '../CreatorContext';
@@ -10,7 +10,7 @@ import './AddCreatorsField.scss';
 import CustomSelect from '../../_common/select/CustomSelect';
 
 export interface Creator {
-  personId: number;
+  walletId: number;
   editionId: number;
   alias: string;
   type: CreatorType;
@@ -27,19 +27,19 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
 
   // local state
   // const [isLoading, setLoading] = useState<boolean>(false);
-  // const [personOptions, setPersonOptions] = useState<any>([]); // the full list of persons
+  // const [walletOptions, setWalletOptions] = useState<any>([]); // the full list of wallets
   const {
-    personOptions,
-    setPersonOptions,
-    isLoadingPersonOptions: isLoading,
-    setLoadingPersonOptions: setLoading,
-    fetchPersons
+    walletOptions,
+    setWalletOptions,
+    isLoadingWalletOptions: isLoading,
+    setLoadingWalletOptions: setLoading,
+    fetchWallets
   } = useCreatorContext();
-  const [filteredPersons, setFilteredPersons] = useState<any>([]); // the filtered list when searching
-  const [creators, setCreators] = useState<Creator[]>([]); // the final list of persons
+  const [filteredWallets, setFilteredWallets] = useState<any>([]); // the filtered list when searching
+  const [creators, setCreators] = useState<Creator[]>([]); // the final list of wallets
   const [creatorsCommissionSum, setCreatorsCommissionSum] = useState<number>(0);
   const [searchValue, setSearchValue] = useState<string>('');
-  const [showAddPersonModal, setShowAddPersonModal] = useState<boolean>(false);
+  const [showAddWalletModal, setShowAddWalletModal] = useState<boolean>(false);
 
   const updateValues = (values: Creator[]) => {
     // calculate total commission sum
@@ -55,26 +55,26 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
   };
 
   useEffect(() => {
-    fetchPersons();
+    fetchWallets();
 
     if (field.value) {
       const newCreators = field.value;
 
       // add the alias to the main object
       newCreators.forEach((cre: any) => {
-        cre.alias = cre.person.alias;
+        cre.alias = cre.wallet.alias;
       });
 
       updateValues(newCreators);
     }
   }, []);
 
-  const getMatchedPersonsList = (searchText: string | undefined) => {
+  const getMatchedWalletsList = (searchText: string | undefined) => {
     if (searchText && searchText !== '') {
       if (searchText === '*') {
-        return personOptions;
+        return walletOptions;
       }
-      return personOptions.filter((p: any) => p.alias.toLowerCase().includes(searchText.toLowerCase()));
+      return walletOptions.filter((p: any) => p.alias.toLowerCase().includes(searchText.toLowerCase()));
     }
     return [];
   };
@@ -82,29 +82,29 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
   const onSearchChange = (event: any) => {
     setSearchValue(event.target.value);
     // instant search
-    setFilteredPersons(getMatchedPersonsList(event.target.value));
+    setFilteredWallets(getMatchedWalletsList(event.target.value));
   };
 
   const onSearchKeyPress = (event: any) => {
     const isEnterPressed = event.which === ENTER_KEY || event.keyCode === ENTER_KEY;
     if (isEnterPressed) {
-      setFilteredPersons(getMatchedPersonsList(searchValue));
+      setFilteredWallets(getMatchedWalletsList(searchValue));
       event.preventDefault(); // make sure the form isn't submitted as well
     }
   };
 
   const onSearchBlur = () => {
-    setFilteredPersons(getMatchedPersonsList(searchValue));
+    setFilteredWallets(getMatchedWalletsList(searchValue));
   };
 
   const onCloseSearch = () => {
     setSearchValue('');
-    setFilteredPersons(getMatchedPersonsList(''));
+    setFilteredWallets(getMatchedWalletsList(''));
   };
 
   const checkIfCreatorExists = (creators: Creator[], id: any) => {
     return creators.some((item: Creator) => {
-      return item.personId === id;
+      return item.walletId === id;
     });
   };
 
@@ -112,11 +112,11 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
     return creators.reduce((prev: any, p: Creator) => prev + p.salesCommissionShare, 0);
   };
 
-  const updateCreator = (personId: number, itemAttributes: any) => {
-    const index = creators.findIndex((c: Creator) => c.personId === personId);
+  const updateCreator = (walletId: number, itemAttributes: any) => {
+    const index = creators.findIndex((c: Creator) => c.walletId === walletId);
     if (index === -1) {
       // handle error
-      console.log(`Creator with the personid ${personId} cannot be found`);
+      console.log(`Creator with the walletid ${walletId} cannot be found`);
     } else {
       const newCreators = [
         ...creators.slice(0, index),
@@ -134,13 +134,13 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
   // };
 
   const onAdd = (id: any) => {
-    // add from option list to selected person list
-    const person = personOptions.find((p: any) => p.id === id);
-    if (person && !checkIfCreatorExists(creators, id)) {
+    // add from option list to selected wallet list
+    const wallet = walletOptions.find((p: any) => p.id === id);
+    if (wallet && !checkIfCreatorExists(creators, id)) {
       const creator: Creator = {
-        personId: person.id,
+        walletId: wallet.id,
         editionId: 0,
-        alias: person.alias,
+        alias: wallet.alias,
         type: CreatorType.Creator,
         salesCommissionShare: 100
       };
@@ -174,31 +174,31 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
 
   const onRemove = (id: any) => {
     // remove from selected creators list
-    const newCreators = creators.filter((p: Creator) => p.personId !== id);
+    const newCreators = creators.filter((p: Creator) => p.walletId !== id);
     if (newCreators) {
       updateValues(newCreators);
     }
   };
 
-  const onCreatePersonSuccess = (person: any) => {
+  const onCreateWalletSuccess = (wallet: any) => {
     // reload and add to selected list
     setLoading(true);
-    const { id } = person;
+    const { id } = wallet;
 
     niftyService
-      .getPersonsByAccountId()
+      .getWalletsByAccountId()
       .then((res) => {
-        setPersonOptions(res);
+        setWalletOptions(res);
         setLoading(false);
 
-        // add from result list to selected person list
-        // have to use res since the person option list isn't yet loaded
-        const person = res.find((p: any) => p.id === id);
-        if (person && !checkIfCreatorExists(creators, id)) {
+        // add from result list to selected wallet list
+        // have to use res since the wallet option list isn't yet loaded
+        const wallet = res.find((p: any) => p.id === id);
+        if (wallet && !checkIfCreatorExists(creators, id)) {
           const creator: Creator = {
-            personId: person.id,
+            walletId: wallet.id,
             editionId: 0,
-            alias: person.alias,
+            alias: wallet.alias,
             type: CreatorType.Creator,
             salesCommissionShare: 100
           };
@@ -214,7 +214,7 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
       });
   };
 
-  const onCreatePersonFailure = (error: any) => {
+  const onCreateWalletFailure = (error: any) => {
     console.log(error);
     alertService.error(error, { autoClose: false });
   };
@@ -222,8 +222,8 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
   return (
     <>
       <div className="container-fluid p-0">
-        <small id="addPersonHelpBlock1" className="form-text text-muted">
-          Search here for persons you have already added (use * to show all)
+        <small id="addWalletHelpBlock1" className="form-text text-muted">
+          Search here for wallets you have already added (use * to show all)
         </small>
         <div className="form-inline my-2 my-lg-0">
           <input
@@ -236,7 +236,7 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
             onKeyPress={onSearchKeyPress}
             onBlur={onSearchBlur}
           />
-          {!isLoading && filteredPersons && filteredPersons.length > 0 && (
+          {!isLoading && filteredWallets && filteredWallets.length > 0 && (
             <table className="table table-sm table-dark">
               <thead className="thead">
                 <tr>
@@ -256,17 +256,17 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
                 </tr>
               </thead>
               <tbody>
-                {filteredPersons.map((person: any) => (
-                  <tr key={person.id}>
-                    <td>{person.id}</td>
-                    <td>{person.alias}</td>
-                    <td>{Status[person.status]}</td>
+                {filteredWallets.map((wallet: any) => (
+                  <tr key={wallet.id}>
+                    <td>{wallet.id}</td>
+                    <td>{wallet.alias}</td>
+                    <td>{Status[wallet.status]}</td>
                     <td className="text-center">
-                      {person.isConfirmed ? <i className="fas fa-certificate icon-confirmed"></i> : 'No'}
+                      {wallet.isConfirmed ? <i className="fas fa-certificate icon-confirmed"></i> : 'No'}
                     </td>
-                    {/* <td>{PersonType[person.type]}</td> */}
+                    {/* <td>{WalletType[wallet.type]}</td> */}
                     <td>
-                      <button type="button" className="btn btn-sm btn-success" onClick={() => onAdd(person.id)}>
+                      <button type="button" className="btn btn-sm btn-success" onClick={() => onAdd(wallet.id)}>
                         Add
                       </button>
                     </td>
@@ -276,11 +276,11 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
             </table>
           )}
         </div>
-        <AddPersonModal
-          show={showAddPersonModal}
-          setShow={setShowAddPersonModal}
-          onSuccess={onCreatePersonSuccess}
-          onFailure={onCreatePersonFailure}
+        <AddWalletModal
+          show={showAddWalletModal}
+          setShow={setShowAddWalletModal}
+          onSuccess={onCreateWalletSuccess}
+          onFailure={onCreateWalletFailure}
         />
         <div className="mt-2">
           <div>
@@ -308,22 +308,22 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
                 {!isLoading &&
                   creators &&
                   creators.map((creator: Creator) => (
-                    <tr key={creator.personId}>
-                      <td className="align-middle">{creator.personId}</td>
+                    <tr key={creator.walletId}>
+                      <td className="align-middle">{creator.walletId}</td>
                       <td className="align-middle">{creator.alias}</td>
-                      {/* <td>{Status[person.status]}</td> */}
+                      {/* <td>{Status[wallet.status]}</td> */}
                       <td className="align-middle">
                         <CustomSelect
                           name="type"
                           options={creatorTypeOptions}
                           defaultValue={{ label: CreatorType[creator.type], value: creator.type }}
                           onChange={(value: any) => {
-                            updateCreator(creator.personId, { type: Number(value?.value) });
+                            updateCreator(creator.walletId, { type: Number(value?.value) });
                           }}
                         />
                       </td>
                       {/* <td className="text-center">
-                        {person.isAnonymous ? <i className="fas fa-user-secret"></i> : 'Open'}
+                        {wallet.isAnonymous ? <i className="fas fa-user-secret"></i> : 'Open'}
                       </td> */}
                       <td className="align-middle">
                         <input
@@ -333,7 +333,7 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
                           type="number"
                           // onKeyPress={handleNumberKeypress}
                           onChange={(event) =>
-                            updateCreator(creator.personId, { salesCommissionShare: Number(event.target.value) })
+                            updateCreator(creator.walletId, { salesCommissionShare: Number(event.target.value) })
                           }
                         />
                       </td>
@@ -342,7 +342,7 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
                           type="button"
                           tabIndex={-1}
                           className="btn btn-sm btn-outline-secondary"
-                          onClick={() => onRemove(creator.personId)}>
+                          onClick={() => onRemove(creator.walletId)}>
                           <i className="fas fa-user-minus"></i>
                         </button>
                       </td>
@@ -366,11 +366,11 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
                 )}
               </tbody>
             </table>
-            <small id="addPersonHelpBlock2" className="form-text text-muted">
-              Add new person here if you don't find the person you are looking when searching.
+            <small id="addWalletHelpBlock2" className="form-text text-muted">
+              Add new wallet here if you don't find the wallet you are looking when searching.
             </small>
-            <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowAddPersonModal(true)}>
-              Add New Person
+            <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowAddWalletModal(true)}>
+              Add New Wallet
             </button>
           </div>
         </div>

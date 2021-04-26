@@ -7,8 +7,8 @@ import FocusError from '../../_common/FocusError';
 // import UploadImageComponent from '../../_common/UploadComponent';
 import MyUploadComponent from '../../_common/MyUploadComponent';
 import * as Scroll from 'react-scroll';
-import { AddCreatorsField } from '../person/AddCreatorsField';
-import { AddOwnerField } from '../person/AddOwnerField';
+import { AddCreatorsField } from '../wallet/AddCreatorsField';
+import { AddOwnerField } from '../wallet/AddOwnerField';
 import { Link } from 'react-router-dom';
 
 const scroll = Scroll.animateScroll;

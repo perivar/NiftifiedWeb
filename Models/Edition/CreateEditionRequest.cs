@@ -47,7 +47,7 @@ namespace Niftified.Models.Editions
 
 		// used to set owner
 		[Required]
-		public int OwnerPersonId { get; set; }
+		public int OwnerWalletId { get; set; }
 
 		// used to create volumes
 		public decimal Amount { get; set; } // Initial amount for auctions or the selling price for fixed price sales
@@ -56,10 +56,10 @@ namespace Niftified.Models.Editions
 		// used to set creators
 		// note that all commissions for creators cannot exceed 100%
 		// defaults to only one creator with 100% of the sales commission defined in SalesCommissionToCreators
-		public List<int> CreatorPersonIds { get; set; } = new List<int>();
+		public List<int> CreatorWalletIds { get; set; } = new List<int>();
 		public List<decimal> CreatorCommissionShares { get; set; } = new List<decimal>();
-		public List<string> CreatorPersonAliases { get; set; } = new List<string>();
-		public List<int> CreatorPersonTypes { get; set; } = new List<int>();
+		public List<string> CreatorWalletAliases { get; set; } = new List<string>();
+		public List<int> CreatorWalletTypes { get; set; } = new List<int>();
 
 		#endregion
 	}

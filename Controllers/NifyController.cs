@@ -10,7 +10,6 @@ using System.Linq;
 using System.Security.Claims;
 using Niftified.Helpers;
 
-using Niftified.Models.Persons;
 using Niftified.Models.Wallets;
 using Niftified.Models.Editions;
 using Niftified.Models.Volumes;
@@ -203,68 +202,6 @@ namespace Niftified.Controllers
 			return Ok(volumes);
 		}
 
-		[Authorize(Role.Admin)]
-		[HttpGet("/api/persons/")]
-		public ActionResult<IEnumerable<PersonResponse>> GetPersons()
-		{
-			var persons = _niftyService.GetPersons();
-			return Ok(persons);
-		}
-
-		[Authorize]
-		[HttpGet("/api/person/{id:int}")]
-		public ActionResult<PersonResponse> GetPersonById(int id)
-		{
-			var person = _niftyService.GetPersonById(id);
-			return Ok(person);
-		}
-
-		[Authorize]
-		[HttpGet("/api/persons/{accountId:int}")]
-		public ActionResult<IEnumerable<PersonResponse>> GetPersonsByAccountId(int accountId)
-		{
-			var persons = _niftyService.GetPersonsByAccountId(accountId);
-			return Ok(persons);
-		}
-
-		[Authorize]
-		[HttpPost("/api/person/")]
-		public ActionResult<PersonResponse> CreatePerson(CreatePersonRequest model)
-		{
-			var person = _niftyService.CreatePerson(model);
-			return Ok(person);
-		}
-
-		[Authorize]
-		[HttpPut("/api/person/{id:int}")]
-		public ActionResult<PersonResponse> UpdatePerson(int id, UpdatePersonRequest model)
-		{
-			// TODO: only owners can update their own?
-
-			var person = _niftyService.UpdatePerson(id, model);
-			return Ok(person);
-		}
-
-		[Authorize]
-		[HttpDelete("/api/person/{id:int}")]
-		public ActionResult<PersonResponse> DeletePerson(int id)
-		{
-			// get the current logged in user 
-			// and verify that the edition is owned by this user
-			var accountId = Account.Id;
-			var person = _niftyService.GetPersonById(id);
-			if (person.Account.Id != accountId)
-			{
-				throw new KeyNotFoundException("Cannot delete a person you don't own!");
-			}
-			else
-			{
-				_niftyService.DeletePerson(id);
-			}
-
-			return Ok(true);
-		}
-
 		[Authorize]
 		[HttpGet("/api/likes/{accountId:int}")]
 		public ActionResult<LikesResponse> GetLikesByAccountId(int accountId)
@@ -288,7 +225,7 @@ namespace Niftified.Controllers
 				var updateRequest = new UpdateLikesRequest();
 				updateRequest.AccountId = model.AccountId;
 				updateRequest.LikedEditionIds = model.LikedEditionIds;
-				updateRequest.LikedPersonIds = model.LikedPersonIds;
+				updateRequest.LikedWalletIds = model.LikedWalletIds;
 				updateRequest.LikedVolumeIds = model.LikedVolumeIds;
 
 				var likes = _niftyService.UpdateLikes(updateRequest.AccountId, updateRequest);
@@ -313,10 +250,10 @@ namespace Niftified.Controllers
 		}
 
 		[Authorize]
-		[HttpGet("/api/wallets/{personId:int}")]
-		public ActionResult<IEnumerable<WalletResponse>> GetWalletsByPersonId(int personId)
+		[HttpGet("/api/wallets/{accountId:int}")]
+		public ActionResult<IEnumerable<WalletResponse>> GetWalletsByAccountId(int accountId)
 		{
-			var wallets = _niftyService.GetWalletsByPersonId(personId);
+			var wallets = _niftyService.GetWalletsByAccountId(accountId);
 			return Ok(wallets);
 		}
 
@@ -345,8 +282,7 @@ namespace Niftified.Controllers
 			// and verify that the wallet is owned by this user
 			var accountId = Account.Id;
 			var wallet = _niftyService.GetWalletById(id);
-			var person = _niftyService.GetPersonById(wallet.PersonId);
-			if (person.Account.Id != accountId)
+			if (wallet.Account.Id != accountId)
 			{
 				throw new KeyNotFoundException("Cannot delete a wallet you don't own!");
 			}

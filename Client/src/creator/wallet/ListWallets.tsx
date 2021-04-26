@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { niftyService } from '../../_services';
-import QRCode from 'qrcode.react';
-import { WalletType } from '../../_common/enums';
+import { accountService, niftyService, alertService } from '../../_services';
+import { Status } from '../../_common/enums';
 import ConfirmModal from '../../_common/ConfirmModal';
+import { AddWalletModal } from './AddWalletModal';
 
-export const ListWallets = ({ match }: { match: any }) => {
+import './AddCreatorsField.scss';
+
+export const ListWallets = ({ history }: { history: any; match: any }) => {
   // const { path } = match;
-  const { id } = match.params;
+  const user = accountService.userValue;
 
   const [isLoading, setLoading] = useState<boolean>(false);
   const [wallets, setWallets] = useState<any>([]);
@@ -16,12 +18,22 @@ export const ListWallets = ({ match }: { match: any }) => {
   const [confirmDeleteId, setConfirmDeleteId] = useState<number>(0);
   const [confirmDeleteTitle, setConfirmDeleteTitle] = useState<string | undefined>();
 
+  // add a new wallet using a modal
+  const [showAddWalletModal, setShowAddWalletModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    // redirect to home if not logged in
+    if (!user) {
+      history.push('/');
+    }
+  }, [history]);
+
   // load volumes async
-  React.useEffect(() => {
+  useEffect(() => {
     setLoading(true);
 
     niftyService
-      .getWalletsByPersonId(id)
+      .getWalletsByAccountId()
       .then((res) => {
         setWallets(res);
         setLoading(false);
@@ -30,7 +42,23 @@ export const ListWallets = ({ match }: { match: any }) => {
         console.log(error);
         setLoading(false);
       });
-  }, [id]);
+  }, []);
+
+  const onAddWalletSuccess = (wallet: any) => {
+    // reload and add to selected list
+    setLoading(true);
+
+    niftyService
+      .getWalletsByAccountId()
+      .then((res) => {
+        setWallets(res);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setLoading(false);
+      });
+  };
 
   const onCancelDeleteWallet = () => {
     // make sure to set confirm delete id to zero
@@ -41,7 +69,7 @@ export const ListWallets = ({ match }: { match: any }) => {
   const confirmDelete = (wallet: any) => {
     const { id } = wallet;
     setConfirmDeleteId(id);
-    setConfirmDeleteTitle(wallet.name ? wallet.name : wallet.id);
+    setConfirmDeleteTitle(wallet.alias ? wallet.alias : wallet.id);
     setShowConfirmModal(true);
   };
 
@@ -59,128 +87,84 @@ export const ListWallets = ({ match }: { match: any }) => {
 
   return (
     <>
-      <Link className="btn btn-primary" to={`/creator/profile`}>
-        My Profile
-      </Link>
-      <Link className="btn btn-secondary ml-2" to={`/creator/wallet/new/${id}`}>
-        Add Wallet
-      </Link>
+      <button type="button" className="btn btn-primary" onClick={() => setShowAddWalletModal(true)}>
+        Add New Wallet
+      </button>
       <div className="container mt-4">
         <div className="row">
           <div className="col">
-            <h4>Wallets</h4>
-            <div className="card-deck">
-              {!isLoading &&
-                wallets &&
-                wallets.map((wallet: any) => (
-                  <div className="card" key={wallet.id}>
-                    <div className="card-header">
-                      <div className="row">
-                        <div className="col-md-10">
-                          <div className="w-75">{wallet.name ? wallet.name : '(No Name)'}</div>
-                        </div>
-                        <div className="col-md-2 float-right">
-                          <button type="button" onClick={() => confirmDelete(wallet)} className="btn btn-sm btn-danger">
-                            Del
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="card-body">
-                      <h5 className="card-title"># {wallet.id}</h5>
-                      <div className="card-text">
-                        <ul className="list-group list-group-flush">
-                          <li className="list-group-item">
-                            <strong>Type:</strong> {WalletType[wallet.type]}
-                          </li>
-                          <li className="list-group-item">
-                            <div className="mb-2">
-                              <strong>Private Key WIF:</strong>
-                            </div>
-                            <div>
-                              <QRCode
-                                value={wallet.privateKeyWIFEncrypted}
-                                size={1280}
-                                bgColor={'#ffffff'}
-                                fgColor={'#000000'}
-                                level={'H'}
-                                includeMargin={false}
-                                renderAs={'canvas'}
-                                style={{ width: '164px', height: '164px' }}
-                              />
-                            </div>
-                            <code>{wallet.privateKeyWIFEncrypted}</code>
-                          </li>
-                          <li className="list-group-item">
-                            <strong>Private Key:</strong>
-                            <div className="mb-2">
-                              <small className="text-muted">Hexadecimal format: (64 characters [0-9A-F])</small>
-                            </div>
-                            <div>
-                              <code>{wallet.privateKeyEncrypted}</code>
-                            </div>
-                          </li>
-
-                          <li className="list-group-item">
-                            <div className="mb-2">
-                              <strong>Public Address:</strong>
-                            </div>
-                            <div>
-                              <QRCode
-                                value={wallet.publicAddress}
-                                size={1280}
-                                bgColor={'#ffffff'}
-                                fgColor={'#000000'}
-                                level={'H'}
-                                includeMargin={false}
-                                renderAs={'canvas'}
-                                style={{ width: '164px', height: '164px' }}
-                              />
-                            </div>
-                            <code>{wallet.publicAddress}</code>
-                          </li>
-                          <li className="list-group-item">
-                            <strong>Public Key Hash:</strong>
-                            <div className="mb-2">
-                              <small className="text-muted">
-                                RIPEMD160 ( SHA256(publickey) ) in hexadecimal format: (40 characters [0-9A-F])
-                              </small>
-                            </div>
-                            <div>
-                              <QRCode
-                                value={wallet.publicKeyHash}
-                                size={1280}
-                                bgColor={'#ffffff'}
-                                fgColor={'#000000'}
-                                level={'H'}
-                                includeMargin={false}
-                                renderAs={'canvas'}
-                                style={{ width: '164px', height: '164px' }}
-                              />
-                            </div>
-                            <code>{wallet.publicKeyHash}</code>
-                          </li>
-                          <li className="list-group-item">
-                            <strong>Public Key:</strong>
-                            <div className="mb-2">
-                              <small className="text-muted">Hexadecimal format: (130 characters [0-9A-F])</small>
-                            </div>
-                            <div>
-                              <code>{wallet.publicKey}</code>
-                            </div>
-                          </li>
-                        </ul>
-                      </div>
-                      <p className="card-text">
-                        <small className="text-muted">Created {new Date(wallet.created).toLocaleString()}</small>
-                      </p>
-                    </div>
-                  </div>
-                ))}
+            <h4>Wallets connected to you</h4>
+            <div className="table-responsive">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Status</th>
+                    <th scope="col" className="text-center">
+                      Confirmed
+                    </th>
+                    {/* <th scope="col">Type</th> */}
+                    <th scope="col">Alias</th>
+                    <th scope="col" className="text-center">
+                      Anonymous
+                    </th>
+                    <th scope="col" className="text-center">
+                      Details
+                    </th>
+                    <th scope="col">Edit / Delete</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {!isLoading &&
+                    wallets &&
+                    wallets.map((wallet: any) => (
+                      <tr key={wallet.id}>
+                        <td>{wallet.id}</td>
+                        <td>{Status[wallet.status]}</td>
+                        <td className="text-center">
+                          {wallet.isConfirmed ? <i className="fas fa-certificate icon-confirmed"></i> : 'No'}
+                        </td>
+                        {/* <td>{WalletType[wallet.type]}</td> */}
+                        <td>{wallet.alias}</td>
+                        <td className="text-center">
+                          {wallet.isAnonymous ? <i className="fas fa-user-secret"></i> : 'Open'}
+                        </td>
+                        <td className="text-center">
+                          <Link to={`/creator/walletdetails/${wallet.id}`} className="btn btn-sm btn-light btn-block">
+                            Show wallet details
+                          </Link>
+                        </td>
+                        <td className="btn-group">
+                          <Link to={`/creator/wallet/edit/${wallet.id}`} className="btn btn-sm btn-secondary mr-1">
+                            Edit
+                          </Link>
+                          {!isLoading ? (
+                            <button
+                              type="button"
+                              onClick={() => confirmDelete(wallet)}
+                              className="btn btn-sm btn-danger">
+                              Delete
+                            </button>
+                          ) : (
+                            <button type="button" className="btn btn-secondary btn-sm" disabled>
+                              Delete
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
       </div>
+      <AddWalletModal
+        show={showAddWalletModal}
+        setShow={setShowAddWalletModal}
+        onSuccess={onAddWalletSuccess}
+        onFailure={(error: any) => alertService.error(error)}
+      />
       <ConfirmModal
         show={showConfirmModal}
         setShow={setShowConfirmModal}

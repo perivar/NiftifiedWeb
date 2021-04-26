@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { FieldProps } from 'formik';
 import { niftyService, alertService } from '../../_services';
-import { AddPersonModal } from './AddPersonModal';
+import { AddWalletModal } from './AddWalletModal';
 import { Status } from '../../_common/enums';
 import { useCreatorContext } from '../CreatorContext';
 
 import './AddCreatorsField.scss';
 
-export interface Person {
+export interface Wallet {
   id: number;
   created: string;
   updated: string;
@@ -33,18 +33,18 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
 
   // local state
   // const [isLoading, setLoading] = useState<boolean>(false);
-  // const [personOptions, setPersonOptions] = useState<any>([]); // the full list of persons
+  // const [walletOptions, setWalletOptions] = useState<any>([]); // the full list of wallets
   const {
-    personOptions,
-    setPersonOptions,
-    isLoadingPersonOptions: isLoading,
-    setLoadingPersonOptions: setLoading,
-    fetchPersons
+    walletOptions,
+    setWalletOptions,
+    isLoadingWalletOptions: isLoading,
+    setLoadingWalletOptions: setLoading,
+    fetchWallets
   } = useCreatorContext();
-  const [filteredPersons, setFilteredPersons] = useState<any>([]); // the filtered list when searching
+  const [filteredWallets, setFilteredWallets] = useState<any>([]); // the filtered list when searching
   const [owner, setOwner] = useState<Owner | null>(null); // the owner
   const [searchValue, setSearchValue] = useState<string>('');
-  const [showAddPersonModal, setShowAddPersonModal] = useState<boolean>(false);
+  const [showAddWalletModal, setShowAddWalletModal] = useState<boolean>(false);
 
   const updateValue = (owner: Owner | null) => {
     // set values
@@ -55,22 +55,22 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
   };
 
   useEffect(() => {
-    fetchPersons();
+    fetchWallets();
 
     if (field.value) {
       const newOwner = field.value;
-      newOwner.alias = newOwner.person.alias;
+      newOwner.alias = newOwner.wallet.alias;
 
       updateValue(newOwner);
     }
   }, []);
 
-  const getMatchedPersonsList = (searchText: string | undefined) => {
+  const getMatchedWalletsList = (searchText: string | undefined) => {
     if (searchText && searchText !== '') {
       if (searchText === '*') {
-        return personOptions;
+        return walletOptions;
       }
-      return personOptions.filter((p: any) => p.alias.toLowerCase().includes(searchText.toLowerCase()));
+      return walletOptions.filter((p: any) => p.alias.toLowerCase().includes(searchText.toLowerCase()));
     }
     return [];
   };
@@ -78,34 +78,34 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
   const onSearchChange = (event: any) => {
     setSearchValue(event.target.value);
     // instant search
-    setFilteredPersons(getMatchedPersonsList(event.target.value));
+    setFilteredWallets(getMatchedWalletsList(event.target.value));
   };
 
   const onSearchKeyPress = (event: any) => {
     const isEnterPressed = event.which === ENTER_KEY || event.keyCode === ENTER_KEY;
     if (isEnterPressed) {
-      setFilteredPersons(getMatchedPersonsList(searchValue));
+      setFilteredWallets(getMatchedWalletsList(searchValue));
       event.preventDefault(); // make sure the form isn't submitted as well
     }
   };
 
   const onSearchBlur = () => {
-    setFilteredPersons(getMatchedPersonsList(searchValue));
+    setFilteredWallets(getMatchedWalletsList(searchValue));
   };
 
   const onCloseSearch = () => {
     setSearchValue('');
-    setFilteredPersons(getMatchedPersonsList(''));
+    setFilteredWallets(getMatchedWalletsList(''));
   };
 
   const onAdd = (id: any) => {
-    // add from option list to selected person
-    const person = personOptions.find((p: any) => p.id === id);
-    updateValue(person);
+    // add from option list to selected wallet
+    const wallet = walletOptions.find((p: any) => p.id === id);
+    updateValue(wallet);
 
     // close the search box since we only add one owner
     setSearchValue('');
-    setFilteredPersons(getMatchedPersonsList(''));
+    setFilteredWallets(getMatchedWalletsList(''));
   };
 
   const onRemove = (id: any) => {
@@ -113,21 +113,21 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
     updateValue(null);
   };
 
-  const onCreatePersonSuccess = (person: any) => {
+  const onCreateWalletSuccess = (wallet: any) => {
     // reload and add to selected list
     setLoading(true);
-    const { id } = person;
+    const { id } = wallet;
 
     niftyService
-      .getPersonsByAccountId()
+      .getWalletsByAccountId()
       .then((res) => {
-        setPersonOptions(res);
+        setWalletOptions(res);
         setLoading(false);
 
-        // add from result list to selected person list
-        // have to use res since the person option list isn't yet loaded
-        const person = res.find((p: any) => p.id === id);
-        updateValue(person);
+        // add from result list to selected wallet list
+        // have to use res since the wallet option list isn't yet loaded
+        const wallet = res.find((p: any) => p.id === id);
+        updateValue(wallet);
       })
       .catch((error) => {
         console.log(error);
@@ -135,7 +135,7 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
       });
   };
 
-  const onCreatePersonFailure = (error: any) => {
+  const onCreateWalletFailure = (error: any) => {
     console.log(error);
     alertService.error(error, { autoClose: false });
   };
@@ -143,8 +143,8 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
   return (
     <>
       <div className="container-fluid p-0">
-        <small id="addPersonHelpBlock1" className="form-text text-muted">
-          Search here for persons you have already added (use * to show all)
+        <small id="addWalletHelpBlock1" className="form-text text-muted">
+          Search here for wallets you have already added (use * to show all)
         </small>
         <div className="form-inline my-2 my-lg-0">
           <input
@@ -157,7 +157,7 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
             onKeyPress={onSearchKeyPress}
             onBlur={onSearchBlur}
           />
-          {!isLoading && filteredPersons && filteredPersons.length > 0 && (
+          {!isLoading && filteredWallets && filteredWallets.length > 0 && (
             <table className="table table-sm table-dark">
               <thead className="thead">
                 <tr>
@@ -177,17 +177,17 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
                 </tr>
               </thead>
               <tbody>
-                {filteredPersons.map((person: any) => (
-                  <tr key={person.id}>
-                    <td>{person.id}</td>
-                    <td>{person.alias}</td>
-                    <td>{Status[person.status]}</td>
+                {filteredWallets.map((wallet: any) => (
+                  <tr key={wallet.id}>
+                    <td>{wallet.id}</td>
+                    <td>{wallet.alias}</td>
+                    <td>{Status[wallet.status]}</td>
                     <td className="text-center">
-                      {person.isConfirmed ? <i className="fas fa-certificate icon-confirmed"></i> : 'No'}
+                      {wallet.isConfirmed ? <i className="fas fa-certificate icon-confirmed"></i> : 'No'}
                     </td>
-                    {/* <td>{PersonType[person.type]}</td> */}
+                    {/* <td>{WalletType[wallet.type]}</td> */}
                     <td>
-                      <button type="button" className="btn btn-sm btn-success" onClick={() => onAdd(person.id)}>
+                      <button type="button" className="btn btn-sm btn-success" onClick={() => onAdd(wallet.id)}>
                         Add
                       </button>
                     </td>
@@ -197,11 +197,11 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
             </table>
           )}
         </div>
-        <AddPersonModal
-          show={showAddPersonModal}
-          setShow={setShowAddPersonModal}
-          onSuccess={onCreatePersonSuccess}
-          onFailure={onCreatePersonFailure}
+        <AddWalletModal
+          show={showAddWalletModal}
+          setShow={setShowAddWalletModal}
+          onSuccess={onCreateWalletSuccess}
+          onFailure={onCreateWalletFailure}
         />
         <div className="mt-2">
           <div>
@@ -235,11 +235,11 @@ export const AddOwnerField = ({ field, form }: FieldProps) => {
                 )}
               </tbody>
             </table>
-            <small id="addPersonHelpBlock2" className="form-text text-muted">
-              Add new person here if you don't find the person you are looking when searching.
+            <small id="addWalletHelpBlock2" className="form-text text-muted">
+              Add new wallet here if you don't find the wallet you are looking when searching.
             </small>
-            <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowAddPersonModal(true)}>
-              Add New Person
+            <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowAddWalletModal(true)}>
+              Add New Wallet
             </button>
           </div>
         </div>

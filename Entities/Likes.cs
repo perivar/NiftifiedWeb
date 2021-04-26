@@ -11,6 +11,6 @@ namespace Niftified.Entities
 
 		public int[] LikedEditionIds { get; set; }
 		public int[] LikedVolumeIds { get; set; }
-		public int[] LikedPersonIds { get; set; }
+		public int[] LikedWalletIds { get; set; }
 	}
 }

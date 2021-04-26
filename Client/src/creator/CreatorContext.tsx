@@ -2,11 +2,11 @@ import React, { createContext, useCallback, useContext, useMemo, useState } from
 import { niftyService } from '../_services';
 
 export interface CreatorContextData {
-  personOptions: any[];
-  setPersonOptions: (value: any) => void;
-  isLoadingPersonOptions: boolean;
-  setLoadingPersonOptions: (value: boolean) => void;
-  fetchPersons: () => void;
+  walletOptions: any[];
+  setWalletOptions: (value: any) => void;
+  isLoadingWalletOptions: boolean;
+  setLoadingWalletOptions: (value: boolean) => void;
+  fetchWallets: () => void;
 }
 
 // create the global context
@@ -25,34 +25,34 @@ export const useCreatorContext = () => {
 // see https://wanago.io/2020/09/28/react-context-api-hooks-typescript/
 const useCreatorContextValue = (): CreatorContextData => {
   // global state variables
-  const [personOptions, setPersonOptions] = useState<any>(null); // the full list of persons
-  const [isLoadingPersonOptions, setLoadingPersonOptions] = useState<boolean>(false);
+  const [walletOptions, setWalletOptions] = useState<any>(null); // the full list of wallets
+  const [isLoadingWalletOptions, setLoadingWalletOptions] = useState<boolean>(false);
 
-  // load all person options async
-  const fetchPersons = useCallback(() => {
-    setLoadingPersonOptions(true);
+  // load all wallet options async
+  const fetchWallets = useCallback(() => {
+    setLoadingWalletOptions(true);
 
     niftyService
-      .getPersonsByAccountId()
+      .getWalletsByAccountId()
       .then((res) => {
-        setPersonOptions(res);
-        setLoadingPersonOptions(false);
+        setWalletOptions(res);
+        setLoadingWalletOptions(false);
       })
       .catch((error) => {
         console.log(error);
-        setLoadingPersonOptions(false);
+        setLoadingWalletOptions(false);
       });
-  }, [setPersonOptions]);
+  }, [setWalletOptions]);
 
   return useMemo(
     () => ({
-      personOptions,
-      setPersonOptions,
-      isLoadingPersonOptions,
-      setLoadingPersonOptions,
-      fetchPersons
+      walletOptions,
+      setWalletOptions,
+      isLoadingWalletOptions,
+      setLoadingWalletOptions,
+      fetchWallets
     }),
-    [personOptions, setPersonOptions, isLoadingPersonOptions, setLoadingPersonOptions, fetchPersons]
+    [walletOptions, setWalletOptions, isLoadingWalletOptions, setLoadingWalletOptions, fetchWallets]
   );
 };
 

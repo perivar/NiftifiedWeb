@@ -10,6 +10,6 @@ namespace Niftified.Models.Likes
 
 		public List<int> LikedEditionIds { get; set; }
 		public List<int> LikedVolumeIds { get; set; }
-		public List<int> LikedPersonIds { get; set; }
+		public List<int> LikedWalletIds { get; set; }
 	}
 }
