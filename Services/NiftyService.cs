@@ -705,7 +705,7 @@ namespace Niftified.Services
 				var extension = Path.GetExtension(model.File.FileName);
 
 				// random filename with extension
-				var fileName = string.Format("{0}.{1}", model.TokenId, extension);
+				var fileName = string.Format("{0}{1}", model.TokenId, extension);
 				var filePath = Path.Combine(_appSettings.StoredFilesPath, fileName);
 
 				// create the StoredFilesPath directory, if it doesn't already exist
