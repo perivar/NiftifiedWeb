@@ -58,7 +58,7 @@ function Update({ history }: { history: any }) {
         <Form>
           <h4>Update Profile</h4>
           <div className="form-row">
-            <div className="form-group col">
+            <div className="form-group col-lg">
               <label htmlFor="firstNameField">First Name</label>
               <Field
                 id="firstNameField"
@@ -68,7 +68,7 @@ function Update({ history }: { history: any }) {
               />
               <ErrorMessage name="firstName" component="div" className="invalid-feedback" />
             </div>
-            <div className="form-group col">
+            <div className="form-group col-lg">
               <label htmlFor="lastNameField">Last Name</label>
               <Field
                 id="lastNameField"
@@ -92,7 +92,7 @@ function Update({ history }: { history: any }) {
           <h4 className="pt-3">Change Password</h4>
           <p>Leave blank to keep the same password</p>
           <div className="form-row">
-            <div className="form-group col">
+            <div className="form-group col-lg">
               <label htmlFor="passwordField">Password</label>
               <Field
                 id="passwordField"
@@ -102,7 +102,7 @@ function Update({ history }: { history: any }) {
               />
               <ErrorMessage name="password" component="div" className="invalid-feedback" />
             </div>
-            <div className="form-group col">
+            <div className="form-group col-lg">
               <label htmlFor="confirmPasswordField">Confirm Password</label>
               <Field
                 id="confirmPasswordField"
@@ -118,12 +118,7 @@ function Update({ history }: { history: any }) {
               {isSubmitting && <span className="spinner-border spinner-border-sm mr-1"></span>}
               Update
             </button>
-            <button
-              type="button"
-              onClick={() => onDelete()}
-              className="btn btn-danger"
-              style={{ width: '75px' }}
-              disabled={isDeleting}>
+            <button type="button" onClick={() => onDelete()} className="btn btn-danger" disabled={isDeleting}>
               {isDeleting ? <span className="spinner-border spinner-border-sm"></span> : <span>Delete</span>}
             </button>
             <Link to="." className="btn btn-link">

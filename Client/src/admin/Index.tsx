@@ -9,13 +9,13 @@ function Admin({ match }: { match: any }) {
 
   return (
     <>
-      <div className="mb-2">
-        <Link className="btn btn-secondary" to={`/creator/profile`}>
-          <i className="fa fa-user"></i> Home
-        </Link>
-      </div>
-      <div className="p-4 card">
-        <div className="container">
+      <div className="container-fluid">
+        <div className="mb-2">
+          <Link className="btn btn-secondary" to={`/creator/profile`}>
+            <i className="fa fa-user"></i> Home
+          </Link>
+        </div>
+        <div className="p-4 card">
           <Switch>
             <Route exact path={path} component={Overview} />
             <Route path={`${path}/users`} component={Users} />

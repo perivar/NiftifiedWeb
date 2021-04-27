@@ -113,7 +113,7 @@ export const ListVolumes = ({ match }: { match: any }) => {
       },
       {
         Header: 'Current Owner',
-        accessor: 'owner.alias'
+        accessor: 'ownerWallet.alias'
       }
     ],
     []

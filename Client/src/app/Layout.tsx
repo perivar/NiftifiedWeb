@@ -13,7 +13,7 @@ export const Layout: React.FunctionComponent<Props> = (props: Props) => {
     <>
       <Header />
       <div className="page-content">
-        <div className="container mt-3 mb-3">{props.children}</div>
+        <div className="container-fluid mt-3 mb-3">{props.children}</div>
       </div>
       <Footer />
     </>

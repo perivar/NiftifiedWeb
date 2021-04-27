@@ -6,7 +6,7 @@ import FormikSelect from '../../_common/select/FormikSelect';
 import FocusError from '../../_common/FocusError';
 import * as Scroll from 'react-scroll';
 import { Link } from 'react-router-dom';
-import { FormValues } from './NewWallet';
+import { FormValues } from './AddWalletModal';
 import { statusOptions } from '../../_common/enums';
 
 const scroll = Scroll.animateScroll;
@@ -84,7 +84,7 @@ export const EditWalletForm = ({ history, match }: { history: any; match: any })
         .updateWallet(id, values)
         .then(() => {
           formikHelpers.setSubmitting(false);
-          alertService.success('Successfully updated a new wallet!', {
+          alertService.success('Successfully updated the wallet!', {
             keepAfterRouteChange: true
           });
           history.push('/creator/profile');
@@ -119,7 +119,7 @@ export const EditWalletForm = ({ history, match }: { history: any; match: any })
                         className={`form-control${errors.alias && touched.alias ? ' is-invalid' : ''}`}
                       />
                       <small id="nameHelpBlock" className="form-text text-muted">
-                        Please enter a name or an alias.
+                        Please enter a name or an alias to differentiate the wallets.
                       </small>
                       <ErrorMessage name="alias" component="div" className="invalid-feedback" />
                     </div>

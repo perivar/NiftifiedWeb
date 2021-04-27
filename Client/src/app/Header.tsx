@@ -40,16 +40,6 @@ export const Header = () => {
                 <>
                   <NavLink
                     to="/creator/profile"
-                    className="nav-item nav-link"
-                    onClick={() =>
-                      setTimeout(() => {
-                        setExpanded(false);
-                      }, 150)
-                    }>
-                    <i className="fa fa-user"></i>
-                  </NavLink>
-                  <NavLink
-                    to="/creator/wallet"
                     className="nav-item nav-link mr-2"
                     onClick={() =>
                       setTimeout(() => {
@@ -58,6 +48,16 @@ export const Header = () => {
                     }>
                     <i className="fas fa-wallet"></i>
                   </NavLink>
+                  {/* <NavLink
+                    to="/creator/wallet"
+                    className="nav-item nav-link mr-2"
+                    onClick={() =>
+                      setTimeout(() => {
+                        setExpanded(false);
+                      }, 150)
+                    }>
+										<i className="fa fa-user"></i>
+                  </NavLink> */}
                 </>
               ) : (
                 <>

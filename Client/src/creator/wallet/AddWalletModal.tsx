@@ -8,11 +8,29 @@ import { Field, ErrorMessage, withFormik, FormikProps } from 'formik';
 import * as Yup from 'yup';
 import FocusError from '../../_common/FocusError';
 // import CustomSelect from '../../_common/select/CustomSelect';
-import { FormValues } from './NewWallet';
 import { Status, WalletType } from '../../_common/enums';
 // import { makeWallet } from '../wallet/GenerateWallet';
 import { encrypt } from '../wallet/webcrypto';
 import CryptoUtil from '../../_common/crypto/util';
+
+export interface FormValues {
+  alias: string;
+  isAnonymous: boolean;
+  accountId: number;
+  status: Status;
+  // type: CreatorType; // creator, co-creator?
+  isConfirmed: boolean;
+
+  // wallet info
+  name: string;
+  walletType: WalletType;
+  privateKeyEncrypted: string;
+  privateKeyWIFEncrypted: string;
+  privateMnemonicEncrypted: string;
+  publicAddress: string;
+  publicKey: string;
+  publicKeyHash: string;
+}
 
 interface OtherProps {
   show: boolean;
@@ -58,7 +76,7 @@ const InnerForm = (props: OtherProps & FormikProps<FormValues>) => {
   return (
     <Modal show={show} onHide={handleClose} autoFocus={false}>
       <Modal.Header closeButton>
-        <Modal.Title>Add New Wallet</Modal.Title>
+        <Modal.Title>New Wallet</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div className="form-row">
@@ -73,12 +91,12 @@ const InnerForm = (props: OtherProps & FormikProps<FormValues>) => {
                 className={`form-control${errors.alias && touched.alias ? ' is-invalid' : ''}`}
               />
               <small id="nameHelpBlock" className="form-text text-muted">
-                Please enter a name or an alias.
+                Please enter a name or an alias to differentiate the wallets.
               </small>
               <ErrorMessage name="alias" component="div" className="invalid-feedback" />
             </div>
             <p>
-              <strong>You are about to create a wallet with a new Crypto Wallet</strong>
+              <strong>You are about to create a new NiftyCoin Crypto Wallet</strong>
             </p>
             <p>
               To protect the wallet (private keys) you will be asked to provide a pass phrase.
@@ -86,8 +104,8 @@ const InnerForm = (props: OtherProps & FormikProps<FormValues>) => {
               ever get access to the wallet (private keys). Niftified.com does not have access to your private key!
             </p>
             <p className="text-danger">
-              If you forget this, you will <strong>NEVER</strong> get access to the wallet, and any sales commission
-              income for this wallet will be lost <strong>FOREVER!</strong>
+              <i className="fas fa-exclamation-triangle"></i> If you forget this, you will <strong>NEVER</strong> get
+              access to the wallet, and any commission income for this wallet will be lost <strong>FOREVER!</strong>
             </p>
             {/* <div className="form-group">
                 <div className="form-check">
@@ -164,7 +182,6 @@ const enhanceWithFormik = withFormik<OtherProps, FormValues>({
 
       const firstExternalAddress = await CryptoUtil.changeAddressFromMnemonic(mnemonic, network);
 
-      const segwitAddress = CryptoUtil.toSegWitAddress(firstExternalAddress, network);
       const legacyAddress = CryptoUtil.toLegacyAddress(firstExternalAddress, network);
       const privateKeyWIF = firstExternalAddress.toWIF();
       const publicKey = CryptoUtil.toPublicKey(firstExternalAddress);

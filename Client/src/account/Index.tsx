@@ -20,10 +20,10 @@ function Account({ history, match }: { history: any; match: any }) {
   }, [history]);
 
   return (
-    <div className="container">
+    <div className="container-fluid">
       <div className="row">
-        <div className="col-sm-8 offset-sm-2 mt-5">
-          <div className="card m-3">
+        <div className="col-sm-6 offset-sm-3 mt-4">
+          <div className="card m-1">
             <Switch>
               <Route path={`${path}/login`} component={Login} />
               <Route path={`${path}/register`} component={Register} />

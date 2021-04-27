@@ -223,7 +223,7 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
     <>
       <div className="container-fluid p-0">
         <small id="addWalletHelpBlock1" className="form-text text-muted">
-          Search here for wallets you have already added (use * to show all)
+          Lookup wallets you have already added (use * to show all)
         </small>
         <div className="form-inline my-2 my-lg-0">
           <input
@@ -367,10 +367,10 @@ export const AddCreatorsField = ({ field, form }: FieldProps) => {
               </tbody>
             </table>
             <small id="addWalletHelpBlock2" className="form-text text-muted">
-              Add new wallet here if you don't find the wallet you are looking when searching.
+              Add a new wallet here if you cannot find the wallet you are looking for when searching.
             </small>
             <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowAddWalletModal(true)}>
-              Add New Wallet
+              New Wallet
             </button>
           </div>
         </div>

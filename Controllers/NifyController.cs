@@ -245,7 +245,15 @@ namespace Niftified.Controllers
 		[HttpGet("/api/wallet/{id:int}")]
 		public ActionResult<WalletResponse> GetWalletById(int id)
 		{
+			// get the current logged in user 
+			// and verify that the wallet is owned by this user
+			var accountId = Account.Id;
 			var wallet = _niftyService.GetWalletById(id);
+			if (wallet.Account.Id != accountId)
+			{
+				throw new KeyNotFoundException("Cannot get a wallet you don't own!");
+			}
+
 			return Ok(wallet);
 		}
 
@@ -269,7 +277,15 @@ namespace Niftified.Controllers
 		[HttpPut("/api/wallet/{id:int}")]
 		public ActionResult<WalletResponse> UpdateWallet(int id, UpdateWalletRequest model)
 		{
-			// TODO: only owners can update their own?
+			// get the current logged in user 
+			// and verify that the wallet is owned by this user
+			var accountId = Account.Id;
+			var oldWallet = _niftyService.GetWalletById(id);
+			if (oldWallet.Account.Id != accountId)
+			{
+				throw new KeyNotFoundException("Cannot update a wallet you don't own!");
+			}
+
 			var wallet = _niftyService.UpdateWallet(id, model);
 			return Ok(wallet);
 		}

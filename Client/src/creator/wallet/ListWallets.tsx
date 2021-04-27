@@ -88,7 +88,7 @@ export const ListWallets = ({ history }: { history: any; match: any }) => {
   return (
     <>
       <button type="button" className="btn btn-primary" onClick={() => setShowAddWalletModal(true)}>
-        Add New Wallet
+        New Wallet
       </button>
       <div className="container mt-4">
         <div className="row">
@@ -130,7 +130,7 @@ export const ListWallets = ({ history }: { history: any; match: any }) => {
                           {wallet.isAnonymous ? <i className="fas fa-user-secret"></i> : 'Open'}
                         </td>
                         <td className="text-center">
-                          <Link to={`/creator/walletdetails/${wallet.id}`} className="btn btn-sm btn-light btn-block">
+                          <Link to={`/creator/wallet/${wallet.id}`} className="btn btn-sm btn-light btn-block">
                             Show wallet details
                           </Link>
                         </td>
