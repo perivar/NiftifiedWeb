@@ -176,6 +176,7 @@ namespace Niftified.Controllers
 		{
 			// check raw parameters
 			// var form = Request.Form;
+			// return Ok();
 
 			// Check if the request contains multipart / form - data.
 			if (model.File == null)
@@ -185,6 +186,23 @@ namespace Niftified.Controllers
 
 			var file = _niftyService.CreateFile(model);
 			return Ok(file);
+		}
+
+		[HttpPost("/api/tokenicon/")]
+		public ActionResult<TokenIconResponse> CreateTokenIcon([FromForm] CreateTokenIconRequest model)
+		{
+			// check raw parameters
+			// var form = Request.Form;
+			// return Ok();
+
+			// Check if the request contains multipart / form - data.
+			if (model.TokenIcon == null)
+			{
+				return new UnsupportedMediaTypeResult();
+			}
+
+			var tokenIcon = _niftyService.CreateTokenIcon(model);
+			return Ok(tokenIcon);
 		}
 
 		[HttpGet("/api/volumes/{editionId:int}")]

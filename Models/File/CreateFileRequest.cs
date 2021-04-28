@@ -10,7 +10,6 @@ namespace Niftified.Models.Tags
 		[Required]
 		public IFormFile File { get; set; }
 
-		[Required]
-		public string TokenId { get; set; }
+		public string FileId { get; set; }
 	}
 }

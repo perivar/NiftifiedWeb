@@ -69,6 +69,9 @@ namespace Niftified.Services
 
 		// file
 		FileResponse CreateFile(CreateFileRequest model);
+
+		// token icon
+		TokenIconResponse CreateTokenIcon(CreateTokenIconRequest model);
 	}
 
 	public class NiftyService : INiftyService
@@ -704,8 +707,17 @@ namespace Niftified.Services
 				// get extensions
 				var extension = Path.GetExtension(model.File.FileName);
 
-				// random filename with extension
-				var fileName = string.Format("{0}{1}", model.TokenId, extension);
+				string fileNameNoExtension = "";
+				if ("".Equals(model.FileId))
+				{
+					fileNameNoExtension = model.FileId;
+				}
+				else
+				{
+					fileNameNoExtension = Path.GetRandomFileName().Replace(".", string.Empty);
+				}
+
+				var fileName = string.Format("{0}{1}", fileNameNoExtension, extension);
 				var filePath = Path.Combine(_appSettings.StoredFilesPath, fileName);
 
 				// create the StoredFilesPath directory, if it doesn't already exist
@@ -721,6 +733,40 @@ namespace Niftified.Services
 				}
 
 				file.DataSourceFileName = fileName;
+			}
+			return file;
+		}
+
+		public TokenIconResponse CreateTokenIcon(CreateTokenIconRequest model)
+		{
+			// store file
+			var file = new TokenIconResponse();
+			if (model.TokenIcon != null && model.TokenIcon.Length > 0)
+			{
+				file.DataSourceFileType = model.TokenIcon.ContentType;
+				file.DataSourceFileSize = model.TokenIcon.Length;
+
+				// get extensions
+				var extension = Path.GetExtension(model.TokenIcon.FileName);
+				var fileName = string.Format("{0}{1}", model.TokenId, extension);
+				var filePath = Path.Combine(_appSettings.StoredFilesPath, fileName);
+
+				// create the StoredFilesPath directory, if it doesn't already exist
+				string storedFilesDir = Path.GetDirectoryName(filePath);
+				if (!Directory.Exists(storedFilesDir))
+				{
+					Directory.CreateDirectory(storedFilesDir);
+				}
+
+				using (var stream = System.IO.File.Create(filePath))
+				{
+					model.TokenIcon.CopyTo(stream);
+				}
+
+				file.DataSourceFileName = fileName;
+
+				// the original mint.niftycoin.org expects the approvalRequested to be set
+				file.ApprovalRequested = true;
 			}
 			return file;
 		}
