@@ -90,9 +90,6 @@ export class NFT1 {
       // Prevent error if user fails to add the document hash.
       if (!configObj.documentHash) configObj.documentHash = '';
 
-      // If mint baton is not specified, then replace it with null.
-      if (!configObj.mintBatonVout) configObj.mintBatonVout = null;
-
       const script = slpMdm.NFT1.Child.genesis(
         configObj.ticker,
         configObj.name,
@@ -190,6 +187,59 @@ export class NFT1 {
       return { script, outputs };
     } catch (err) {
       console.log('Error in generateNFTGroupSendOpReturn()');
+      throw err;
+    }
+  }
+
+  generateNFTGroupSendManyOpReturn(tokenUtxos: TokenUTXOInfo[], sendQtyArray: number[]) {
+    try {
+      const { tokenId } = tokenUtxos[0];
+      const { decimals } = tokenUtxos[0];
+
+      // Calculate sum of send array
+      const sendQtySum = sendQtyArray.reduce((a, b) => a + b, 0);
+      const sendQtyBig = new slpMdm.BN(sendQtySum).times(10 ** decimals);
+
+      // Calculate the total amount of tokens owned by the wallet.
+      const totalTokens = tokenUtxos.reduce(
+        (tot: any, txo: any) => tot.plus(new slpMdm.BN(txo.tokenQty).times(10 ** decimals)),
+        new slpMdm.BN(0)
+      );
+
+      const change = totalTokens.minus(sendQtyBig);
+      // console.log(`change: ${change}`)
+
+      let script;
+      let outputs = 1;
+
+      // The normal case, when there is token change to return to sender.
+      if (change > 0) {
+        outputs = sendQtyArray.length + 1;
+
+        // convert the number array to Big Number array
+        const sendQtyBigArray = sendQtyArray.map((qty) => new slpMdm.BN(Math.floor(qty).toString()));
+
+        // Convert to integer string.
+        const changeBig = new slpMdm.BN(Math.floor(change).toString());
+        sendQtyBigArray.push(changeBig);
+
+        // Generate the OP_RETURN as a Buffer.
+        script = slpMdm.NFT1.Group.send(tokenId, sendQtyBigArray);
+
+        // Corner case, when there is no token change to send back.
+      } else {
+        outputs = sendQtyArray.length;
+
+        // convert the number array to Big Number array
+        const sendQtyBigArray = sendQtyArray.map((qty) => new slpMdm.BN(Math.floor(qty).toString()));
+
+        // Generate the OP_RETURN as a Buffer.
+        script = slpMdm.NFT1.Group.send(tokenId, sendQtyBigArray);
+      }
+
+      return { script, outputs };
+    } catch (err) {
+      console.log('Error in generateNFTGroupSendManyOpReturn()');
       throw err;
     }
   }

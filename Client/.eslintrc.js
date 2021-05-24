@@ -199,6 +199,7 @@ module.exports = {
       // default to latest and warns if missing
       // It will default to 'detect' in the future
     },
+    'import/core-modules': ['rxjs/operators'],
     'import/resolver': {
       node: {
         extensions: ['.mjs', '.js', '.json', '.ts', '.tsx']

@@ -1,18 +1,12 @@
 /*
-  Send Group NFT tokens of type tokenId to user with tokenReceiverAddress.
+  Burn a specific quantity of tokens of type tokenId
 */
 
 import * as bitcoin from 'bitcoinjs-lib';
 import { Transaction } from 'bitcoinjs-lib';
-import CryptoUtil, { WalletInfo } from '../../util';
+import CryptoUtil, { WalletInfo } from '../util';
 
-export async function sendGroupToken(
-  walletInfo: WalletInfo,
-  tokenId: string,
-  tokenQty: number,
-  tokenReceiverAddress = '',
-  NETWORK = 'mainnet'
-) {
+export async function burnMintBaton(walletInfo: WalletInfo, tokenId: string, NETWORK = 'mainnet') {
   try {
     const { mnemonic } = walletInfo;
 
@@ -56,8 +50,7 @@ export async function sendGroupToken(
       if (
         utxo && // UTXO is associated with a token.
         utxo.tokenId === tokenId && // UTXO matches the token ID.
-        utxo.utxoType === 'token' && // UTXO is not a minting baton.
-        utxo.tokenType === 129 // UTXO is for an NFT Group
+        utxo.utxoType === 'minting-baton' // UTXO is a minting baton.
       ) {
         return true;
       }
@@ -73,9 +66,8 @@ export async function sendGroupToken(
     const nfyUtxo = CryptoUtil.findBiggestUtxo(nfyUtxos);
     // console.log(`nfyUtxo: ${JSON.stringify(nfyUtxo, null, 2)}`);
 
-    const slpSendObj = slp.NFT1.generateNFTGroupSendOpReturn(tokenUtxos, tokenQty);
-    const slpData = slpSendObj.script;
-    // console.log(`slpOutputs: ${slpSendObj.outputs}`);
+    // Generate the SLP OP_RETURN.
+    const slpData = slp.TokenType1.generateBurnOpReturn(tokenUtxos, 0);
 
     // BEGIN transaction construction.
 
@@ -92,16 +84,10 @@ export async function sendGroupToken(
     }
 
     // estimate fee. paying X niftoshis/byte
-    const txFee = CryptoUtil.estimateFee({ P2PKH: tokenUtxos.length + 1 }, { P2PKH: slpSendObj.outputs > 1 ? 4 : 3 });
+    const txFee = CryptoUtil.estimateFee({ P2PKH: tokenUtxos.length + 1 }, { P2PKH: 3 });
 
     // amount to send back to the sending address. It's the original amount - 1 sat/byte for tx size
-    let remainder = originalAmount - txFee - 546;
-
-    // subtract another dust transaction if required
-    if (slpSendObj.outputs > 1) {
-      remainder = remainder - 546;
-    }
-
+    const remainder = originalAmount - txFee - 546;
     if (remainder < 1) {
       throw new Error('Selected UTXO does not have enough niftoshis');
     }
@@ -110,20 +96,11 @@ export async function sendGroupToken(
     // Add OP_RETURN as first output.
     transactionBuilder.addOutput(slpData, 0);
 
-    // Send the token back to the same wallet if the user hasn't specified a
-    // different address.
-    if (tokenReceiverAddress === '') tokenReceiverAddress = walletInfo.legacyAddress;
-
     // Send dust transaction representing tokens being sent.
-    transactionBuilder.addOutput(tokenReceiverAddress, 546);
-
-    // Return any token change back to the sender.
-    if (slpSendObj.outputs > 1) {
-      transactionBuilder.addOutput(legacyAddress, 546);
-    }
+    transactionBuilder.addOutput(walletInfo.legacyAddress, 546);
 
     // Last output: send the NFY change back to the wallet.
-    transactionBuilder.addOutput(legacyAddress, remainder);
+    transactionBuilder.addOutput(walletInfo.legacyAddress, remainder);
 
     // Sign the transaction with the private key for the NFY UTXO paying the fees.
     transactionBuilder.sign(0, changeKeyPair, undefined, Transaction.SIGHASH_ALL, originalAmount);
@@ -151,7 +128,7 @@ export async function sendGroupToken(
     CryptoUtil.transactionStatus(txidStr, NETWORK);
     return txidStr;
   } catch (err) {
-    console.error('Error in sendGroupToken: ', err);
+    console.error('Error in burnTokens: ', err);
     console.log(`Error message: ${err.message}`);
     throw err;
   }

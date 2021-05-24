@@ -1,5 +1,10 @@
 /*
   Burn a specific quantity of tokens of type tokenId
+	Burning tokens is exactly the same as sending tokens without change. The only
+  difference is that the output of the OP_RETURN indicates the difference.
+  e.g. If you have 100 tokens and want to burn 10, you use the 100 token UTXO
+  as input, and write the output OP_RETURN with a quantity of 90. That will
+  effectively burn 10 tokens.
 */
 
 import * as bitcoin from 'bitcoinjs-lib';
@@ -39,7 +44,7 @@ export async function burnTokens(walletInfo: WalletInfo, tokenId: string, tokenQ
       }
       return false;
     });
-    console.log(`nfyUTXOs: ${JSON.stringify(nfyUtxos, null, 2)}`);
+    // console.log(`nfyUTXOs: ${JSON.stringify(nfyUtxos, null, 2)}`);
 
     if (nfyUtxos.length === 0) {
       throw new Error('Wallet does not have a NFY UTXO to pay miner fees.');
@@ -130,5 +135,6 @@ export async function burnTokens(walletInfo: WalletInfo, tokenId: string, tokenQ
   } catch (err) {
     console.error('Error in burnTokens: ', err);
     console.log(`Error message: ${err.message}`);
+    throw err;
   }
 }

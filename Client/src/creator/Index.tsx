@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { NewEditionForm } from './edition/NewEdition';
+import { CreateFrontpage } from './edition/CreateFrontpage';
 import { EditEditionForm } from './edition/EditEdition';
 import { ListEditions } from './edition/ListEditions';
 import { ListVolumes } from './volume/ListVolumes';
@@ -23,7 +24,8 @@ function Creator({ match }: { match: any }) {
       <div className="container-fluid">
         <Switch>
           <Route exact path={`${path}`} component={ListEditions} />
-          <Route path={`${path}/edition/new`} component={NewEditionForm} />
+          {/* <Route path={`${path}/edition/new`} component={NewEditionForm} /> */}
+          <Route path={`${path}/edition/new`} component={CreateFrontpage} />
           <Route path={`${path}/edition/edit/:id`} component={EditEditionForm} />
           <Route path={`${path}/edition/publish/:id`} component={PublishEdition} />
           <Route path={`${path}/editions/:query`} component={EditionSearchResults} />

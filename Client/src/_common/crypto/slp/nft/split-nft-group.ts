@@ -1,12 +1,19 @@
 /*
-  Send Group NFT tokens of type tokenId to user with tokenReceiverAddress.
+An initial preparation transaction is required before a new NFT can be created. 
+This ensures only 1 parent token is burned in the NFT Genesis transaction.
+After this is transaction is broadcast you can proceed to fill out the NFT details 
+and then click 'Create NFT'
+@see 
+https://github.com/simpleledger/Electron-Cash-SLP/blob/master/electroncash_gui/qt/slp_create_token_genesis_dialog.py#L399
+https://github.com/simpleledger/Electron-Cash-SLP/blob/master/electroncash/slp.py#L467
+https://slp.dev/packages/slp-mdm.js/#send
+https://github.com/Juungle/fungal-spore-exploder/blob/9792a8eb95cce5e301ed822bfe737124e2e55f9b/src/Bitcoin.ts#L215
 */
-
 import * as bitcoin from 'bitcoinjs-lib';
 import { Transaction } from 'bitcoinjs-lib';
 import CryptoUtil, { WalletInfo } from '../../util';
 
-export async function sendGroupToken(
+export async function splitNFTGroup(
   walletInfo: WalletInfo,
   tokenId: string,
   tokenQty: number,
@@ -73,7 +80,15 @@ export async function sendGroupToken(
     const nfyUtxo = CryptoUtil.findBiggestUtxo(nfyUtxos);
     // console.log(`nfyUtxo: ${JSON.stringify(nfyUtxo, null, 2)}`);
 
-    const slpSendObj = slp.NFT1.generateNFTGroupSendOpReturn(tokenUtxos, tokenQty);
+    const sendQtyArray: number[] = [];
+    for (let i = 0; i < tokenQty && i < 18; ++i) {
+      sendQtyArray.push(1);
+    }
+    if (tokenQty > 18) {
+      sendQtyArray.push(tokenQty - 18);
+    }
+
+    const slpSendObj = slp.NFT1.generateNFTGroupSendManyOpReturn(tokenUtxos, sendQtyArray);
     const slpData = slpSendObj.script;
     // console.log(`slpOutputs: ${slpSendObj.outputs}`);
 
@@ -92,13 +107,13 @@ export async function sendGroupToken(
     }
 
     // estimate fee. paying X niftoshis/byte
-    const txFee = CryptoUtil.estimateFee({ P2PKH: tokenUtxos.length + 1 }, { P2PKH: slpSendObj.outputs > 1 ? 4 : 3 });
+    const txFee = CryptoUtil.estimateFee({ P2PKH: tokenUtxos.length + 1 }, { P2PKH: slpSendObj.outputs + 2 });
 
     // amount to send back to the sending address. It's the original amount - 1 sat/byte for tx size
     let remainder = originalAmount - txFee - 546;
 
-    // subtract another dust transaction if required
-    if (slpSendObj.outputs > 1) {
+    // subtract dust transactions if required
+    for (let i = 1; i < slpSendObj.outputs; i++) {
       remainder = remainder - 546;
     }
 
@@ -118,7 +133,7 @@ export async function sendGroupToken(
     transactionBuilder.addOutput(tokenReceiverAddress, 546);
 
     // Return any token change back to the sender.
-    if (slpSendObj.outputs > 1) {
+    for (let i = 1; i < slpSendObj.outputs; i++) {
       transactionBuilder.addOutput(legacyAddress, 546);
     }
 
@@ -151,7 +166,7 @@ export async function sendGroupToken(
     CryptoUtil.transactionStatus(txidStr, NETWORK);
     return txidStr;
   } catch (err) {
-    console.error('Error in sendGroupToken: ', err);
+    console.error('Error in prepareGroupToken: ', err);
     console.log(`Error message: ${err.message}`);
     throw err;
   }

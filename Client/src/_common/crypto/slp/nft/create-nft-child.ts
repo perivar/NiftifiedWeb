@@ -11,6 +11,17 @@ import CryptoUtil, { NFTChildGenesisOpReturnConfig, WalletInfo } from '../../uti
 
 import { Transaction } from 'bitcoinjs-lib';
 
+// Example SLP NFT config object for the child (the actual token)
+// NFT1 Child Genesis
+// NFT1-child tokens have quantity set to 1,
+// no baton vout (i.e. future minting impossible),
+// and have 0 decimal places.
+// Because of these differences, the signature for this method excludes these parameters.
+// const configObjChild: NFTChildGenesisOpReturnConfig = {
+//   name: 'NFT Test Token Child',
+//   ticker: 'NFTY0001',
+//   documentUrl: 'https://www.niftycoin.org'
+// };
 export async function createNFTChild(
   walletInfo: WalletInfo,
   tokenId: string,
@@ -58,7 +69,7 @@ export async function createNFTChild(
     }
 
     // Filter out the token UTXOs that match the user-provided token ID
-    // and contain the minting baton.
+    // and does not contain the minting baton.
     tokenUtxos = tokenUtxos.filter((utxo: any) => {
       if (
         utxo && // UTXO is associated with a token.
@@ -76,7 +87,7 @@ export async function createNFTChild(
     }
 
     // Get the biggest UTXO to pay for the transaction.
-    const utxo = CryptoUtil.findBiggestUtxo(utxos);
+    const utxo = CryptoUtil.findBiggestUtxo(nfyUtxos);
     // console.log(`utxo: ${JSON.stringify(utxo, null, 2)}`)
 
     // instance of transaction builder
@@ -136,6 +147,7 @@ export async function createNFTChild(
     return txidStr;
   } catch (err) {
     console.error('Error in createNFTChild: ', err);
+    console.log(`Error message: ${err.message}`);
     throw err;
   }
 }
